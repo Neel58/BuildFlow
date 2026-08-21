@@ -1,0 +1,360 @@
+# BuildFlow: Exhaustive 55-Phase Implementation & Directory Plan
+
+This document details the exhaustive project structure and a 55-phase day-by-day implementation plan, with concrete verification test cases for each phase.
+
+---
+
+## Exhaustive Project Structure
+
+Here is the exact file-level blueprint of the workspace (`d:\BuildFlow`):
+
+```
+d:\BuildFlow\
+├── backend/
+│   ├── src/
+│   │   ├── config/
+│   │   │   ├── db.js                 # MongoDB connection & transactions
+│   │   │   └── socket.js             # Socket.IO event setup
+│   │   ├── controllers/
+│   │   │   ├── authController.js     # User registration/login & token refresh
+│   │   │   ├── componentController.js# Catalog browsing, filtering & updates
+│   │   │   ├── buildController.js    # Customer saved builds (CRUD)
+│   │   │   ├── orderController.js    # Order checkout, workflow status updates
+│   │   │   ├── auditController.js    # Logs fetch & query systems
+│   │   │   └── reportController.js   # Analytics aggregation & CSV/PDF exports
+│   │   ├── middleware/
+│   │   │   ├── auth.js               # JWT signature verification
+│   │   │   ├── rbac.js               # Role validation rules
+│   │   │   ├── validate.js           # Schema input validator
+│   │   │   └── errorHandler.js       # Centralized error handler interceptor
+│   │   ├── models/
+│   │   │   ├── User.js               # Users (Roles: Admin, Customer, etc.)
+│   │   │   ├── Component.js          # Component specs & inventory stock
+│   │   │   ├── Build.js              # Saved custom builds
+│   │   │   ├── Order.js              # State-based fulfillment tracking
+│   │   │   └── AuditLog.js           # Immutable append-only audit trail
+│   │   ├── routes/
+│   │   │   ├── auth.js               # Registration & authentication
+│   │   │   ├── components.js         # Component routes
+│   │   │   ├── builds.js             # Custom builds routes
+│   │   │   ├── orders.js             # Checkout & workflows
+│   │   │   ├── audit.js              # Log searches
+│   │   │   └── payment.js            # Mock webhook receiver
+│   │   ├── utils/
+│   │   │   ├── compatibilityCheck.js # CPU socket, RAM speed, PSU calculations
+│   │   │   └── retryEngine.js        # Notification/API call auto-retrier
+│   │   └── server.js                 # Main HTTP, Socket.IO & app entry point
+│   ├── scripts/
+│   │   └── seed.js                   # Pre-populates database with mock parts
+│   ├── .env.example                  # Environment secrets template
+│   └── package.json
+└── frontend/
+    ├── src/
+    │   ├── assets/                   # SVG, fonts, and styling assets
+    │   ├── components/
+    │   │   ├── Navbar.jsx            # Responsive navigation with role display
+    │   │   ├── ProtectedRoute.jsx    # Client-side router gatekeeper
+    │   │   └── Input.jsx             # Standardized validation form field
+    │   ├── pages/
+    │   │   ├── Login.jsx             # Login Form
+    │   │   ├── Register.jsx          # Register Form
+    │   │   ├── PCBuilder.jsx         # Custom builder component selector grid
+    │   │   ├── MyBuilds.jsx          # Saved build listings & compare cards
+    │   │   ├── Cart.jsx              # Shopping cart & checkout triggers
+    │   │   ├── OrderTracking.jsx     # Visual step progress bar for customers
+    │   │   ├── WarehouseDashboard.jsx# Stock manager adjustments & low alerts
+    │   │   ├── AssemblyDashboard.jsx # Technician job queue workbench
+    │   │   ├── QADashboard.jsx       # Inspector stress tests checkboxes
+    │   │   ├── LogisticsDashboard.jsx# Shipment packaging & carrier tracker
+    │   │   └── AdminDashboard.jsx    # Analytics charts & users editor
+    │   ├── store/
+    │   │   ├── authStore.js          # Zustand User & Token store
+    │   │   └── buildStore.js         # Zustand Builder & Cart store
+    │   ├── utils/
+    │   │   ├── api.js                # Axios HTTP settings & interceptors
+    │   │   └── formatters.js         # Currency and date utility functions
+    │   ├── App.jsx                   # Layout container and route declarations
+    │   ├── index.css                 # Custom CSS tokens & Tailwind imports
+    │   └── main.jsx                  # React DOM mount point
+    ├── tailwind.config.js
+    └── package.json
+```
+
+---
+
+## 55-Phase Granular Roadmap
+
+### Phase 1: Directory Structure Setup
+*   **Goal:** Create workspace folder structures and base directory directories.
+*   **Files:** All initial subfolders.
+*   **Test Case (TC-1.1):** Run directory check -> Assert all 12 planned subdirectories exist.
+
+### Phase 2: Backend package.json & Dependencies
+*   **Goal:** Initialize package.json and install production tools.
+*   **Files:** `backend/package.json`.
+*   **Test Case (TC-2.1):** Verify script listings exist and run validation script checks.
+
+### Phase 3: Frontend package.json & Vite Setup
+*   **Goal:** Scaffold React Vite template and configure initial manifest configs.
+*   **Files:** `frontend/package.json`.
+*   **Test Case (TC-3.1):** Verify Vite builds clean template without script errors.
+
+### Phase 4: Environment Configurations
+*   **Goal:** Setup backend `.env` variables and verify loader parser.
+*   **Files:** `backend/.env`.
+*   **Test Case (TC-4.1):** Check values loaded by server config -> Assert DB URI loads cleanly.
+
+### Phase 5: Express health endpoints
+*   **Goal:** Set up primary application listener and health validation routers.
+*   **Files:** `backend/src/server.js`.
+*   **Test Case (TC-5.1):** Request `GET /api/health` -> Assert return status `200` & `{ status: "UP" }`.
+
+### Phase 6: MongoDB Connection configuration
+*   **Goal:** Write connection routines with auto-reconnection parameters.
+*   **Files:** `backend/src/config/db.js`.
+*   **Test Case (TC-6.1):** Verify server console prints successful connection status logs.
+
+### Phase 7: Centralized Error Middleware
+*   **Goal:** Build middleware parsing standard API error payloads.
+*   **Files:** `backend/src/middleware/errorHandler.js`.
+*   **Test Case (TC-7.1):** Trigger fake validation error -> Verify returns structured error layout.
+
+### Phase 8: Component Mongoose Model
+*   **Goal:** Code catalog components schema.
+*   **Files:** `backend/src/models/Component.js`.
+*   **Test Case (TC-8.1):** Try saving component with negative stock -> Assert database validation fails.
+
+### Phase 9: User Roles Model
+*   **Goal:** Write schema representing roles & hashing properties.
+*   **Files:** `backend/src/models/User.js`.
+*   **Test Case (TC-9.1):** Validate registration database models reject duplicate emails.
+
+### Phase 10: Order State Machine Schema
+*   **Goal:** Code order schemas containing tracking states.
+*   **Files:** `backend/src/models/Order.js`.
+*   **Test Case (TC-10.1):** Insert invalid order state -> Verify Mongoose throws enum validator failure.
+
+### Phase 11: AuditLog Model
+*   **Goal:** Write models tracking system stock modifications and order state updates.
+*   **Files:** `backend/src/models/AuditLog.js`.
+*   **Test Case (TC-11.1):** Save log item -> Assert database creates record with auto-timestamps.
+
+### Phase 12: DB Seed Script
+*   **Goal:** Script a mock library of hardware components.
+*   **Files:** `backend/scripts/seed.js`.
+*   **Test Case (TC-12.1):** Execute seeding -> Check DB component count matches JSON definitions.
+
+### Phase 13: Password Cryptography Utils
+*   **Goal:** Create helpers using bcrypt to hash and verify credentials.
+*   **Files:** `backend/src/controllers/authController.js`.
+*   **Test Case (TC-13.1):** Assert hash comparisons return `true` on correct password match.
+
+### Phase 14: JWT Utility tokens
+*   **Goal:** Implement helpers generating access and refresh signature tokens.
+*   **Files:** `backend/src/controllers/authController.js`.
+*   **Test Case (TC-14.1):** Verify generated token decodes to show target user role.
+
+### Phase 15: Auth Middleware Gatekeeper
+*   **Goal:** Write routes protection middleware parsing request headers.
+*   **Files:** `backend/src/middleware/auth.js`.
+*   **Test Case (TC-15.1):** Access protected endpoints without headers -> Assert `401 Unauthorized`.
+
+### Phase 16: RBAC Validator Middleware
+*   **Goal:** Implement checker blocking access based on token payload roles.
+*   **Files:** `backend/src/middleware/rbac.js`.
+*   **Test Case (TC-16.1):** Request manager page using Customer token -> Assert `403 Forbidden`.
+
+### Phase 17: User Registration API
+*   **Goal:** Build signup routes with express-validator inputs check.
+*   **Files:** `backend/routes/auth.js`.
+*   **Test Case (TC-17.1):** Send registration request with short password -> Verify `400 Bad Request`.
+
+### Phase 18: User Login Endpoint
+*   **Goal:** Create session initialization and token issuance handler.
+*   **Files:** `backend/routes/auth.js`.
+*   **Test Case (TC-18.1):** Perform login -> Assert response includes access token.
+
+### Phase 19: Refresh Token Rotation
+*   **Goal:** Implement access token regeneration routes.
+*   **Files:** `backend/routes/auth.js`.
+*   **Test Case (TC-19.1):** Post expired token with valid refresh token -> Assert new access token returns.
+
+### Phase 20: Component Listing API
+*   **Goal:** Create catalog fetch query controllers.
+*   **Files:** `backend/routes/components.js`.
+*   **Test Case (TC-20.1):** Fetch `/api/components` -> Assert array includes components with stock counts.
+
+### Phase 21: Component Filter logic
+*   **Goal:** Create backend queries matching search keywords and category.
+*   **Files:** `backend/src/controllers/componentController.js`.
+*   **Test Case (TC-21.1):** Filter by "Intel" -> Assert returning list matches brand specs.
+
+### Phase 22: Live Server-Side Compatibility Checker
+*   **Goal:** Implement checker verifying CPU/RAM/PSU specs.
+*   **Files:** `backend/src/utils/compatibilityCheck.js`.
+*   **Test Case (TC-22.1):** Send invalid motherboard/CPU match -> Verify helper identifies compatibility fault.
+
+### Phase 23: Saved Custom Builds endpoints
+*   **Goal:** Build endpoints for draft configurations.
+*   **Files:** `backend/routes/builds.js`.
+*   **Test Case (TC-23.1):** Save build layout -> Assert successfully loaded on GET requests.
+
+### Phase 24: Client Page Scaffold & Design tokens
+*   **Goal:** Setup Tailwind variables and fonts.
+*   **Files:** `frontend/src/index.css`.
+*   **Test Case (TC-24.1):** Build tailwind assets -> Verify CSS styles render cleanly.
+
+### Phase 25: Axios configuration & token refresh interceptors
+*   **Goal:** Write interceptors injecting authorization headers.
+*   **Files:** `frontend/src/utils/api.js`.
+*   **Test Case (TC-25.1):** Request profile -> Assert auth token attaches to headers dynamically.
+
+### Phase 26: Auth Zustand store
+*   **Goal:** Setup user session store.
+*   **Files:** `frontend/src/store/authStore.js`.
+*   **Test Case (TC-26.1):** Verify store persists profile across virtual page reloads.
+
+### Phase 27: Protected Routers Wrapper
+*   **Goal:** Build client route guards.
+*   **Files:** `frontend/src/components/ProtectedRoute.jsx`.
+*   **Test Case (TC-27.1):** Navigate to dashboard without login -> Verify redirects to Login screen.
+
+### Phase 28: Login UI View
+*   **Goal:** Assemble login page layout.
+*   **Files:** `frontend/src/pages/Login.jsx`.
+*   **Test Case (TC-28.1):** Submit correct logins -> Verify redirects to Builder page.
+
+### Phase 29: Registration UI View
+*   **Goal:** Create registration validation form.
+*   **Files:** `frontend/src/pages/Register.jsx`.
+*   **Test Case (TC-29.1):** Submit signup -> Assert successfully signs up user.
+
+### Phase 30: PC Builder Catalog layout
+*   **Goal:** Setup listing layout grids.
+*   **Files:** `frontend/src/pages/PCBuilder.jsx`.
+*   **Test Case (TC-30.1):** Verify layout lists catalog categories correctly.
+
+### Phase 31: Dynamic Builder State
+*   **Goal:** Construct builder selection store.
+*   **Files:** `frontend/src/store/buildStore.js`.
+*   **Test Case (TC-31.1):** Select CPU component -> Verify price counter updates instantly.
+
+### Phase 32: Live Client-Side Compatibility engine
+*   **Goal:** Implement instant warning flags check on selection.
+*   **Files:** `frontend/src/pages/PCBuilder.jsx`.
+*   **Test Case (TC-32.1):** Pick AM5 Motherboard and LGA1700 CPU -> Verify alert displays immediately.
+
+### Phase 33: Builds Manager UI
+*   **Goal:** Create listing, comparison, and save components.
+*   **Files:** `frontend/src/pages/MyBuilds.jsx`.
+*   **Test Case (TC-33.1):** Render saved builds -> Verify list cards match user drafts.
+
+### Phase 34: Cart Page Setup
+*   **Goal:** Create checkout list containing quantities logic.
+*   **Files:** `frontend/src/pages/Cart.jsx`.
+*   **Test Case (TC-34.1):** Remove cart item -> Verify price aggregates correctly.
+
+### Phase 35: Backend checkout API
+*   **Goal:** Build checkout router verifying component compatibility.
+*   **Files:** `backend/routes/orders.js`.
+*   **Test Case (TC-35.1):** Perform post order checkout request -> Verify order is written to DB.
+
+### Phase 36: Mongoose Session stock reservation
+*   **Goal:** Code atomic transaction allocations logic.
+*   **Files:** `backend/src/controllers/orderController.js`.
+*   **Test Case (TC-36.1):** Run simultaneous checkout queries -> Assert only 1 completes.
+
+### Phase 37: Webhook payment verify routing
+*   **Goal:** Write webhook processor handler.
+*   **Files:** `backend/routes/payment.js`.
+*   **Test Case (TC-37.1):** Simulate webhook call -> Assert status updates to Payment Verified.
+
+### Phase 38: Idempotency Validation
+*   **Goal:** Build idempotency checks mapping database key.
+*   **Files:** `backend/src/middleware/validate.js`.
+*   **Test Case (TC-38.1):** Send same idempotency key twice -> Verify returns duplicate error block.
+
+### Phase 39: Audit Logging trigger
+*   **Goal:** Integrate logs writers inside status routes.
+*   **Files:** `backend/src/controllers/auditController.js`.
+*   **Test Case (TC-39.1):** Complete checkout -> Verify DB contains matching audit entry.
+
+### Phase 40: Retry Processor engine
+*   **Goal:** Code retry handler script managing failed APIs.
+*   **Files:** `backend/src/utils/retryEngine.js`.
+*   **Test Case (TC-40.1):** Trigger API timeout -> Verify logic retries configured times.
+
+### Phase 41: Warehouse stock adjust UI
+*   **Goal:** Build stock catalog inventory controllers.
+*   **Files:** `frontend/src/pages/WarehouseDashboard.jsx`.
+*   **Test Case (TC-41.1):** Adjust inventory levels -> Verify table lists update instantly.
+
+### Phase 42: Low-Stock system alarms
+*   **Goal:** Integrate warnings indicators inside listings.
+*   **Files:** `frontend/src/pages/WarehouseDashboard.jsx`.
+*   **Test Case (TC-42.1):** Stock drops under threshold -> Verify red highlight alert triggers.
+
+### Phase 43: Assembly claims queue UI
+*   **Goal:** Setup jobs queue list.
+*   **Files:** `frontend/src/pages/AssemblyDashboard.jsx`.
+*   **Test Case (TC-43.1):** Retrieve pending items -> Assert technician workbench maps current jobs.
+
+### Phase 44: Assembly Progressive Logger
+*   **Goal:** Create assembly workflow logger components.
+*   **Files:** `frontend/src/pages/AssemblyDashboard.jsx`.
+*   **Test Case (TC-44.1):** Post build updates notes -> Assert timeline displays updates.
+
+### Phase 45: QA Checklist View
+*   **Goal:** Implement testing checkbox validations.
+*   **Files:** `frontend/src/pages/QADashboard.jsx`.
+*   **Test Case (TC-45.1):** Save pass report -> Verify transitions to packaging status.
+
+### Phase 46: QA Failed routes
+*   **Goal:** Create error workflow redirecting back to assembly.
+*   **Files:** `frontend/src/pages/QADashboard.jsx`.
+*   **Test Case (TC-46.1):** Save reject report -> Verify state resets to Assembly queue.
+
+### Phase 47: Logistics Package tracker UI
+*   **Goal:** Build courier packages dashboard.
+*   **Files:** `frontend/src/pages/LogisticsDashboard.jsx`.
+*   **Test Case (TC-47.1):** Verify updates to tracking transitions logs immediately.
+
+### Phase 48: Customer Order timeline view
+*   **Goal:** Implement timeline step displays.
+*   **Files:** `frontend/src/pages/OrderTracking.jsx`.
+*   **Test Case (TC-48.1):** Verify active tracking stage is visually highlighted.
+
+### Phase 49: Socket.IO Server configuration
+*   **Goal:** Connect socket listeners to express setup.
+*   **Files:** `backend/src/config/socket.js`.
+*   **Test Case (TC-49.1):** Verify socket logs connection status.
+
+### Phase 50: Frontend socket hooks
+*   **Goal:** Bind dynamic event updates handlers.
+*   **Files:** `frontend/src/store/buildStore.js`.
+*   **Test Case (TC-50.1):** Fire backend event -> Assert client list updates dynamically.
+
+### Phase 51: Admin analytics aggregate API
+*   **Goal:** Create dashboard statistics reports queries.
+*   **Files:** `backend/src/controllers/reportController.js`.
+*   **Test Case (TC-51.1):** Request analytics metrics -> Verify correctly structured responses.
+
+### Phase 52: Admin dashboard charts view
+*   **Goal:** Construct interactive analytics graphs using Recharts.
+*   **Files:** `frontend/src/pages/AdminDashboard.jsx`.
+*   **Test Case (TC-52.1):** Check chart display limits parse bounds correctly.
+
+### Phase 53: CSV/PDF export report API
+*   **Goal:** Setup report generators scripts.
+*   **Files:** `backend/src/controllers/reportController.js`.
+*   **Test Case (TC-53.1):** Trigger export -> Verify download stream triggers.
+
+### Phase 54: Helmet Security hardening
+*   **Goal:** Setup CORS whitelist policies and Helmet.
+*   **Files:** `backend/src/server.js`.
+*   **Test Case (TC-54.1):** Verify secure headers exist on responses.
+
+### Phase 55: Production Compile check
+*   **Goal:** Run optimized scripts compiles check.
+*   **Files:** `frontend/package.json`.
+*   **Test Case (TC-55.1):** Run build -> Assert output assets generate cleanly.
