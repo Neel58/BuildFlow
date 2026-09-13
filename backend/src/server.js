@@ -27,6 +27,13 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+// Routes
+const authRoutes = require('./routes/auth');
+const componentRoutes = require('./routes/components');
+
+app.use('/api/auth', authRoutes);
+app.use('/api/components', componentRoutes);
+
 // Centralized Error Handler Middleware
 app.use(errorHandler);
 
