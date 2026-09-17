@@ -70,7 +70,7 @@ exports.updateComponent = async (req, res, next) => {
     const updatedComponent = await Component.findByIdAndUpdate(
       req.params.id,
       req.body,
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     );
 
     if (req.user) {

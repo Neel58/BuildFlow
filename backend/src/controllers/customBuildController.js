@@ -93,7 +93,7 @@ exports.updateBuild = async (req, res, next) => {
     const build = await CustomBuild.findOneAndUpdate(
       { _id: req.params.id, user: req.user._id },
       { name, components: componentIds, totalPrice, isCompatible, compatibilityIssues, estimatedPowerDraw, updatedAt: Date.now() },
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     ).populate('components');
 
     if (!build) return res.status(404).json({ message: 'Build not found' });

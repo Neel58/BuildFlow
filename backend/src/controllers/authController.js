@@ -30,14 +30,23 @@ exports.registerUser = async (req, res, next) => {
       lastName,
       email,
       password,
-      role
+      role: role || 'Customer'
     });
+
+    const accessToken = generateAccessToken(user._id, user.role);
+    const refreshToken = generateRefreshToken(user._id);
+
+    user.refreshToken = refreshToken;
+    await user.save();
 
     res.status(201).json({
       _id: user._id,
       firstName: user.firstName,
+      lastName: user.lastName,
       email: user.email,
-      role: user.role
+      role: user.role,
+      accessToken,
+      refreshToken
     });
   } catch (error) {
     next(error);
@@ -71,6 +80,7 @@ exports.loginUser = async (req, res, next) => {
     res.json({
       _id: user._id,
       firstName: user.firstName,
+      lastName: user.lastName,
       email: user.email,
       role: user.role,
       accessToken,

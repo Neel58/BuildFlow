@@ -1,8 +1,11 @@
 const mongoose = require('mongoose');
 
 const connectDB = async () => {
-  const connUri = process.env.MONGO_URI || 'mongodb://localhost:27017/buildflow';
+  const connUri = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/buildflow';
   
+  // Disable command buffering so queries fail fast with clear errors when DB is offline
+  mongoose.set('bufferCommands', false);
+
   const options = {
     autoIndex: true,
     serverSelectionTimeoutMS: 5000,
