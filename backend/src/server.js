@@ -18,7 +18,32 @@ app.use(cors());
 app.use(express.json());
 app.use(morgan('dev'));
 
-// Health Check Endpoint
+// Root & Health Check Endpoints
+const rootHandler = (req, res) => {
+  res.status(200).json({
+    message: 'Welcome to BuildFlow API Server',
+    health: '/api/health',
+    endpoints: {
+      users: '/api/users',
+      components: '/api/components',
+      builds: '/api/builds',
+      cart: '/api/cart',
+      orders: '/api/orders',
+      inventory: '/api/inventory',
+      assembly: '/api/assembly',
+      qa: '/api/qa',
+      logistics: '/api/logistics',
+      notifications: '/api/notifications',
+      auditLogs: '/api/audit-logs',
+      analytics: '/api/analytics/dashboard',
+      reports: '/api/reports/export'
+    }
+  });
+};
+
+app.get('/', rootHandler);
+app.get('/api', rootHandler);
+
 app.get('/api/health', (req, res) => {
   res.status(200).json({
     status: 'UP',
