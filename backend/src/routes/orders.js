@@ -1,7 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const orderController = require('../controllers/orderController');
-const { protect, authorize } = require('../middleware/auth');
+const { protect } = require('../middleware/auth');
+const { authorize } = require('../middleware/rbac');
 
 // Protect all routes
 router.use(protect);
@@ -20,6 +21,6 @@ router.route('/:id')
 
 // Admin only route for updating status
 router.route('/:id/status')
-  .put(authorize('admin'), orderController.updateOrderStatus);
+  .put(authorize('Admin'), orderController.updateOrderStatus);
 
 module.exports = router;
