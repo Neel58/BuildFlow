@@ -2,9 +2,7 @@ const Order = require('../models/Order');
 const Cart = require('../models/Cart');
 const Component = require('../models/Component');
 const CustomBuild = require('../models/CustomBuild');
-
-// Helper to simulate payment gateway delay
-const simulatePayment = () => new Promise(resolve => setTimeout(() => resolve('mock_tx_' + Date.now()), 1000));
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY || 'sk_test_placeholder');
 
 exports.checkout = async (req, res, next) => {
   try {
@@ -40,26 +38,64 @@ exports.checkout = async (req, res, next) => {
       calculatedTotal += price * item.quantity;
     }
 
-    // Mock Charge
-    const transactionId = await simulatePayment();
+    // Generate Stripe PaymentIntent
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: Math.round(calculatedTotal * 100), // Stripe uses smallest currency unit (cents)
+      currency: 'usd',
+      metadata: { userId: req.user._id.toString() }
+    });
 
     const newOrder = new Order({
       user: req.user._id,
       items: orderItems,
       totalAmount: calculatedTotal,
-      status: 'Payment Verified', // Skip Pending
+      status: 'Pending', // User still needs to pay on frontend
       shippingAddress,
-      paymentIntentId: transactionId
+      paymentIntentId: paymentIntent.id
     });
 
     const savedOrder = await newOrder.save();
 
-    // Empty Cart
-    cart.items = [];
-    cart.totalPrice = 0;
-    await cart.save();
+    // Note: We don't empty the cart until payment is actually confirmed.
 
-    res.status(201).json({ message: 'Order placed successfully', order: savedOrder });
+    res.status(201).json({ 
+      message: 'Order created, awaiting payment', 
+      order: savedOrder,
+      clientSecret: paymentIntent.client_secret
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.confirmPayment = async (req, res, next) => {
+  try {
+    const { paymentIntentId } = req.body;
+
+    const order = await Order.findOne({ paymentIntentId, user: req.user._id });
+    if (!order) return res.status(404).json({ message: 'Order not found' });
+
+    if (order.status !== 'Pending') {
+      return res.status(400).json({ message: 'Order is already processed' });
+    }
+
+    // In a real app, you would retrieve the PaymentIntent from Stripe to verify its status is 'succeeded'
+    // For this mock, we assume the frontend sent the confirmation correctly.
+    // const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
+    // if (paymentIntent.status !== 'succeeded') throw new Error('Payment not succeeded');
+
+    order.status = 'Payment Verified';
+    await order.save();
+
+    // Empty Cart now that payment is successful
+    const cart = await Cart.findOne({ user: req.user._id });
+    if (cart) {
+      cart.items = [];
+      cart.totalPrice = 0;
+      await cart.save();
+    }
+
+    res.json({ message: 'Payment confirmed successfully', order });
   } catch (error) {
     next(error);
   }

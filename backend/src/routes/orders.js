@@ -9,6 +9,9 @@ router.use(protect);
 router.route('/checkout')
   .post(orderController.checkout);
 
+router.route('/confirm-payment')
+  .post(orderController.confirmPayment);
+
 router.route('/')
   .get(orderController.getUserOrders);
 
