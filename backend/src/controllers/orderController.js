@@ -14,18 +14,36 @@ exports.checkout = async (req, res, next) => {
       return res.status(400).json({ message: 'Cart is empty' });
     }
 
-    // Determine prices and build order items
+    // Determine prices, build order items, and check stock
     const orderItems = [];
     let calculatedTotal = 0;
+    const componentsToReserve = []; // { componentId, quantity }
 
     for (const item of cart.items) {
       let price = 0;
       if (item.itemType === 'Component') {
         const comp = await Component.findById(item.componentId);
-        if (comp) price = comp.price;
+        if (!comp) return res.status(404).json({ message: `Component ${item.componentId} not found` });
+        
+        if (comp.availableStock < item.quantity) {
+          return res.status(400).json({ message: `Insufficient stock for component: ${comp.name}` });
+        }
+        
+        price = comp.price;
+        componentsToReserve.push({ componentId: comp._id, quantity: item.quantity });
+        
       } else if (item.itemType === 'CustomBuild') {
-        const build = await CustomBuild.findById(item.customBuildId);
-        if (build) price = build.totalPrice;
+        const build = await CustomBuild.findById(item.customBuildId).populate('components');
+        if (!build) return res.status(404).json({ message: `Build ${item.customBuildId} not found` });
+        
+        for (const buildComp of build.components) {
+          if (buildComp.availableStock < item.quantity) {
+             return res.status(400).json({ message: `Insufficient stock for component in build: ${buildComp.name}` });
+          }
+          componentsToReserve.push({ componentId: buildComp._id, quantity: item.quantity });
+        }
+        
+        price = build.totalPrice;
       }
       
       orderItems.push({
@@ -38,9 +56,16 @@ exports.checkout = async (req, res, next) => {
       calculatedTotal += price * item.quantity;
     }
 
+    // Reserve the stock
+    for (const reserveReq of componentsToReserve) {
+      await Component.findByIdAndUpdate(reserveReq.componentId, {
+        $inc: { reservedStock: reserveReq.quantity }
+      });
+    }
+
     // Generate Stripe PaymentIntent
     const paymentIntent = await stripe.paymentIntents.create({
-      amount: Math.round(calculatedTotal * 100), // Stripe uses smallest currency unit (cents)
+      amount: Math.round(calculatedTotal * 100), 
       currency: 'usd',
       metadata: { userId: req.user._id.toString() }
     });
@@ -49,14 +74,12 @@ exports.checkout = async (req, res, next) => {
       user: req.user._id,
       items: orderItems,
       totalAmount: calculatedTotal,
-      status: 'Pending', // User still needs to pay on frontend
+      status: 'Pending', 
       shippingAddress,
       paymentIntentId: paymentIntent.id
     });
 
     const savedOrder = await newOrder.save();
-
-    // Note: We don't empty the cart until payment is actually confirmed.
 
     res.status(201).json({ 
       message: 'Order created, awaiting payment', 
@@ -79,15 +102,11 @@ exports.confirmPayment = async (req, res, next) => {
       return res.status(400).json({ message: 'Order is already processed' });
     }
 
-    // In a real app, you would retrieve the PaymentIntent from Stripe to verify its status is 'succeeded'
-    // For this mock, we assume the frontend sent the confirmation correctly.
-    // const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
-    // if (paymentIntent.status !== 'succeeded') throw new Error('Payment not succeeded');
-
+    // In a real app, verify Stripe PaymentIntent here
     order.status = 'Payment Verified';
     await order.save();
 
-    // Empty Cart now that payment is successful
+    // Empty Cart
     const cart = await Cart.findOne({ user: req.user._id });
     if (cart) {
       cart.items = [];
@@ -125,12 +144,10 @@ exports.getOrderById = async (req, res, next) => {
   }
 };
 
-// Update order status (simulated admin or automated workflow)
 exports.updateOrderStatus = async (req, res, next) => {
   try {
     const { status, assemblyNotes, qaNotes, trackingNumber } = req.body;
     
-    // In a real system, this would be admin-only
     const validStatuses = [
       'Pending', 'Payment Verified', 'Warehouse Allocating', 'Assembly Queue', 
       'In Assembly', 'QA Inspection', 'QA Failed', 'Packaging', 
@@ -141,13 +158,57 @@ exports.updateOrderStatus = async (req, res, next) => {
       return res.status(400).json({ message: 'Invalid status' });
     }
 
-    const order = await Order.findById(req.params.id);
+    const order = await Order.findById(req.params.id).populate('items.customBuildId');
     if (!order) return res.status(404).json({ message: 'Order not found' });
-
+    
+    const previousStatus = order.status;
     order.status = status;
     if (assemblyNotes) order.assemblyNotes = assemblyNotes;
     if (qaNotes) order.qaNotes = qaNotes;
     if (trackingNumber) order.trackingNumber = trackingNumber;
+
+    // Handle inventory logic based on status changes
+    if (status === 'Cancelled' && previousStatus !== 'Cancelled') {
+      // Release reservation
+      const componentsToRelease = [];
+      for (const item of order.items) {
+        if (item.itemType === 'Component') {
+          componentsToRelease.push({ componentId: item.componentId, quantity: item.quantity });
+        } else if (item.itemType === 'CustomBuild') {
+          const build = await CustomBuild.findById(item.customBuildId);
+          if (build && build.components) {
+            for (const buildCompId of build.components) {
+              componentsToRelease.push({ componentId: buildCompId, quantity: item.quantity });
+            }
+          }
+        }
+      }
+      for (const releaseReq of componentsToRelease) {
+        await Component.findByIdAndUpdate(releaseReq.componentId, {
+          $inc: { reservedStock: -releaseReq.quantity }
+        });
+      }
+    } else if (status === 'Shipped' && previousStatus !== 'Shipped') {
+      // Fulfill stock (decrement total stock and reserved stock)
+      const componentsToFulfill = [];
+      for (const item of order.items) {
+        if (item.itemType === 'Component') {
+          componentsToFulfill.push({ componentId: item.componentId, quantity: item.quantity });
+        } else if (item.itemType === 'CustomBuild') {
+          const build = await CustomBuild.findById(item.customBuildId);
+          if (build && build.components) {
+            for (const buildCompId of build.components) {
+              componentsToFulfill.push({ componentId: buildCompId, quantity: item.quantity });
+            }
+          }
+        }
+      }
+      for (const fulfillReq of componentsToFulfill) {
+        await Component.findByIdAndUpdate(fulfillReq.componentId, {
+          $inc: { stock: -fulfillReq.quantity, reservedStock: -fulfillReq.quantity }
+        });
+      }
+    }
 
     await order.save();
     res.json(order);
