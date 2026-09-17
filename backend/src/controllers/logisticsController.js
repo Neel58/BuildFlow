@@ -43,8 +43,8 @@ exports.confirmPackaging = async (req, res, next) => {
 
     await task.save();
 
-    order.status = 'Ready to Ship'; // Using this as intermediate state, or just leave at Packaging until Shipped
-    await order.save();
+    // Order status remains 'Packaging' until it is physically shipped
+    // await order.save(); // Not needed if we don't modify the order here
 
     res.json({ message: 'Order packaged and ready to ship', task });
   } catch (error) {
