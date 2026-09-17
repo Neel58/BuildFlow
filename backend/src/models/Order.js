@@ -1,10 +1,18 @@
 const mongoose = require('mongoose');
 
 const orderItemSchema = new mongoose.Schema({
-  component: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Component',
+  itemType: {
+    type: String,
+    enum: ['Component', 'CustomBuild'],
     required: true
+  },
+  componentId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Component'
+  },
+  customBuildId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'CustomBuild'
   },
   quantity: {
     type: Number,
@@ -15,6 +23,17 @@ const orderItemSchema = new mongoose.Schema({
     type: Number,
     required: true
   }
+});
+
+// Ensure either component or custom build is provided based on itemType
+orderItemSchema.pre('validate', function(next) {
+  if (this.itemType === 'Component' && !this.componentId) {
+    return next(new Error('Component ID is required when itemType is Component'));
+  }
+  if (this.itemType === 'CustomBuild' && !this.customBuildId) {
+    return next(new Error('CustomBuild ID is required when itemType is CustomBuild'));
+  }
+  next();
 });
 
 const orderSchema = new mongoose.Schema({
