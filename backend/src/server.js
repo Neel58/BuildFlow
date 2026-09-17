@@ -35,6 +35,7 @@ const customBuildRoutes = require('./routes/customBuilds');
 const cartRoutes = require('./routes/cart');
 const orderRoutes = require('./routes/orders');
 const assemblyRoutes = require('./routes/assembly');
+const qaRoutes = require('./routes/qa');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/components', componentRoutes);
@@ -43,6 +44,7 @@ app.use('/api/builds', customBuildRoutes);
 app.use('/api/cart', cartRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/assembly', assemblyRoutes);
+app.use('/api/qa', qaRoutes);
 
 // Centralized Error Handler Middleware
 app.use(errorHandler);

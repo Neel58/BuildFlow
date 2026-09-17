@@ -102,7 +102,12 @@ exports.confirmPayment = async (req, res, next) => {
       return res.status(400).json({ message: 'Order is already processed' });
     }
 
-    // In a real app, verify Stripe PaymentIntent here
+    // Verify PaymentIntent from Stripe
+    const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
+    if (paymentIntent.status !== 'succeeded') {
+      return res.status(400).json({ message: 'Payment not succeeded' });
+    }
+
     order.status = 'Payment Verified';
     await order.save();
 

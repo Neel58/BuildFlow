@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const orderController = require('../controllers/orderController');
-const { protect } = require('../middleware/auth');
+const { protect, authorize } = require('../middleware/auth');
 
 // Protect all routes
 router.use(protect);
@@ -18,8 +18,8 @@ router.route('/')
 router.route('/:id')
   .get(orderController.getOrderById);
 
-// In a real application, this route would be protected by an 'admin' role middleware
+// Admin only route for updating status
 router.route('/:id/status')
-  .put(orderController.updateOrderStatus);
+  .put(authorize('admin'), orderController.updateOrderStatus);
 
 module.exports = router;
