@@ -32,11 +32,13 @@ const authRoutes = require('./routes/auth');
 const componentRoutes = require('./routes/components');
 const compatibilityRoutes = require('./routes/compatibility');
 const customBuildRoutes = require('./routes/customBuilds');
+const cartRoutes = require('./routes/cart');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/components', componentRoutes);
 app.use('/api/compatibility', compatibilityRoutes);
 app.use('/api/builds', customBuildRoutes);
+app.use('/api/cart', cartRoutes);
 
 // Centralized Error Handler Middleware
 app.use(errorHandler);
