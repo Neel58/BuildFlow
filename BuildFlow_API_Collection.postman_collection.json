@@ -1,0 +1,1056 @@
+{
+  "info": {
+    "_postman_id": "buildflow-api-collection-v1",
+    "name": "BuildFlow API",
+    "description": "Complete API collection for BuildFlow — PC Builder & Order Management Platform.\n\n## Setup\n1. Set the `baseUrl` variable to `http://127.0.0.1:5001`\n2. Register a user via `POST /api/auth/register`\n3. Login via `POST /api/auth/login` — the collection auto-saves the token\n4. For Admin-only routes, promote your user role in MongoDB or use a seeded Admin account\n\n## Variables\n- `baseUrl` — e.g. `http://127.0.0.1:5001`\n- `authToken` — JWT Access Token (auto-set on login)\n- `refreshToken` — JWT Refresh Token (auto-set on login)\n- `userId` — Current user ID (auto-set on login)\n- `componentId` — A component ID for testing\n- `buildId` — A build ID for testing\n- `orderId` — An order ID for testing\n- `cartItemId` — An item ID for testing",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl",      "value": "http://127.0.0.1:5001", "type": "string" },
+    { "key": "authToken",    "value": "",                     "type": "string" },
+    { "key": "refreshToken", "value": "",                     "type": "string" },
+    { "key": "resetToken",   "value": "",                     "type": "string" },
+    { "key": "userId",       "value": "",                     "type": "string" },
+    { "key": "componentId",  "value": "",                     "type": "string" },
+    { "key": "buildId",      "value": "",                     "type": "string" },
+    { "key": "orderId",      "value": "",                     "type": "string" },
+    { "key": "paymentIntentId", "value": "",                  "type": "string" },
+    { "key": "cartItemId",   "value": "",                     "type": "string" }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [{ "key": "token", "value": "{{authToken}}", "type": "string" }]
+  },
+  "item": [
+
+    {
+      "name": "🔐 Auth",
+      "description": "Authentication routes — register, login, token refresh",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/api/auth/register", "host": ["{{baseUrl}}"], "path": ["api","auth","register"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"email\": \"john.doe@example.com\",\n  \"password\": \"password123\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201 || pm.response.code === 200) {",
+                  "  const json = pm.response.json();",
+                  "  // Register returns _id directly (no token - must login separately)",
+                  "  if (json._id) pm.collectionVariables.set('userId', json._id);",
+                  "  pm.test('Register successful', () => pm.response.to.have.status(201));",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/api/auth/login", "host": ["{{baseUrl}}"], "path": ["api","auth","login"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"john.doe@example.com\",\n  \"password\": \"password123\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  const json = pm.response.json();",
+                  "  // Controller returns accessToken (not token)",
+                  "  if (json.accessToken)  pm.collectionVariables.set('authToken',    json.accessToken);",
+                  "  if (json.refreshToken) pm.collectionVariables.set('refreshToken', json.refreshToken);",
+                  "  if (json._id)          pm.collectionVariables.set('userId',       json._id);",
+                  "  pm.test('Login successful', () => pm.response.to.have.status(200));",
+                  "  pm.test('Token present', () => pm.expect(json.accessToken).to.be.a('string'));",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Refresh Token",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/api/auth/refresh", "host": ["{{baseUrl}}"], "path": ["api","auth","refresh"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"{{refreshToken}}\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  const json = pm.response.json();",
+                  "  // Refresh returns accessToken",
+                  "  if (json.accessToken) pm.collectionVariables.set('authToken', json.accessToken);",
+                  "  if (json.refreshToken) pm.collectionVariables.set('refreshToken', json.refreshToken);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+
+    {
+      "name": "👤 Users",
+      "description": "User profile and admin user management routes",
+      "item": [
+        {
+          "name": "Request Password Reset",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/api/users/password-reset", "host": ["{{baseUrl}}"], "path": ["api","users","password-reset"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"john.doe@example.com\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  const json = pm.response.json();",
+                  "  if (json.resetToken) pm.collectionVariables.set('resetToken', json.resetToken);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Verify Password Reset & Update Password",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/api/users/password-reset/verify", "host": ["{{baseUrl}}"], "path": ["api","users","password-reset","verify"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"john.doe@example.com\",\n  \"token\": \"{{resetToken}}\",\n  \"newPassword\": \"newpassword123\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  const json = pm.response.json();",
+                  "  if (json.resetToken) pm.collectionVariables.set('resetToken', json.resetToken);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get User Profile",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/users/{{userId}}", "host": ["{{baseUrl}}"], "path": ["api","users","{{userId}}"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Has user data', () => {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json).to.have.property('_id');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update User Profile",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/api/users/{{userId}}", "host": ["{{baseUrl}}"], "path": ["api","users","{{userId}}"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Jane\",\n  \"lastName\": \"Doe\",\n  \"phone\": \"+1234567890\"\n}"
+            }
+          }
+        },
+        {
+          "name": "[Admin] List All Users",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/users?role=Customer", "host": ["{{baseUrl}}"], "path": ["api","users"], "query": [{ "key": "role", "value": "Customer" }] }
+          }
+        },
+        {
+          "name": "[Admin] Change User Role",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/api/users/{{userId}}/role", "host": ["{{baseUrl}}"], "path": ["api","users","{{userId}}","role"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"role\": \"Admin\"\n}"
+            }
+          }
+        },
+        {
+          "name": "[Admin] Deactivate User",
+          "request": {
+            "method": "PUT",
+            "url": { "raw": "{{baseUrl}}/api/users/{{userId}}/deactivate", "host": ["{{baseUrl}}"], "path": ["api","users","{{userId}}","deactivate"] }
+          }
+        },
+        {
+          "name": "[Admin] Delete User",
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{baseUrl}}/api/users/{{userId}}", "host": ["{{baseUrl}}"], "path": ["api","users","{{userId}}"] }
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "🧩 Components",
+      "description": "PC component catalog — browse, search, and admin CRUD",
+      "item": [
+        {
+          "name": "Browse / Search Components",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/components?category=GPU&minPrice=200&maxPrice=1000&search=RTX",
+              "host": ["{{baseUrl}}"],
+              "path": ["api","components"],
+              "query": [
+                { "key": "category", "value": "GPU" },
+                { "key": "minPrice", "value": "200" },
+                { "key": "maxPrice", "value": "1000" },
+                { "key": "search",   "value": "RTX" }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "if (Array.isArray(json) && json.length > 0) {",
+                  "  pm.collectionVariables.set('componentId', json[0]._id);",
+                  "} else if (json.data && json.data.length > 0) {",
+                  "  pm.collectionVariables.set('componentId', json.data[0]._id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Component by ID",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/components/{{componentId}}", "host": ["{{baseUrl}}"], "path": ["api","components","{{componentId}}"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Has _id', () => pm.expect(pm.response.json()).to.have.property('_id'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "[Admin] Create Component",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/api/components", "host": ["{{baseUrl}}"], "path": ["api","components"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"NVIDIA RTX 4070 Ti\",\n  \"category\": \"GPU\",\n  \"brand\": \"NVIDIA\",\n  \"price\": 799.99,\n  \"stock\": 50,\n  \"specs\": {\n    \"vram\": \"12GB\",\n    \"tdp\": \"285W\",\n    \"pcie\": \"4.0 x16\"\n  },\n  \"description\": \"High-performance gaming GPU with Ada Lovelace architecture\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "  const json = pm.response.json();",
+                  "  if (json._id) pm.collectionVariables.set('componentId', json._id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "[Admin] Update Component",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/api/components/{{componentId}}", "host": ["{{baseUrl}}"], "path": ["api","components","{{componentId}}"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"price\": 749.99,\n  \"stock\": 75\n}"
+            }
+          }
+        },
+        {
+          "name": "[Admin] Delete Component",
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{baseUrl}}/api/components/{{componentId}}", "host": ["{{baseUrl}}"], "path": ["api","components","{{componentId}}"] }
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "🔨 Builds",
+      "description": "PC Builds — create, retrieve, edit, compare, and share",
+      "item": [
+        {
+          "name": "Create Build",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/api/builds", "host": ["{{baseUrl}}"], "path": ["api","builds"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Gaming Rig 2025\",\n  \"componentIds\": [\"{{componentId}}\"],\n  \"isPublic\": false\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "if (!pm.collectionVariables.get('componentId')) {",
+                  "  pm.sendRequest({ url: pm.variables.replaceIn('{{baseUrl}}/api/components'), method: 'GET' }, (error, response) => {",
+                  "    if (!error && response.code === 200) {",
+                  "      const components = response.json();",
+                  "      if (Array.isArray(components) && components[0]?._id) pm.collectionVariables.set('componentId', components[0]._id);",
+                  "    }",
+                  "  });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201 || pm.response.code === 200) {",
+                  "  const json = pm.response.json();",
+                  "  const id = json._id || (json.build && json.build._id);",
+                  "  if (id) pm.collectionVariables.set('buildId', id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Build by ID",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/builds/{{buildId}}", "host": ["{{baseUrl}}"], "path": ["api","builds","{{buildId}}"] }
+          }
+        },
+        {
+          "name": "Get User Builds",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/builds/user/{{userId}}", "host": ["{{baseUrl}}"], "path": ["api","builds","user","{{userId}}"] }
+          }
+        },
+        {
+          "name": "Update Build",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/api/builds/{{buildId}}", "host": ["{{baseUrl}}"], "path": ["api","builds","{{buildId}}"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Gaming Rig 2025 (Updated)\",\n  \"isPublic\": true\n}"
+            }
+          }
+        },
+        {
+          "name": "Delete Build",
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{baseUrl}}/api/builds/{{buildId}}", "host": ["{{baseUrl}}"], "path": ["api","builds","{{buildId}}"] }
+          }
+        },
+        {
+          "name": "Compare Builds",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/builds/compare?ids={{buildId}},ANOTHER_BUILD_ID",
+              "host": ["{{baseUrl}}"],
+              "path": ["api","builds","compare"],
+              "query": [{ "key": "ids", "value": "{{buildId}},ANOTHER_BUILD_ID" }]
+            }
+          }
+        },
+        {
+          "name": "Share Build",
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{baseUrl}}/api/builds/{{buildId}}/share", "host": ["{{baseUrl}}"], "path": ["api","builds","{{buildId}}","share"] }
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "🛒 Cart",
+      "description": "Shopping cart — view, add, update, and remove items",
+      "item": [
+        {
+          "name": "Get Cart",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/cart/{{userId}}", "host": ["{{baseUrl}}"], "path": ["api","cart","{{userId}}"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "const items = json.items || (json.cart && json.cart.items) || [];",
+                  "if (items.length > 0) pm.collectionVariables.set('cartItemId', items[0]._id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Add Item to Cart",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/api/cart/{{userId}}/items", "host": ["{{baseUrl}}"], "path": ["api","cart","{{userId}}","items"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"componentId\": \"{{componentId}}\",\n  \"quantity\": 1\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const json = pm.response.json();",
+                  "const items = json.items || (json.cart && json.cart.items) || [];",
+                  "if (items.length > 0) pm.collectionVariables.set('cartItemId', items[items.length-1]._id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update Cart Item Quantity",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/api/cart/{{userId}}/items/{{cartItemId}}", "host": ["{{baseUrl}}"], "path": ["api","cart","{{userId}}","items","{{cartItemId}}"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"quantity\": 2\n}"
+            }
+          }
+        },
+        {
+          "name": "Remove Item from Cart",
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{baseUrl}}/api/cart/{{userId}}/items/{{cartItemId}}", "host": ["{{baseUrl}}"], "path": ["api","cart","{{userId}}","items","{{cartItemId}}"] }
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "📦 Orders",
+      "description": "Order lifecycle — checkout, payment, history, invoice, reorder",
+      "item": [
+        {
+          "name": "Checkout (Calculate Total)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/api/orders/checkout", "host": ["{{baseUrl}}"], "path": ["api","orders","checkout"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"shippingAddress\": {\n    \"street\": \"123 Main St\",\n    \"city\": \"New York\",\n    \"state\": \"NY\",\n    \"zip\": \"10001\",\n    \"country\": \"US\"\n  },\n  \"paymentMethod\": \"stripe\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "  const json = pm.response.json();",
+                  "  const order = json.order || json;",
+                  "  if (order._id) pm.collectionVariables.set('orderId', order._id);",
+                  "  if (order.paymentIntentId) pm.collectionVariables.set('paymentIntentId', order.paymentIntentId);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Confirm Payment & Create Order",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/api/orders/confirm-payment", "host": ["{{baseUrl}}"], "path": ["api","orders","confirm-payment"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"orderId\": \"{{orderId}}\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const json = pm.response.json();",
+                  "const id = json._id || (json.order && json.order._id);",
+                  "if (id) pm.collectionVariables.set('orderId', id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Order by ID",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/orders/{{orderId}}", "host": ["{{baseUrl}}"], "path": ["api","orders","{{orderId}}"] }
+          }
+        },
+        {
+          "name": "Get My Orders",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/orders/user/{{userId}}", "host": ["{{baseUrl}}"], "path": ["api","orders","user","{{userId}}"] }
+          }
+        },
+        {
+          "name": "Download Invoice",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/orders/{{orderId}}/invoice", "host": ["{{baseUrl}}"], "path": ["api","orders","{{orderId}}","invoice"] }
+          }
+        },
+        {
+          "name": "Reorder",
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{baseUrl}}/api/orders/{{orderId}}/reorder", "host": ["{{baseUrl}}"], "path": ["api","orders","{{orderId}}","reorder"] }
+          }
+        },
+        {
+          "name": "[Admin] Override Order State",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/api/orders/{{orderId}}/state", "host": ["{{baseUrl}}"], "path": ["api","orders","{{orderId}}","state"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"state\": \"Processing\",\n  \"reason\": \"Manual admin override for testing\"\n}"
+            }
+          }
+        },
+        {
+          "name": "[Admin] List Orders by Status",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/orders?status=Pending",
+              "host": ["{{baseUrl}}"],
+              "path": ["api","orders"],
+              "query": [{ "key": "status", "value": "Pending" }]
+            }
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "🏭 Inventory",
+      "description": "Stock levels, adjustments, reservations, and low-stock alerts",
+      "item": [
+        {
+          "name": "View All Inventory",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/inventory", "host": ["{{baseUrl}}"], "path": ["api","inventory"] }
+          }
+        },
+        {
+          "name": "Get Inventory for Component",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/inventory/{{componentId}}", "host": ["{{baseUrl}}"], "path": ["api","inventory","{{componentId}}"] }
+          }
+        },
+        {
+          "name": "Low Stock Alert",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/inventory/low-stock", "host": ["{{baseUrl}}"], "path": ["api","inventory","low-stock"] }
+          }
+        },
+        {
+          "name": "[Warehouse] Adjust Stock",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/api/inventory/{{componentId}}/adjust", "host": ["{{baseUrl}}"], "path": ["api","inventory","{{componentId}}","adjust"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"adjustment\": 10,\n  \"reason\": \"Received new shipment\"\n}"
+            }
+          }
+        },
+        {
+          "name": "[Warehouse] Reserve Stock",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/api/inventory/reserve", "host": ["{{baseUrl}}"], "path": ["api","inventory","reserve"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"orderId\": \"{{orderId}}\",\n  \"items\": [\n    { \"componentId\": \"{{componentId}}\", \"quantity\": 1 }\n  ]\n}"
+            }
+          }
+        },
+        {
+          "name": "[Warehouse] Allocate Reserved Stock",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/api/inventory/allocate", "host": ["{{baseUrl}}"], "path": ["api","inventory","allocate"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"orderId\": \"{{orderId}}\"\n}"
+            }
+          }
+        },
+        {
+          "name": "[Warehouse] Release Reserved Stock",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/api/inventory/release", "host": ["{{baseUrl}}"], "path": ["api","inventory","release"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"orderId\": \"{{orderId}}\"\n}"
+            }
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "⚙️ Assembly",
+      "description": "Assembly queue, technician assignment, progress, and completion",
+      "item": [
+        {
+          "name": "Get Assembly Queue",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/assembly/queue", "host": ["{{baseUrl}}"], "path": ["api","assembly","queue"] }
+          }
+        },
+        {
+          "name": "Assign Order to Technician",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/api/assembly/{{orderId}}/assign", "host": ["{{baseUrl}}"], "path": ["api","assembly","{{orderId}}","assign"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"technicianId\": \"{{userId}}\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Record Assembly Progress",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/api/assembly/{{orderId}}/progress", "host": ["{{baseUrl}}"], "path": ["api","assembly","{{orderId}}","progress"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"log\": \"CPU installed — thermal paste applied, cooler seated\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Mark Assembly Complete",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/api/assembly/{{orderId}}/complete", "host": ["{{baseUrl}}"], "path": ["api","assembly","{{orderId}}","complete"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"assemblyNotes\": \"Build completed successfully, ready for QA\"\n}"
+            }
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "✅ QA / Quality Testing",
+      "description": "Quality assurance queue, reports, and pass/fail decisions",
+      "item": [
+        {
+          "name": "Get QA Queue",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/qa/queue", "host": ["{{baseUrl}}"], "path": ["api","qa","queue"] }
+          }
+        },
+        {
+          "name": "Record QA Report",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/api/qa/{{orderId}}/report", "host": ["{{baseUrl}}"], "path": ["api","qa","{{orderId}}","report"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"report\": \"Benchmark: 9500pts. Temp: 72C. Boot: 8s. All components passing. No thermal issues detected.\"\n}"
+            }
+          }
+        },
+        {
+          "name": "QA Decision (Pass / Fail)",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/api/qa/{{orderId}}/decision", "host": ["{{baseUrl}}"], "path": ["api","qa","{{orderId}}","decision"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"decision\": \"Passed\",\n  \"notes\": \"All QA checks passed\"\n}"
+            }
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "🚚 Logistics / Shipment",
+      "description": "Packaging, shipment, tracking, delivery status updates",
+      "item": [
+        {
+          "name": "Get Logistics Queue",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/logistics/queue", "host": ["{{baseUrl}}"], "path": ["api","logistics","queue"] }
+          }
+        },
+        {
+          "name": "Confirm Packaging",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/api/logistics/{{orderId}}/package", "host": ["{{baseUrl}}"], "path": ["api","logistics","{{orderId}}","package"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"packageWeight\": 5.2,\n  \"dimensions\": { \"length\": 50, \"width\": 40, \"height\": 30 },\n  \"notes\": \"Fragile — handle with care\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Generate Shipment & Tracking Number",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/api/logistics/{{orderId}}/shipment", "host": ["{{baseUrl}}"], "path": ["api","logistics","{{orderId}}","shipment"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"trackingNumber\": \"1Z999AA10123456784\",\n  \"courier\": \"FedEx\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Get Tracking Status",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/logistics/{{orderId}}/tracking", "host": ["{{baseUrl}}"], "path": ["api","logistics","{{orderId}}","tracking"] }
+          }
+        },
+        {
+          "name": "Update Delivery Status (Courier Webhook)",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/api/logistics/{{orderId}}/delivery-status", "host": ["{{baseUrl}}"], "path": ["api","logistics","{{orderId}}","delivery-status"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"Out for Delivery\",\n  \"location\": \"New York Distribution Center\",\n  \"timestamp\": \"2025-09-17T14:00:00Z\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Record Failed Delivery",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/api/logistics/{{orderId}}/failed-delivery", "host": ["{{baseUrl}}"], "path": ["api","logistics","{{orderId}}","failed-delivery"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Customer not available\",\n  \"action\": \"reschedule\",\n  \"rescheduleDate\": \"2025-09-20\"\n}"
+            }
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "🔔 Notifications",
+      "description": "User notifications, system messaging, and order notification logs",
+      "item": [
+        {
+          "name": "Get User Notifications",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/notifications/{{userId}}", "host": ["{{baseUrl}}"], "path": ["api","notifications","{{userId}}"] }
+          }
+        },
+        {
+          "name": "Send Notification",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/api/notifications", "host": ["{{baseUrl}}"], "path": ["api","notifications"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"{{userId}}\",\n  \"type\": \"Email\",\n  \"subject\": \"Your order is ready!\",\n  \"message\": \"Your BuildFlow order has passed QA and is being packaged.\",\n  \"orderId\": \"{{orderId}}\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Get Notification Log for Order",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/notifications/log/{{orderId}}", "host": ["{{baseUrl}}"], "path": ["api","notifications","log","{{orderId}}"] }
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "📋 Audit Logs",
+      "description": "Admin-only immutable audit trail",
+      "item": [
+        {
+          "name": "[Admin] Search / Filter Audit Logs",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/audit-logs?action=ORDER_CREATED&from=2025-01-01",
+              "host": ["{{baseUrl}}"],
+              "path": ["api","audit-logs"],
+              "query": [
+                { "key": "action", "value": "ORDER_CREATED" },
+                { "key": "from",   "value": "2025-01-01" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "[Admin] Get Audit Log by ID",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/audit-logs/:id", "host": ["{{baseUrl}}"], "path": ["api","audit-logs",":id"],
+              "variable": [{ "key": "id", "value": "AUDIT_LOG_ID_HERE" }]
+            }
+          }
+        },
+        {
+          "name": "[System] Append Audit Log",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/api/audit-logs", "host": ["{{baseUrl}}"], "path": ["api","audit-logs"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"action\": \"ORDER_STATE_CHANGED\",\n  \"entityType\": \"Order\",\n  \"entityId\": \"{{orderId}}\",\n  \"performedBy\": \"{{userId}}\",\n  \"details\": \"State changed from Pending to Processing\"\n}"
+            }
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "📊 Analytics & Reports",
+      "description": "Business metrics dashboard and data exports",
+      "item": [
+        {
+          "name": "Get Dashboard Metrics",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/analytics/dashboard", "host": ["{{baseUrl}}"], "path": ["api","analytics","dashboard"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Has metrics data', () => pm.expect(pm.response.json()).to.be.an('object'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "[Admin] Export Report as CSV",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/reports/export?type=orders&format=csv",
+              "host": ["{{baseUrl}}"],
+              "path": ["api","reports","export"],
+              "query": [
+                { "key": "type",   "value": "orders" },
+                { "key": "format", "value": "csv" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "[Admin] Export Report as PDF",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/reports/export?type=inventory&format=pdf",
+              "host": ["{{baseUrl}}"],
+              "path": ["api","reports","export"],
+              "query": [
+                { "key": "type",   "value": "inventory" },
+                { "key": "format", "value": "pdf" }
+              ]
+            }
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "❤️ Health Check",
+      "description": "Server health and root endpoints",
+      "item": [
+        {
+          "name": "Root — API Info",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api", "host": ["{{baseUrl}}"], "path": ["api"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Server is up', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Health Check",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/health", "host": ["{{baseUrl}}"], "path": ["api","health"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status UP', () => pm.response.to.have.status(200));",
+                  "pm.test('Health is UP', () => pm.expect(pm.response.json().status).to.eql('UP'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    }
+
+  ]
+}
