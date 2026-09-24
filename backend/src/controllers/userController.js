@@ -79,7 +79,7 @@ exports.verifyPasswordReset = async (req, res, next) => {
 // Retrieve user profile
 exports.getUserProfile = async (req, res, next) => {
   try {
-    const user = await User.findById(req.params.id).select('-password');
+    const user = await User.findById(req.params.id).select('-password -refreshToken');
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
@@ -110,7 +110,10 @@ exports.updateUserProfile = async (req, res, next) => {
     if (address) user.address = address;
 
     const updatedUser = await user.save();
-    res.json(updatedUser);
+    const userResponse = updatedUser.toObject();
+    delete userResponse.password;
+    delete userResponse.refreshToken;
+    res.json(userResponse);
   } catch (error) {
     next(error);
   }

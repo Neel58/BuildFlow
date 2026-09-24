@@ -62,7 +62,7 @@ exports.recordProgress = async (req, res, next) => {
     const task = await AssemblyTask.findOne({ order: orderId });
     if (!task) return res.status(404).json({ message: 'Assembly task not found' });
 
-    if (task.technician.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
+    if (task.technician.toString() !== req.user._id.toString() && req.user.role !== 'Admin') {
       return res.status(403).json({ message: 'Not authorized to update this task' });
     }
 
@@ -88,7 +88,7 @@ exports.completeAssembly = async (req, res, next) => {
     const task = await AssemblyTask.findOne({ order: orderId });
     if (!task) return res.status(404).json({ message: 'Assembly task not found' });
 
-    if (task.technician.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
+    if (task.technician.toString() !== req.user._id.toString() && req.user.role !== 'Admin') {
       return res.status(403).json({ message: 'Not authorized to complete this task' });
     }
 
