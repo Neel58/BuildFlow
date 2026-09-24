@@ -53,6 +53,10 @@ exports.loginUser = async (req, res, next) => {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
+    if (user.isActive === false) {
+      return res.status(403).json({ message: 'Account deactivated. Please contact support.' });
+    }
+
     const isMatch = await user.matchPassword(password);
     if (!isMatch) {
       return res.status(401).json({ message: 'Invalid credentials' });

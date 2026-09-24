@@ -36,6 +36,10 @@ const customBuildSchema = new mongoose.Schema({
     sparse: true,
     unique: true
   },
+  isPublic: {
+    type: Boolean,
+    default: false
+  },
   createdAt: {
     type: Date,
     default: Date.now

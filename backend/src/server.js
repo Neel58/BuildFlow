@@ -18,7 +18,32 @@ app.use(cors());
 app.use(express.json());
 app.use(morgan('dev'));
 
-// Health Check Endpoint
+// Root & Health Check Endpoints
+const rootHandler = (req, res) => {
+  res.status(200).json({
+    message: 'Welcome to BuildFlow API Server',
+    health: '/api/health',
+    endpoints: {
+      users: '/api/users',
+      components: '/api/components',
+      builds: '/api/builds',
+      cart: '/api/cart',
+      orders: '/api/orders',
+      inventory: '/api/inventory',
+      assembly: '/api/assembly',
+      qa: '/api/qa',
+      logistics: '/api/logistics',
+      notifications: '/api/notifications',
+      auditLogs: '/api/audit-logs',
+      analytics: '/api/analytics/dashboard',
+      reports: '/api/reports/export'
+    }
+  });
+};
+
+app.get('/', rootHandler);
+app.get('/api', rootHandler);
+
 app.get('/api/health', (req, res) => {
   res.status(200).json({
     status: 'UP',
@@ -29,24 +54,36 @@ app.get('/api/health', (req, res) => {
 
 // Routes
 const authRoutes = require('./routes/auth');
+const userRoutes = require('./routes/users');
 const componentRoutes = require('./routes/components');
 const compatibilityRoutes = require('./routes/compatibility');
 const customBuildRoutes = require('./routes/customBuilds');
 const cartRoutes = require('./routes/cart');
 const orderRoutes = require('./routes/orders');
+const inventoryRoutes = require('./routes/inventory');
 const assemblyRoutes = require('./routes/assembly');
 const qaRoutes = require('./routes/qa');
 const logisticsRoutes = require('./routes/logistics');
+const notificationRoutes = require('./routes/notifications');
+const auditLogRoutes = require('./routes/auditLogs');
+const analyticsRoutes = require('./routes/analytics');
+const reportRoutes = require('./routes/reports');
 
 app.use('/api/auth', authRoutes);
+app.use('/api/users', userRoutes);
 app.use('/api/components', componentRoutes);
 app.use('/api/compatibility', compatibilityRoutes);
 app.use('/api/builds', customBuildRoutes);
 app.use('/api/cart', cartRoutes);
 app.use('/api/orders', orderRoutes);
+app.use('/api/inventory', inventoryRoutes);
 app.use('/api/assembly', assemblyRoutes);
 app.use('/api/qa', qaRoutes);
 app.use('/api/logistics', logisticsRoutes);
+app.use('/api/notifications', notificationRoutes);
+app.use('/api/audit-logs', auditLogRoutes);
+app.use('/api/analytics', analyticsRoutes);
+app.use('/api/reports', reportRoutes);
 
 // Centralized Error Handler Middleware
 app.use(errorHandler);

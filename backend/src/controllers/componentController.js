@@ -1,4 +1,5 @@
 const Component = require('../models/Component');
+const AuditLog = require('../models/AuditLog');
 
 exports.getComponents = async (req, res, next) => {
   try {
@@ -32,6 +33,80 @@ exports.getComponentById = async (req, res, next) => {
     const component = await Component.findById(req.params.id);
     if (!component) return res.status(404).json({ message: 'Component not found' });
     res.json(component);
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Admin: Create component
+exports.createComponent = async (req, res, next) => {
+  try {
+    const component = new Component(req.body);
+    const savedComponent = await component.save();
+
+    if (req.user) {
+      await AuditLog.create({
+        action: 'COMPONENT_CREATED',
+        actor: req.user._id,
+        targetId: savedComponent._id,
+        entityType: 'Component',
+        newValue: savedComponent,
+        description: `Created component ${savedComponent.name}`
+      });
+    }
+
+    res.status(201).json(savedComponent);
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Admin: Update component details
+exports.updateComponent = async (req, res, next) => {
+  try {
+    const oldComponent = await Component.findById(req.params.id);
+    if (!oldComponent) return res.status(404).json({ message: 'Component not found' });
+
+    const updatedComponent = await Component.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true, runValidators: true }
+    );
+
+    if (req.user) {
+      await AuditLog.create({
+        action: 'COMPONENT_UPDATED',
+        actor: req.user._id,
+        targetId: updatedComponent._id,
+        entityType: 'Component',
+        changes: { previous: oldComponent, updated: updatedComponent },
+        description: `Updated component ${updatedComponent.name}`
+      });
+    }
+
+    res.json(updatedComponent);
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Admin: Delete component
+exports.deleteComponent = async (req, res, next) => {
+  try {
+    const component = await Component.findByIdAndDelete(req.params.id);
+    if (!component) return res.status(404).json({ message: 'Component not found' });
+
+    if (req.user) {
+      await AuditLog.create({
+        action: 'COMPONENT_DELETED',
+        actor: req.user._id,
+        targetId: req.params.id,
+        entityType: 'Component',
+        description: `Deleted component ${component.name}`
+      });
+    }
+
+    res.json({ message: 'Component deleted successfully' });
   } catch (error) {
     next(error);
   }

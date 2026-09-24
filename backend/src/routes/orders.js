@@ -4,23 +4,28 @@ const orderController = require('../controllers/orderController');
 const { protect } = require('../middleware/auth');
 const { authorize } = require('../middleware/rbac');
 
-// Protect all routes
 router.use(protect);
 
-router.route('/checkout')
-  .post(orderController.checkout);
+router.post('/checkout', orderController.checkout);
+router.post('/confirm-payment', orderController.confirmPayment);
 
-router.route('/confirm-payment')
-  .post(orderController.confirmPayment);
+router.get('/user/:userId', orderController.getUserOrders);
+router.get('/:id/invoice', orderController.getInvoice);
+router.post('/:id/reorder', orderController.reorder);
+
+// Admin state override & status updates
+router.put('/:id/state', authorize('Admin'), orderController.overrideOrderState);
+router.put('/:id/status', authorize('Admin'), orderController.updateOrderStatus);
 
 router.route('/')
-  .get(orderController.getUserOrders);
+  .post(orderController.checkout)
+  .get((req, res, next) => {
+    if (req.user && req.user.role === 'Admin') {
+      return orderController.getAllOrders(req, res, next);
+    }
+    return orderController.getUserOrders(req, res, next);
+  });
 
-router.route('/:id')
-  .get(orderController.getOrderById);
-
-// Admin only route for updating status
-router.route('/:id/status')
-  .put(authorize('Admin'), orderController.updateOrderStatus);
+router.get('/:id', orderController.getOrderById);
 
 module.exports = router;

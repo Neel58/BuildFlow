@@ -17,17 +17,22 @@ const calculateTotalPrice = async (cart) => {
   return total;
 };
 
+// Get target userId helper
+const getTargetUserId = (req) => {
+  return req.params.userId || (req.user && req.user._id);
+};
+
 exports.getCart = async (req, res, next) => {
   try {
-    let cart = await Cart.findOne({ user: req.user._id })
+    const userId = getTargetUserId(req);
+    let cart = await Cart.findOne({ user: userId })
       .populate('items.componentId')
       .populate('items.customBuildId');
 
     if (!cart) {
-      cart = new Cart({ user: req.user._id, items: [] });
+      cart = new Cart({ user: userId, items: [] });
       await cart.save();
     } else {
-      // Recalculate price in case component prices changed
       cart.totalPrice = await calculateTotalPrice(cart);
       await cart.save();
     }
@@ -40,30 +45,33 @@ exports.getCart = async (req, res, next) => {
 
 exports.addToCart = async (req, res, next) => {
   try {
-    const { itemType, itemId, quantity = 1 } = req.body;
+    const userId = getTargetUserId(req);
+    const { itemType, itemId, quantity = 1, componentId, customBuildId } = req.body;
+    const effectiveItemType = itemType || (componentId ? 'Component' : (customBuildId ? 'CustomBuild' : null));
+    const effectiveItemId = itemId || componentId || customBuildId;
 
-    if (!['Component', 'CustomBuild'].includes(itemType)) {
-      return res.status(400).json({ message: 'Invalid itemType' });
+    if (!['Component', 'CustomBuild'].includes(effectiveItemType) || !effectiveItemId) {
+      return res.status(400).json({ message: 'Invalid itemType or itemId' });
     }
 
-    let cart = await Cart.findOne({ user: req.user._id });
+    let cart = await Cart.findOne({ user: userId });
     if (!cart) {
-      cart = new Cart({ user: req.user._id, items: [] });
+      cart = new Cart({ user: userId, items: [] });
     }
 
     // Check if item already exists in cart
     const existingItemIndex = cart.items.findIndex(item => {
-      if (itemType === 'Component') return item.componentId && item.componentId.toString() === itemId;
-      if (itemType === 'CustomBuild') return item.customBuildId && item.customBuildId.toString() === itemId;
+      if (effectiveItemType === 'Component') return item.componentId && item.componentId.toString() === effectiveItemId;
+      if (effectiveItemType === 'CustomBuild') return item.customBuildId && item.customBuildId.toString() === effectiveItemId;
       return false;
     });
 
     if (existingItemIndex > -1) {
       cart.items[existingItemIndex].quantity += quantity;
     } else {
-      const newItem = { itemType, quantity };
-      if (itemType === 'Component') newItem.componentId = itemId;
-      else newItem.customBuildId = itemId;
+      const newItem = { itemType: effectiveItemType, quantity };
+      if (effectiveItemType === 'Component') newItem.componentId = effectiveItemId;
+      else newItem.customBuildId = effectiveItemId;
       cart.items.push(newItem);
     }
 
@@ -82,17 +90,25 @@ exports.addToCart = async (req, res, next) => {
 
 exports.updateCartItem = async (req, res, next) => {
   try {
-    const { itemId } = req.params; // This is the _id of the cartItem subdocument
+    const userId = getTargetUserId(req);
+    const { itemId } = req.params; // _id of cart item or componentId/customBuildId
     const { quantity } = req.body;
 
-    const cart = await Cart.findOne({ user: req.user._id });
+    const cart = await Cart.findOne({ user: userId });
     if (!cart) return res.status(404).json({ message: 'Cart not found' });
 
-    const item = cart.items.id(itemId);
+    let item = cart.items.id(itemId);
+    if (!item) {
+      item = cart.items.find(i => 
+        (i.componentId && i.componentId.toString() === itemId) || 
+        (i.customBuildId && i.customBuildId.toString() === itemId)
+      );
+    }
+
     if (!item) return res.status(404).json({ message: 'Item not found in cart' });
 
     if (quantity <= 0) {
-      cart.items.pull(itemId);
+      cart.items.pull(item._id);
     } else {
       item.quantity = quantity;
     }
@@ -112,14 +128,25 @@ exports.updateCartItem = async (req, res, next) => {
 
 exports.removeFromCart = async (req, res, next) => {
   try {
+    const userId = getTargetUserId(req);
     const { itemId } = req.params;
 
-    const cart = await Cart.findOne({ user: req.user._id });
+    const cart = await Cart.findOne({ user: userId });
     if (!cart) return res.status(404).json({ message: 'Cart not found' });
 
-    cart.items.pull(itemId);
-    cart.totalPrice = await calculateTotalPrice(cart);
-    await cart.save();
+    let item = cart.items.id(itemId);
+    if (!item) {
+      item = cart.items.find(i => 
+        (i.componentId && i.componentId.toString() === itemId) || 
+        (i.customBuildId && i.customBuildId.toString() === itemId)
+      );
+    }
+
+    if (item) {
+      cart.items.pull(item._id);
+      cart.totalPrice = await calculateTotalPrice(cart);
+      await cart.save();
+    }
 
     res.json(cart);
   } catch (error) {
@@ -129,7 +156,8 @@ exports.removeFromCart = async (req, res, next) => {
 
 exports.clearCart = async (req, res, next) => {
   try {
-    const cart = await Cart.findOne({ user: req.user._id });
+    const userId = getTargetUserId(req);
+    const cart = await Cart.findOne({ user: userId });
     if (!cart) return res.status(404).json({ message: 'Cart not found' });
 
     cart.items = [];

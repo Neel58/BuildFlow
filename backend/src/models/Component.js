@@ -52,6 +52,9 @@ const componentSchema = new mongoose.Schema({
     type: Date,
     default: Date.now
   }
+}, {
+  toJSON: { virtuals: true },
+  toObject: { virtuals: true }
 });
 
 // Virtual helper to check actual available stock

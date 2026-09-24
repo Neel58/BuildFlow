@@ -31,6 +31,19 @@ const userSchema = new mongoose.Schema({
     required: true,
     trim: true
   },
+  isActive: {
+    type: Boolean,
+    default: true
+  },
+  resetPasswordToken: String,
+  resetPasswordExpire: Date,
+  address: {
+    street: String,
+    city: String,
+    state: String,
+    zipCode: String,
+    country: String
+  },
   refreshToken: String
 }, {
   timestamps: true

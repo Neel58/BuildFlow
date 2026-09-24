@@ -3,22 +3,27 @@ const router = express.Router();
 const customBuildController = require('../controllers/customBuildController');
 const { protect } = require('../middleware/auth');
 
-// Apply auth middleware to all routes
-router.use(protect);
+// Optional protect wrapper for GET /:id so public builds can be viewed without token
+const optionalProtect = async (req, res, next) => {
+  if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+    return protect(req, res, next);
+  }
+  next();
+};
+
+router.get('/compare', optionalProtect, customBuildController.compareBuilds);
+router.get('/user/:userId', protect, customBuildController.getUserBuilds);
 
 router.route('/')
-  .post(customBuildController.saveBuild)
-  .get(customBuildController.getUserBuilds);
-
-router.route('/compare')
-  .get(customBuildController.compareBuilds);
+  .post(protect, customBuildController.saveBuild)
+  .get(protect, customBuildController.getUserBuilds);
 
 router.route('/:id')
-  .get(customBuildController.getBuildById)
-  .put(customBuildController.updateBuild)
-  .delete(customBuildController.deleteBuild);
+  .get(optionalProtect, customBuildController.getBuildById)
+  .put(protect, customBuildController.updateBuild)
+  .delete(protect, customBuildController.deleteBuild);
 
 router.route('/:id/share')
-  .post(customBuildController.shareBuild);
+  .post(protect, customBuildController.shareBuild);
 
 module.exports = router;
