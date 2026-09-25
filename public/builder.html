@@ -1,0 +1,1229 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Start Custom Build - BuildFlow PC Studio & Engineering</title>
+  <meta name="description" content="Configure your custom PC with real-time socket matching, TDP wattage verification, and component compatibility. Assembled and bench-tested in India.">
+  <meta property="og:title" content="Start Custom Build - BuildFlow PC Studio & Engineering">
+  <meta property="og:description" content="Configure your custom PC with real-time hardware compatibility checks. All prices in Indian Rupees (₹).">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
+            display: ['"Space Grotesk"', '"Plus Jakarta Sans"', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#fff1f2',
+              100: '#ffe4e6',
+              500: '#ef4444',
+              600: '#dc2626',
+              700: '#b91c1c',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+      background-color: #f8fafc;
+      color: #0f172a;
+    }
+    .font-display {
+      font-family: 'Space Grotesk', 'Plus Jakarta Sans', sans-serif;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased selection:bg-red-500 selection:text-white">
+
+  <!-- TOP HEADER -->
+  <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200/80">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 py-3.5 flex items-center justify-between">
+      
+      <!-- Brand & Back Link -->
+      <div class="flex items-center gap-6">
+        <a href="/" class="flex items-center gap-2.5 text-slate-900 group">
+          <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-red-600 via-red-500 to-orange-400 flex items-center justify-center shadow-md shadow-red-500/20 group-hover:scale-105 transition-transform">
+            <svg class="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+            </svg>
+          </div>
+          <span class="font-display text-xl font-bold tracking-tight text-slate-950 flex items-center">
+            Build<span class="text-red-600">Flow</span>
+          </span>
+        </a>
+
+        <div class="hidden md:flex items-center gap-2 text-xs font-medium text-slate-500 border-l border-slate-200 pl-6">
+          <a href="/" class="hover:text-red-600 transition-colors">Home</a>
+          <span>/</span>
+          <span class="text-slate-900 font-semibold">Custom PC Configurator</span>
+        </div>
+      </div>
+
+      <!-- Live Build Status in Nav -->
+      <div class="flex items-center gap-4">
+        <!-- Live Total in Nav -->
+        <div class="hidden sm:flex flex-col text-right">
+          <span class="text-[10px] uppercase font-bold tracking-wider text-slate-400">Total Build (INR)</span>
+          <span id="nav-total-price" class="text-lg font-bold font-mono text-slate-900 tabular-nums">₹0</span>
+        </div>
+
+        <!-- Cart Button -->
+        <button id="open-cart-btn" class="relative p-2 text-slate-700 hover:text-red-600 hover:bg-slate-100 rounded-lg transition-colors" title="View Cart">
+          <i data-lucide="shopping-bag" class="w-5 h-5"></i>
+          <span id="cart-counter" class="absolute -top-1 -right-1 bg-red-600 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">0</span>
+        </button>
+
+        <!-- Back to Home Button -->
+        <a href="/" class="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors">
+          <i data-lucide="home" class="w-3.5 h-3.5"></i>
+          <span>Homepage</span>
+        </a>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- SUBHEADER / PRESETS BAR -->
+  <section class="bg-white border-b border-slate-200 py-3">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
+      
+      <div class="flex items-center gap-3">
+        <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Quick Presets:</span>
+        <div class="flex items-center gap-2 overflow-x-auto no-scrollbar">
+          <button onclick="loadPreset('apex4k')" class="preset-btn px-3 py-1.5 text-xs font-medium rounded-lg bg-slate-100 hover:bg-red-50 hover:text-red-700 transition-colors whitespace-nowrap">
+            🎮 Apex 4K Gaming (₹2,79,999)
+          </button>
+          <button onclick="loadPreset('workstation')" class="preset-btn px-3 py-1.5 text-xs font-medium rounded-lg bg-slate-100 hover:bg-red-50 hover:text-red-700 transition-colors whitespace-nowrap">
+            ⚡ AI & 3D Render Studio (₹3,79,999)
+          </button>
+          <button onclick="loadPreset('competitor')" class="preset-btn px-3 py-1.5 text-xs font-medium rounded-lg bg-slate-100 hover:bg-red-50 hover:text-red-700 transition-colors whitespace-nowrap">
+            🎯 Competitive Esports (₹1,19,999)
+          </button>
+          <button onclick="resetBuilder()" class="px-2.5 py-1.5 text-xs font-medium text-slate-400 hover:text-red-600 transition-colors whitespace-nowrap" title="Clear all slots">
+            Reset
+          </button>
+        </div>
+      </div>
+
+      <!-- Currency Guarantee Notice -->
+      <div class="flex items-center gap-2 text-xs text-slate-500">
+        <span class="inline-flex items-center gap-1 text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded font-semibold text-[11px]">
+          <i data-lucide="check" class="w-3 h-3 text-emerald-600"></i> All Prices in Indian Rupees (₹)
+        </span>
+        <span class="text-slate-300">|</span>
+        <span>GST Included &middot; Free Insured Delivery Across India</span>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- MAIN CONFIGURATOR WORKSPACE -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+    
+    <!-- Title and Compatibility Header Banner -->
+    <div class="mb-8">
+      <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div>
+          <span class="text-xs font-bold uppercase tracking-wider text-red-600">Interactive Studio</span>
+          <h1 class="font-display text-3xl sm:text-4xl font-bold tracking-tight text-slate-900 mt-1">
+            Build Your Custom Computer
+          </h1>
+          <p class="text-sm text-slate-600 mt-1 max-w-2xl">
+            Select authentic components below. Our engine continuously verifies socket alignment, thermal requirements, memory speeds, and cabinet clearance.
+          </p>
+        </div>
+
+        <!-- Share & Export Buttons -->
+        <div class="flex items-center gap-2">
+          <button onclick="saveAndShareBuild()" class="inline-flex items-center gap-2 px-3.5 py-2 text-xs font-semibold text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors shadow-sm">
+            <i data-lucide="share-2" class="w-3.5 h-3.5 text-red-500"></i>
+            <span>Share Spec Link</span>
+          </button>
+          <button onclick="printSpecSheet()" class="inline-flex items-center gap-2 px-3.5 py-2 text-xs font-semibold text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors shadow-sm">
+            <i data-lucide="printer" class="w-3.5 h-3.5"></i>
+            <span>Print Spec Sheet</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2-COLUMN LAYOUT: Left Component Slots (8 cols) | Right Sticky Summary & Checkout (4 cols) -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      
+      <!-- LEFT: 8 COMPONENT SLOTS -->
+      <div class="lg:col-span-8 space-y-4">
+
+        <!-- SLOT 1: CPU -->
+        <div id="slot-card-cpu" class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm hover:border-slate-300 transition-all">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div class="flex items-start gap-4">
+              <div class="w-12 h-12 rounded-xl bg-red-50 text-red-600 border border-red-100 flex items-center justify-center font-bold text-xs shrink-0">
+                <i data-lucide="cpu" class="w-6 h-6 text-red-600"></i>
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="text-xs font-bold uppercase tracking-wider text-slate-400">01. Processor (CPU)</span>
+                  <span class="text-[10px] font-semibold text-red-600 bg-red-50 px-1.5 py-0.5 rounded">Core Silicon</span>
+                </div>
+                <h3 id="slot-name-cpu" class="text-base font-bold text-slate-900 mt-0.5">AMD Ryzen 7 7800X3D</h3>
+                <p id="slot-desc-cpu" class="text-xs text-slate-500 mt-0.5">Socket AM5 &middot; 8 Cores / 16 Threads &middot; 120W TDP</p>
+              </div>
+            </div>
+            
+            <div class="flex items-center sm:flex-col sm:items-end justify-between gap-2 border-t sm:border-t-0 pt-3 sm:pt-0 border-slate-100">
+              <span id="slot-price-cpu" class="text-base font-bold font-mono text-slate-900 tabular-nums">₹34,999</span>
+              <button onclick="openComponentModal('CPU')" class="px-3.5 py-1.5 text-xs font-semibold text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors flex items-center gap-1.5">
+                <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+                <span>Change CPU</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLOT 2: MOTHERBOARD -->
+        <div id="slot-card-mobo" class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm hover:border-slate-300 transition-all">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div class="flex items-start gap-4">
+              <div class="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 border border-indigo-100 flex items-center justify-center font-bold text-xs shrink-0">
+                <i data-lucide="circuit-board" class="w-6 h-6 text-indigo-600"></i>
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="text-xs font-bold uppercase tracking-wider text-slate-400">02. Motherboard</span>
+                  <span class="text-[10px] font-semibold text-indigo-700 bg-indigo-50 px-1.5 py-0.5 rounded">Foundation</span>
+                </div>
+                <h3 id="slot-name-mobo" class="text-base font-bold text-slate-900 mt-0.5">MSI B650 TOMAHAWK WIFI</h3>
+                <p id="slot-desc-mobo" class="text-xs text-slate-500 mt-0.5">Socket AM5 &middot; Chipset B650 &middot; DDR5 &middot; ATX</p>
+              </div>
+            </div>
+            
+            <div class="flex items-center sm:flex-col sm:items-end justify-between gap-2 border-t sm:border-t-0 pt-3 sm:pt-0 border-slate-100">
+              <span id="slot-price-mobo" class="text-base font-bold font-mono text-slate-900 tabular-nums">₹19,999</span>
+              <button onclick="openComponentModal('Motherboard')" class="px-3.5 py-1.5 text-xs font-semibold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition-colors flex items-center gap-1.5">
+                <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+                <span>Change Board</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLOT 3: GRAPHICS CARD (GPU) -->
+        <div id="slot-card-gpu" class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm hover:border-slate-300 transition-all">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div class="flex items-start gap-4">
+              <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-100 flex items-center justify-center font-bold text-xs shrink-0">
+                <i data-lucide="monitor" class="w-6 h-6 text-emerald-600"></i>
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="text-xs font-bold uppercase tracking-wider text-slate-400">03. Graphics Card (GPU)</span>
+                  <span class="text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded">Compute & Visuals</span>
+                </div>
+                <h3 id="slot-name-gpu" class="text-base font-bold text-slate-900 mt-0.5">NVIDIA GeForce RTX 4090 24GB</h3>
+                <p id="slot-desc-gpu" class="text-xs text-slate-500 mt-0.5">450W TDP &middot; Length: 336mm &middot; DLSS 3.5</p>
+              </div>
+            </div>
+            
+            <div class="flex items-center sm:flex-col sm:items-end justify-between gap-2 border-t sm:border-t-0 pt-3 sm:pt-0 border-slate-100">
+              <span id="slot-price-gpu" class="text-base font-bold font-mono text-slate-900 tabular-nums">₹1,59,999</span>
+              <button onclick="openComponentModal('GPU')" class="px-3.5 py-1.5 text-xs font-semibold text-emerald-600 bg-emerald-50 hover:bg-emerald-100 rounded-lg transition-colors flex items-center gap-1.5">
+                <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+                <span>Change GPU</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLOT 4: RAM -->
+        <div id="slot-card-ram" class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm hover:border-slate-300 transition-all">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div class="flex items-start gap-4">
+              <div class="w-12 h-12 rounded-xl bg-amber-50 text-amber-700 border border-amber-100 flex items-center justify-center font-bold text-xs shrink-0">
+                <i data-lucide="layers" class="w-6 h-6 text-amber-600"></i>
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="text-xs font-bold uppercase tracking-wider text-slate-400">04. Memory (RAM)</span>
+                  <span class="text-[10px] font-semibold text-amber-800 bg-amber-50 px-1.5 py-0.5 rounded">High-Speed DDR5</span>
+                </div>
+                <h3 id="slot-name-ram" class="text-base font-bold text-slate-900 mt-0.5">Corsair Vengeance 32GB DDR5 6000MHz</h3>
+                <p id="slot-desc-ram" class="text-xs text-slate-500 mt-0.5">2x16GB &middot; DDR5 &middot; Low Profile &middot; CL30</p>
+              </div>
+            </div>
+            
+            <div class="flex items-center sm:flex-col sm:items-end justify-between gap-2 border-t sm:border-t-0 pt-3 sm:pt-0 border-slate-100">
+              <span id="slot-price-ram" class="text-base font-bold font-mono text-slate-900 tabular-nums">₹9,999</span>
+              <button onclick="openComponentModal('RAM')" class="px-3.5 py-1.5 text-xs font-semibold text-amber-700 bg-amber-50 hover:bg-amber-100 rounded-lg transition-colors flex items-center gap-1.5">
+                <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+                <span>Change RAM</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLOT 5: STORAGE (SSD) -->
+        <div id="slot-card-ssd" class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm hover:border-slate-300 transition-all">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div class="flex items-start gap-4">
+              <div class="w-12 h-12 rounded-xl bg-purple-50 text-purple-600 border border-purple-100 flex items-center justify-center font-bold text-xs shrink-0">
+                <i data-lucide="hard-drive" class="w-6 h-6 text-purple-600"></i>
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="text-xs font-bold uppercase tracking-wider text-slate-400">05. Primary Storage (M.2 NVMe)</span>
+                  <span class="text-[10px] font-semibold text-purple-700 bg-purple-50 px-1.5 py-0.5 rounded">PCIe 4.0</span>
+                </div>
+                <h3 id="slot-name-ssd" class="text-base font-bold text-slate-900 mt-0.5">Samsung 990 PRO 2TB</h3>
+                <p id="slot-desc-ssd" class="text-xs text-slate-500 mt-0.5">M.2 NVMe PCIe 4.0 &middot; 7,450 MB/s Read &middot; Heatsink Ready</p>
+              </div>
+            </div>
+            
+            <div class="flex items-center sm:flex-col sm:items-end justify-between gap-2 border-t sm:border-t-0 pt-3 sm:pt-0 border-slate-100">
+              <span id="slot-price-ssd" class="text-base font-bold font-mono text-slate-900 tabular-nums">₹15,499</span>
+              <button onclick="openComponentModal('SSD')" class="px-3.5 py-1.5 text-xs font-semibold text-purple-600 bg-purple-50 hover:bg-purple-100 rounded-lg transition-colors flex items-center gap-1.5">
+                <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+                <span>Change SSD</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLOT 6: POWER SUPPLY (PSU) -->
+        <div id="slot-card-psu" class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm hover:border-slate-300 transition-all">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div class="flex items-start gap-4">
+              <div class="w-12 h-12 rounded-xl bg-sky-50 text-sky-600 border border-sky-100 flex items-center justify-center font-bold text-xs shrink-0">
+                <i data-lucide="zap" class="w-6 h-6 text-sky-600"></i>
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="text-xs font-bold uppercase tracking-wider text-slate-400">06. Power Supply (PSU)</span>
+                  <span class="text-[10px] font-semibold text-sky-700 bg-sky-50 px-1.5 py-0.5 rounded">ATX 3.0 &middot; Gold</span>
+                </div>
+                <h3 id="slot-name-psu" class="text-base font-bold text-slate-900 mt-0.5">Corsair RM850x 850W Gold</h3>
+                <p id="slot-desc-psu" class="text-xs text-slate-500 mt-0.5">850 Watts &middot; Fully Modular &middot; PCIe 5.0 12VHPWR</p>
+              </div>
+            </div>
+            
+            <div class="flex items-center sm:flex-col sm:items-end justify-between gap-2 border-t sm:border-t-0 pt-3 sm:pt-0 border-slate-100">
+              <span id="slot-price-psu" class="text-base font-bold font-mono text-slate-900 tabular-nums">₹12,499</span>
+              <button onclick="openComponentModal('PSU')" class="px-3.5 py-1.5 text-xs font-semibold text-sky-600 bg-sky-50 hover:bg-sky-100 rounded-lg transition-colors flex items-center gap-1.5">
+                <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+                <span>Change PSU</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLOT 7: CABINET / CASE -->
+        <div id="slot-card-cabinet" class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm hover:border-slate-300 transition-all">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div class="flex items-start gap-4">
+              <div class="w-12 h-12 rounded-xl bg-slate-100 text-slate-700 border border-slate-200 flex items-center justify-center font-bold text-xs shrink-0">
+                <i data-lucide="box" class="w-6 h-6 text-slate-700"></i>
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="text-xs font-bold uppercase tracking-wider text-slate-400">07. Cabinet / Chassis</span>
+                  <span class="text-[10px] font-semibold text-slate-700 bg-slate-100 px-1.5 py-0.5 rounded">High Airflow</span>
+                </div>
+                <h3 id="slot-name-cabinet" class="text-base font-bold text-slate-900 mt-0.5">NZXT H7 Flow RGB</h3>
+                <p id="slot-desc-cabinet" class="text-xs text-slate-500 mt-0.5">ATX Mid-Tower &middot; Max GPU Clearance: 400mm &middot; Tempered Glass</p>
+              </div>
+            </div>
+            
+            <div class="flex items-center sm:flex-col sm:items-end justify-between gap-2 border-t sm:border-t-0 pt-3 sm:pt-0 border-slate-100">
+              <span id="slot-price-cabinet" class="text-base font-bold font-mono text-slate-900 tabular-nums">₹10,999</span>
+              <button onclick="openComponentModal('Cabinet')" class="px-3.5 py-1.5 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors flex items-center gap-1.5">
+                <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+                <span>Change Case</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- SLOT 8: COOLER -->
+        <div id="slot-card-cooler" class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm hover:border-slate-300 transition-all">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div class="flex items-start gap-4">
+              <div class="w-12 h-12 rounded-xl bg-cyan-50 text-cyan-700 border border-cyan-100 flex items-center justify-center font-bold text-xs shrink-0">
+                <i data-lucide="wind" class="w-6 h-6 text-cyan-600"></i>
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="text-xs font-bold uppercase tracking-wider text-slate-400">08. CPU Cooling System</span>
+                  <span class="text-[10px] font-semibold text-cyan-800 bg-cyan-50 px-1.5 py-0.5 rounded">Thermal Control</span>
+                </div>
+                <h3 id="slot-name-cooler" class="text-base font-bold text-slate-900 mt-0.5">DeepCool AK620 Digital</h3>
+                <p id="slot-desc-cooler" class="text-xs text-slate-500 mt-0.5">Dual Tower Air Cooler &middot; Real-time Temp Display &middot; AM5/LGA1700</p>
+              </div>
+            </div>
+            
+            <div class="flex items-center sm:flex-col sm:items-end justify-between gap-2 border-t sm:border-t-0 pt-3 sm:pt-0 border-slate-100">
+              <span id="slot-price-cooler" class="text-base font-bold font-mono text-slate-900 tabular-nums">₹5,999</span>
+              <button onclick="openComponentModal('Cooler')" class="px-3.5 py-1.5 text-xs font-semibold text-cyan-700 bg-cyan-50 hover:bg-cyan-100 rounded-lg transition-colors flex items-center gap-1.5">
+                <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+                <span>Change Cooler</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- RIGHT: STICKY COMPATIBILITY & TOTAL ORDER CARD -->
+      <div class="lg:col-span-4 sticky top-24 space-y-6">
+        
+        <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-lg space-y-6">
+          
+          <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+            <h2 class="font-display text-lg font-bold text-slate-900">Build Review</h2>
+            <span class="text-xs font-semibold text-slate-500">8 of 8 Selected</span>
+          </div>
+
+          <!-- Compatibility Verdict Banner -->
+          <div id="compat-verdict-box" class="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-950 space-y-2">
+            <div class="flex items-center gap-2 font-bold text-sm">
+              <i id="compat-verdict-icon" data-lucide="check-circle-2" class="w-5 h-5 text-emerald-600 shrink-0"></i>
+              <span id="compat-verdict-title">All Hardware 100% Compatible</span>
+            </div>
+            <ul id="compat-verdict-checklist" class="text-xs text-emerald-800 space-y-1 list-disc list-inside">
+              <li>Socket AM5 matches Motherboard</li>
+              <li>DDR5 memory verified</li>
+              <li>GPU 336mm within 400mm Case tolerance</li>
+              <li>Cooler bracket matches CPU</li>
+            </ul>
+          </div>
+
+          <!-- System Wattage Calculation Meter -->
+          <div class="space-y-2">
+            <div class="flex justify-between items-center text-xs font-semibold text-slate-700">
+              <span class="flex items-center gap-1.5">
+                <i data-lucide="battery-charging" class="w-4 h-4 text-slate-500"></i>
+                <span>Estimated Peak Wattage</span>
+              </span>
+              <span id="wattage-meter-label" class="font-mono text-red-600 font-bold tabular-nums">670W / 850W</span>
+            </div>
+            
+            <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+              <div id="wattage-bar-fill" class="bg-red-500 h-full rounded-full transition-all duration-300" style="width: 78%;"></div>
+            </div>
+            
+            <div class="flex justify-between text-[11px] text-slate-400">
+              <span id="wattage-safety-note">+180W Safety Headroom (Safe)</span>
+              <span>Recommended: 750W+</span>
+            </div>
+          </div>
+
+          <!-- Price Breakdown in Rupees (INR) -->
+          <div class="border-t border-slate-100 pt-4 space-y-2.5 text-xs">
+            <div class="flex justify-between text-slate-600">
+              <span>Hardware Parts Total</span>
+              <span id="parts-subtotal" class="font-mono font-medium text-slate-900 tabular-nums">₹2,69,993</span>
+            </div>
+            <div class="flex justify-between text-slate-600">
+              <span>Precision Clean-Room Assembly</span>
+              <span class="text-emerald-700 font-semibold bg-emerald-50 px-1.5 py-0.5 rounded">Free / Included</span>
+            </div>
+            <div class="flex justify-between text-slate-600">
+              <span>24-Hour Stress Testing & BIOS Tune</span>
+              <span class="text-emerald-700 font-semibold bg-emerald-50 px-1.5 py-0.5 rounded">Free / Included</span>
+            </div>
+            <div class="flex justify-between text-slate-600">
+              <span>InstaPak Shock-Foam Transit Insurance</span>
+              <span class="text-emerald-700 font-semibold bg-emerald-50 px-1.5 py-0.5 rounded">Free / Included</span>
+            </div>
+            <div class="flex justify-between text-slate-600">
+              <span>GST & Taxes</span>
+              <span class="text-slate-500 font-medium">Included in MRP</span>
+            </div>
+
+            <div class="border-t border-slate-200/80 pt-3 flex justify-between items-baseline">
+              <div>
+                <span class="text-xs font-bold uppercase tracking-wider text-slate-500 block">Total Rig Price</span>
+                <span class="text-[11px] text-slate-400">All India Delivery</span>
+              </div>
+              <div class="text-right">
+                <span id="grand-total-rupees" class="font-display text-2xl font-bold font-mono text-red-600 tabular-nums">
+                  ₹2,69,993
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Primary Actions -->
+          <div class="space-y-3 pt-2">
+            <button onclick="addCustomBuildToCart()" class="w-full py-3.5 px-4 text-sm font-semibold text-white bg-red-600 hover:bg-red-700 active:bg-red-800 rounded-xl shadow-md shadow-red-600/25 transition-all flex items-center justify-center gap-2">
+              <i data-lucide="shopping-cart" class="w-4 h-4"></i>
+              <span>Add Custom Rig to Cart</span>
+            </button>
+
+            <button onclick="proceedToInstantCheckout()" class="w-full py-3 px-4 text-xs font-semibold text-slate-800 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors flex items-center justify-center gap-2">
+              <i data-lucide="zap" class="w-4 h-4 text-amber-500"></i>
+              <span>Instant Checkout With This Build</span>
+            </button>
+          </div>
+
+          <!-- Support Guarantee Badge -->
+          <div class="border-t border-slate-100 pt-4 flex items-center justify-between text-xs text-slate-500">
+            <span class="flex items-center gap-1.5">
+              <i data-lucide="shield-check" class="w-4 h-4 text-emerald-600"></i>
+              <span>3-Year Hardware Warranty</span>
+            </span>
+            <span>Helpline: 1800-284-5335</span>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- COMPONENT PICKER MODAL -->
+  <div id="component-modal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm p-4 sm:p-6 flex items-center justify-center">
+    <div class="bg-white rounded-2xl max-w-3xl w-full max-h-[85vh] flex flex-col shadow-2xl border border-slate-200 overflow-hidden">
+      
+      <!-- Modal Header -->
+      <div class="p-6 border-b border-slate-200 flex items-center justify-between">
+        <div>
+          <span id="modal-category-badge" class="text-xs font-bold uppercase tracking-wider text-red-600">Component Selector</span>
+          <h3 id="modal-title" class="font-display text-xl font-bold text-slate-900 mt-0.5">Select Processor (CPU)</h3>
+        </div>
+        <button onclick="closeComponentModal()" class="text-slate-400 hover:text-slate-700 p-2 rounded-lg hover:bg-slate-100">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Modal Filter & Search -->
+      <div class="p-4 bg-slate-50 border-b border-slate-200 flex flex-col sm:flex-row items-center gap-3">
+        <div class="relative w-full sm:w-72">
+          <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-2.5"></i>
+          <input 
+            type="text" 
+            id="modal-search-input" 
+            oninput="renderModalComponents()" 
+            placeholder="Search by name, socket, speed..." 
+            class="w-full pl-9 pr-3 py-2 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500"
+          />
+        </div>
+
+        <div class="flex items-center gap-2 w-full sm:w-auto overflow-x-auto text-xs">
+          <button onclick="setModalBrandFilter('ALL')" class="modal-brand-btn active px-3 py-1.5 rounded-lg bg-slate-900 text-white font-medium whitespace-nowrap">
+            All Brands
+          </button>
+          <div id="modal-brand-filters" class="flex items-center gap-2"></div>
+        </div>
+      </div>
+
+      <!-- Modal Items List -->
+      <div id="modal-items-list" class="p-6 overflow-y-auto space-y-3 flex-1">
+        <!-- Rendered dynamically -->
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="p-4 bg-slate-50 border-t border-slate-200 flex justify-between items-center text-xs text-slate-500">
+        <span>Prices shown in Indian Rupees (₹) including all taxes.</span>
+        <button onclick="closeComponentModal()" class="px-4 py-2 font-semibold text-slate-700 hover:bg-slate-200 rounded-lg transition-colors">
+          Cancel
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- CART SLIDE-OVER DRAWER -->
+  <div id="cart-drawer" class="fixed inset-y-0 right-0 z-50 w-full sm:w-96 bg-white shadow-2xl border-l border-slate-200 transform translate-x-full transition-transform duration-300 ease-in-out flex flex-col">
+    <div class="p-6 border-b border-slate-200 flex items-center justify-between">
+      <div class="flex items-center gap-2 font-display text-lg font-bold text-slate-900">
+        <i data-lucide="shopping-bag" class="w-5 h-5 text-red-600"></i>
+        <span>Your BuildFlow Cart</span>
+      </div>
+      <button id="close-cart-btn" class="p-2 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+    </div>
+
+    <!-- Cart items list -->
+    <div id="cart-items" class="flex-1 overflow-y-auto p-6 space-y-4">
+      <div class="text-center py-12 text-slate-400 text-sm">
+        <i data-lucide="package-open" class="w-8 h-8 mx-auto mb-2 text-slate-300"></i>
+        Your shopping cart is currently empty.
+      </div>
+    </div>
+
+    <!-- Cart subtotal footer -->
+    <div class="p-6 border-t border-slate-200 bg-slate-50 space-y-4">
+      <div class="flex justify-between items-center text-sm font-semibold text-slate-700">
+        <span>Subtotal (INR)</span>
+        <span id="cart-subtotal" class="font-mono tabular-nums text-base text-slate-900">₹0</span>
+      </div>
+      <button onclick="triggerCheckout()" class="w-full py-3.5 px-4 text-sm font-semibold text-white bg-red-600 hover:bg-red-700 active:bg-red-800 rounded-lg shadow-sm transition-colors text-center block">
+        Proceed to Checkout
+      </button>
+      <div class="text-center text-[11px] text-slate-400 flex items-center justify-center gap-1">
+        <i data-lucide="lock" class="w-3.5 h-3.5 text-emerald-600"></i>
+        <span>Encrypted Checkout &middot; UPI / Cards / Net Banking</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCRIPT: APPLICATION STATE, RUPEE FORMATTER, COMPONENT DATABASE & COMPATIBILITY ENGINE -->
+  <script>
+    // Format number to Indian Rupees (INR)
+    function formatINR(val) {
+      const num = Number(val) || 0;
+      // If amount was stored in small units (e.g. USD < 5000), multiply by 85
+      let inr = num;
+      if (num > 0 && num < 5000) {
+        inr = Math.round(num * 85);
+      }
+      return new Intl.NumberFormat('en-IN', {
+        style: 'currency',
+        currency: 'INR',
+        maximumFractionDigits: 0
+      }).format(inr);
+    }
+
+    // Default Current Rig State (Selected hardware components)
+    let currentBuild = {
+      cpu: {
+        id: 'cpu-7800x3d',
+        name: 'AMD Ryzen 7 7800X3D',
+        brand: 'AMD',
+        category: 'CPU',
+        price: 34999,
+        specs: { socket: 'AM5', powerDraw: 120, cores: '8C / 16T', clock: '4.2GHz - 5.0GHz' }
+      },
+      mobo: {
+        id: 'mobo-b650-tomahawk',
+        name: 'MSI B650 TOMAHAWK WIFI',
+        brand: 'MSI',
+        category: 'Motherboard',
+        price: 19999,
+        specs: { socket: 'AM5', chipset: 'B650', ramType: 'DDR5', formFactor: 'ATX' }
+      },
+      gpu: {
+        id: 'gpu-rtx4090',
+        name: 'NVIDIA GeForce RTX 4090 24GB',
+        brand: 'NVIDIA',
+        category: 'GPU',
+        price: 159999,
+        specs: { powerDraw: 450, gpuLength: 336, vram: '24GB GDDR6X' }
+      },
+      ram: {
+        id: 'ram-corsair-32gb',
+        name: 'Corsair Vengeance 32GB DDR5 6000MHz',
+        brand: 'Corsair',
+        category: 'RAM',
+        price: 9999,
+        specs: { ramType: 'DDR5', capacity: '32GB (2x16GB)', speed: '6000MHz' }
+      },
+      ssd: {
+        id: 'ssd-samsung-990pro',
+        name: 'Samsung 990 PRO 2TB',
+        brand: 'Samsung',
+        category: 'SSD',
+        price: 15499,
+        specs: { storageInterface: 'M.2 NVMe', capacity: '2TB', speed: '7450 MB/s' }
+      },
+      psu: {
+        id: 'psu-corsair-rm850x',
+        name: 'Corsair RM850x 850W Gold',
+        brand: 'Corsair',
+        category: 'PSU',
+        price: 12499,
+        specs: { wattage: 850, efficiency: '80+ Gold', modular: 'Fully Modular' }
+      },
+      cabinet: {
+        id: 'case-nzxt-h7',
+        name: 'NZXT H7 Flow RGB',
+        brand: 'NZXT',
+        category: 'Cabinet',
+        price: 10999,
+        specs: { formFactor: 'ATX', maxGpuLength: 400, type: 'Mid Tower' }
+      },
+      cooler: {
+        id: 'cooler-ak620',
+        name: 'DeepCool AK620 Digital',
+        brand: 'DeepCool',
+        category: 'Cooler',
+        price: 5999,
+        specs: { coolerSocketSupport: ['AM5', 'LGA1700'], type: 'Dual Tower Air' }
+      }
+    };
+
+    // Component Database with INR Pricing
+    const componentCatalog = {
+      CPU: [
+        { id: 'cpu-7800x3d', name: 'AMD Ryzen 7 7800X3D', brand: 'AMD', price: 34999, specs: { socket: 'AM5', powerDraw: 120, cores: '8C / 16T', clock: '5.0 GHz' } },
+        { id: 'cpu-14900k', name: 'Intel Core i9-14900K', brand: 'Intel', price: 49999, specs: { socket: 'LGA1700', powerDraw: 253, cores: '24C / 32T', clock: '6.0 GHz' } },
+        { id: 'cpu-7950x', name: 'AMD Ryzen 9 7950X', brand: 'AMD', price: 46999, specs: { socket: 'AM5', powerDraw: 170, cores: '16C / 32T', clock: '5.7 GHz' } },
+        { id: 'cpu-7600x', name: 'AMD Ryzen 5 7600X', brand: 'AMD', price: 19499, specs: { socket: 'AM5', powerDraw: 105, cores: '6C / 12T', clock: '5.3 GHz' } },
+        { id: 'cpu-14700k', name: 'Intel Core i7-14700K', brand: 'Intel', price: 37999, specs: { socket: 'LGA1700', powerDraw: 253, cores: '20C / 28T', clock: '5.6 GHz' } }
+      ],
+      Motherboard: [
+        { id: 'mobo-b650-tomahawk', name: 'MSI B650 TOMAHAWK WIFI', brand: 'MSI', price: 19999, specs: { socket: 'AM5', chipset: 'B650', ramType: 'DDR5', formFactor: 'ATX' } },
+        { id: 'mobo-z790-hero', name: 'ASUS ROG MAXIMUS Z790 HERO', brand: 'ASUS', price: 54999, specs: { socket: 'LGA1700', chipset: 'Z790', ramType: 'DDR5', formFactor: 'ATX' } },
+        { id: 'mobo-x670e-master', name: 'Gigabyte X670E AORUS MASTER', brand: 'Gigabyte', price: 42999, specs: { socket: 'AM5', chipset: 'X670E', ramType: 'DDR5', formFactor: 'E-ATX' } },
+        { id: 'mobo-b650-tuf', name: 'ASUS TUF GAMING B650-PLUS WIFI', brand: 'ASUS', price: 18499, specs: { socket: 'AM5', chipset: 'B650', ramType: 'DDR5', formFactor: 'ATX' } },
+        { id: 'mobo-z790-aorus', name: 'Gigabyte Z790 AORUS ELITE AX', brand: 'Gigabyte', price: 23999, specs: { socket: 'LGA1700', chipset: 'Z790', ramType: 'DDR5', formFactor: 'ATX' } }
+      ],
+      GPU: [
+        { id: 'gpu-rtx4090', name: 'NVIDIA GeForce RTX 4090 24GB', brand: 'NVIDIA', price: 159999, specs: { powerDraw: 450, gpuLength: 336, vram: '24GB GDDR6X' } },
+        { id: 'gpu-rtx4080s', name: 'NVIDIA GeForce RTX 4080 SUPER 16GB', brand: 'NVIDIA', price: 89999, specs: { powerDraw: 320, gpuLength: 310, vram: '16GB GDDR6X' } },
+        { id: 'gpu-rtx4070tis', name: 'NVIDIA GeForce RTX 4070 Ti SUPER 16GB', brand: 'NVIDIA', price: 74999, specs: { powerDraw: 285, gpuLength: 300, vram: '16GB GDDR6X' } },
+        { id: 'gpu-rx7900xtx', name: 'AMD Radeon RX 7900 XTX 24GB', brand: 'AMD', price: 84999, specs: { powerDraw: 355, gpuLength: 287, vram: '24GB GDDR6' } },
+        { id: 'gpu-rtx4060', name: 'NVIDIA GeForce RTX 4060 8GB', brand: 'NVIDIA', price: 27999, specs: { powerDraw: 115, gpuLength: 242, vram: '8GB GDDR6' } }
+      ],
+      RAM: [
+        { id: 'ram-corsair-32gb', name: 'Corsair Vengeance 32GB DDR5 6000MHz', brand: 'Corsair', price: 9999, specs: { ramType: 'DDR5', capacity: '32GB (2x16GB)', speed: '6000MHz' } },
+        { id: 'ram-gskill-64gb', name: 'G.Skill Trident Z5 RGB 64GB DDR5 6000MHz', brand: 'G.Skill', price: 19499, specs: { ramType: 'DDR5', capacity: '64GB (2x32GB)', speed: '6000MHz' } },
+        { id: 'ram-fury-16gb', name: 'Kingston Fury Beast 16GB DDR5 5600MHz', brand: 'Kingston', price: 5499, specs: { ramType: 'DDR5', capacity: '16GB (1x16GB)', speed: '5600MHz' } },
+        { id: 'ram-corsair-ddr4-32gb', name: 'Corsair Vengeance 32GB DDR4 3600MHz', brand: 'Corsair', price: 7499, specs: { ramType: 'DDR4', capacity: '32GB (2x16GB)', speed: '3600MHz' } }
+      ],
+      SSD: [
+        { id: 'ssd-samsung-990pro', name: 'Samsung 990 PRO 2TB', brand: 'Samsung', price: 15499, specs: { storageInterface: 'M.2 NVMe', capacity: '2TB', speed: '7450 MB/s' } },
+        { id: 'ssd-wd-sn850x', name: 'WD Black SN850X 2TB Heatsink', brand: 'Western Digital', price: 14999, specs: { storageInterface: 'M.2 NVMe', capacity: '2TB', speed: '7300 MB/s' } },
+        { id: 'ssd-crucial-t700', name: 'Crucial T700 1TB PCIe 5.0', brand: 'Crucial', price: 16999, specs: { storageInterface: 'PCIe 5.0 NVMe', capacity: '1TB', speed: '11700 MB/s' } },
+        { id: 'ssd-kingston-1tb', name: 'Kingston NV2 1TB PCIe 4.0', brand: 'Kingston', price: 5499, specs: { storageInterface: 'M.2 NVMe', capacity: '1TB', speed: '3500 MB/s' } }
+      ],
+      PSU: [
+        { id: 'psu-corsair-rm850x', name: 'Corsair RM850x 850W Gold', brand: 'Corsair', price: 12499, specs: { wattage: 850, efficiency: '80+ Gold', modular: 'Fully Modular' } },
+        { id: 'psu-corsair-rm1000x', name: 'Corsair RM1000x 1000W Shift ATX 3.0', brand: 'Corsair', price: 17999, specs: { wattage: 1000, efficiency: '80+ Gold', modular: 'Fully Modular' } },
+        { id: 'psu-seasonic-750', name: 'Seasonic Focus GX-750 750W Gold', brand: 'Seasonic', price: 9999, specs: { wattage: 750, efficiency: '80+ Gold', modular: 'Fully Modular' } },
+        { id: 'psu-corsair-1200', name: 'Corsair HX1200 1200W Platinum', brand: 'Corsair', price: 23999, specs: { wattage: 1200, efficiency: '80+ Platinum', modular: 'Fully Modular' } }
+      ],
+      Cabinet: [
+        { id: 'case-nzxt-h7', name: 'NZXT H7 Flow RGB', brand: 'NZXT', price: 10999, specs: { formFactor: 'ATX', maxGpuLength: 400, type: 'Mid Tower' } },
+        { id: 'case-lianli-o11', name: 'Lian Li O11 Dynamic EVO', brand: 'Lian Li', price: 13999, specs: { formFactor: 'ATX', maxGpuLength: 422, type: 'Dual Chamber' } },
+        { id: 'case-fractal-north', name: 'Fractal Design North (Walnut Wood)', brand: 'Fractal', price: 14499, specs: { formFactor: 'ATX', maxGpuLength: 355, type: 'Nordic Wood' } },
+        { id: 'case-corsair-4000d', name: 'Corsair 4000D Airflow', brand: 'Corsair', price: 6999, specs: { formFactor: 'ATX', maxGpuLength: 360, type: 'Mid Tower' } }
+      ],
+      Cooler: [
+        { id: 'cooler-ak620', name: 'DeepCool AK620 Digital', brand: 'DeepCool', price: 5999, specs: { coolerSocketSupport: ['AM5', 'LGA1700'], type: 'Dual Tower Air' } },
+        { id: 'cooler-kraken360', name: 'NZXT Kraken Elite 360 RGB LCD', brand: 'NZXT', price: 24999, specs: { coolerSocketSupport: ['AM5', 'LGA1700'], type: '360mm AIO Liquid' } },
+        { id: 'cooler-h150i', name: 'Corsair iCUE LINK H150i RGB 360mm', brand: 'Corsair', price: 19999, specs: { coolerSocketSupport: ['AM5', 'LGA1700'], type: '360mm AIO Liquid' } },
+        { id: 'cooler-nh-d15', name: 'Noctua NH-D15 chromax.black', brand: 'Noctua', price: 10999, specs: { coolerSocketSupport: ['AM5', 'LGA1700'], type: 'Premium Air Cooler' } }
+      ]
+    };
+
+    // Synchronize components from live backend API if available
+    async function syncBackendComponents() {
+      try {
+        const res = await fetch('/api/components');
+        if (res.ok) {
+          const list = await res.json();
+          if (Array.isArray(list) && list.length > 0) {
+            list.forEach(c => {
+              if (componentCatalog[c.category]) {
+                const existingIdx = componentCatalog[c.category].findIndex(x => x.name === c.name);
+                const convertedPrice = c.price < 5000 ? Math.round(c.price * 85) : c.price;
+                const formattedObj = {
+                  id: c._id || `db-${c.category.toLowerCase()}-${Date.now()}`,
+                  name: c.name,
+                  brand: c.brand || 'Genuine OEM',
+                  price: convertedPrice,
+                  specs: c.specifications || {}
+                };
+                if (existingIdx >= 0) {
+                  componentCatalog[c.category][existingIdx] = formattedObj;
+                } else {
+                  componentCatalog[c.category].push(formattedObj);
+                }
+              }
+            });
+          }
+        }
+      } catch (err) {
+        console.warn('API sync completed or offline fallback active');
+      }
+    }
+
+    // Refresh Slot Display & Run Compatibility Check
+    function updateBuilderUI() {
+      let subtotal = 0;
+      let totalPowerDraw = 100; // Motherboard + Fans + RAM + M.2 baseline draw
+
+      // 1. Update CPU
+      const cpu = currentBuild.cpu;
+      subtotal += cpu.price;
+      totalPowerDraw += (cpu.specs.powerDraw || 105);
+      document.getElementById('slot-name-cpu').textContent = cpu.name;
+      document.getElementById('slot-desc-cpu').textContent = `Socket ${cpu.specs.socket || 'AM5'} · ${cpu.specs.cores || '8C/16T'} · ${cpu.specs.powerDraw || 120}W TDP`;
+      document.getElementById('slot-price-cpu').textContent = formatINR(cpu.price);
+
+      // 2. Update Motherboard
+      const mobo = currentBuild.mobo;
+      subtotal += mobo.price;
+      document.getElementById('slot-name-mobo').textContent = mobo.name;
+      document.getElementById('slot-desc-mobo').textContent = `Socket ${mobo.specs.socket || 'AM5'} · Chipset ${mobo.specs.chipset || 'B650'} · ${mobo.specs.ramType || 'DDR5'} · ${mobo.specs.formFactor || 'ATX'}`;
+      document.getElementById('slot-price-mobo').textContent = formatINR(mobo.price);
+
+      // 3. Update GPU
+      const gpu = currentBuild.gpu;
+      subtotal += gpu.price;
+      totalPowerDraw += (gpu.specs.powerDraw || 300);
+      document.getElementById('slot-name-gpu').textContent = gpu.name;
+      document.getElementById('slot-desc-gpu').textContent = `${gpu.specs.powerDraw || 300}W TDP · Length: ${gpu.specs.gpuLength || 320}mm · ${gpu.specs.vram || 'Dedicated VRAM'}`;
+      document.getElementById('slot-price-gpu').textContent = formatINR(gpu.price);
+
+      // 4. Update RAM
+      const ram = currentBuild.ram;
+      subtotal += ram.price;
+      document.getElementById('slot-name-ram').textContent = ram.name;
+      document.getElementById('slot-desc-ram').textContent = `${ram.specs.capacity || '32GB'} · ${ram.specs.ramType || 'DDR5'} · ${ram.specs.speed || '6000MHz'}`;
+      document.getElementById('slot-price-ram').textContent = formatINR(ram.price);
+
+      // 5. Update SSD
+      const ssd = currentBuild.ssd;
+      subtotal += ssd.price;
+      document.getElementById('slot-name-ssd').textContent = ssd.name;
+      document.getElementById('slot-desc-ssd').textContent = `${ssd.specs.storageInterface || 'M.2 NVMe'} · ${ssd.specs.capacity || '2TB'} · ${ssd.specs.speed || 'High Speed'}`;
+      document.getElementById('slot-price-ssd').textContent = formatINR(ssd.price);
+
+      // 6. Update PSU
+      const psu = currentBuild.psu;
+      subtotal += psu.price;
+      const psuCapacity = psu.specs.wattage || 850;
+      document.getElementById('slot-name-psu').textContent = psu.name;
+      document.getElementById('slot-desc-psu').textContent = `${psuCapacity} Watts · ${psu.specs.efficiency || '80+ Gold'} · ${psu.specs.modular || 'Modular'}`;
+      document.getElementById('slot-price-psu').textContent = formatINR(psu.price);
+
+      // 7. Update Cabinet
+      const cabinet = currentBuild.cabinet;
+      subtotal += cabinet.price;
+      document.getElementById('slot-name-cabinet').textContent = cabinet.name;
+      document.getElementById('slot-desc-cabinet').textContent = `${cabinet.specs.formFactor || 'ATX'} · Max GPU Clearance: ${cabinet.specs.maxGpuLength || 400}mm · ${cabinet.specs.type || 'Chassis'}`;
+      document.getElementById('slot-price-cabinet').textContent = formatINR(cabinet.price);
+
+      // 8. Update Cooler
+      const cooler = currentBuild.cooler;
+      subtotal += cooler.price;
+      document.getElementById('slot-name-cooler').textContent = cooler.name;
+      document.getElementById('slot-desc-cooler').textContent = `${cooler.specs.type || 'Thermal Solution'} · Sockets: ${(cooler.specs.coolerSocketSupport || ['AM5', 'LGA1700']).join('/')}`;
+      document.getElementById('slot-price-cooler').textContent = formatINR(cooler.price);
+
+      // Totals
+      document.getElementById('parts-subtotal').textContent = formatINR(subtotal);
+      document.getElementById('grand-total-rupees').textContent = formatINR(subtotal);
+      document.getElementById('nav-total-price').textContent = formatINR(subtotal);
+
+      // Wattage Meter calculation
+      document.getElementById('wattage-meter-label').textContent = `${totalPowerDraw}W / ${psuCapacity}W`;
+      const wattPct = Math.min(Math.round((totalPowerDraw / psuCapacity) * 100), 100);
+      const wattBar = document.getElementById('wattage-bar-fill');
+      const safetyNote = document.getElementById('wattage-safety-note');
+
+      wattBar.style.width = `${wattPct}%`;
+      const headroom = psuCapacity - totalPowerDraw;
+
+      if (headroom >= 150) {
+        wattBar.className = 'bg-emerald-500 h-full rounded-full transition-all duration-300';
+        safetyNote.innerHTML = `<span class="text-emerald-700 font-semibold">+${headroom}W Optimal Headroom (High Efficiency)</span>`;
+      } else if (headroom >= 50) {
+        wattBar.className = 'bg-amber-500 h-full rounded-full transition-all duration-300';
+        safetyNote.innerHTML = `<span class="text-amber-700 font-semibold">+${headroom}W Moderate Headroom</span>`;
+      } else {
+        wattBar.className = 'bg-red-600 h-full rounded-full transition-all duration-300';
+        safetyNote.innerHTML = `<span class="text-red-600 font-bold">WARNING: PSU wattage is near capacity!</span>`;
+      }
+
+      // Live Compatibility Checks
+      runCompatibilityValidation(totalPowerDraw, psuCapacity);
+    }
+
+    function runCompatibilityValidation(totalPowerDraw, psuCapacity) {
+      const cpu = currentBuild.cpu;
+      const mobo = currentBuild.mobo;
+      const ram = currentBuild.ram;
+      const gpu = currentBuild.gpu;
+      const cabinet = currentBuild.cabinet;
+      const cooler = currentBuild.cooler;
+
+      let isValid = true;
+      let warnings = [];
+      let successNotes = [];
+
+      // Check 1: Socket match
+      if (cpu.specs.socket && mobo.specs.socket) {
+        if (cpu.specs.socket !== mobo.specs.socket) {
+          isValid = false;
+          warnings.push(`Socket Conflict: CPU (${cpu.specs.socket}) cannot be mounted on ${mobo.specs.socket} Motherboard.`);
+        } else {
+          successNotes.push(`CPU socket (${cpu.specs.socket}) perfectly matches Motherboard.`);
+        }
+      }
+
+      // Check 2: RAM Generation
+      if (mobo.specs.ramType && ram.specs.ramType) {
+        if (mobo.specs.ramType !== ram.specs.ramType) {
+          isValid = false;
+          warnings.push(`RAM Generation Conflict: Board requires ${mobo.specs.ramType}, but selected RAM is ${ram.specs.ramType}.`);
+        } else {
+          successNotes.push(`${ram.specs.ramType} Memory channels matched.`);
+        }
+      }
+
+      // Check 3: Wattage vs PSU
+      if (totalPowerDraw > psuCapacity) {
+        isValid = false;
+        warnings.push(`Insufficient Power: Estimated system load (${totalPowerDraw}W) exceeds ${psuCapacity}W PSU capacity.`);
+      } else {
+        successNotes.push(`Power draw (${totalPowerDraw}W) within ${psuCapacity}W PSU capacity.`);
+      }
+
+      // Check 4: GPU clearance
+      const gpuLength = gpu.specs.gpuLength || 320;
+      const maxGpuCase = cabinet.specs.maxGpuLength || 400;
+      if (gpuLength > maxGpuCase) {
+        isValid = false;
+        warnings.push(`Chassis Clearance Error: GPU length (${gpuLength}mm) exceeds case maximum clearance (${maxGpuCase}mm).`);
+      } else {
+        successNotes.push(`GPU (${gpuLength}mm) fits comfortably in ${cabinet.name} (${maxGpuCase}mm clearance).`);
+      }
+
+      // Check 5: Cooler socket bracket
+      const coolerSockets = cooler.specs.coolerSocketSupport || ['AM5', 'LGA1700'];
+      if (cpu.specs.socket && !coolerSockets.includes(cpu.specs.socket)) {
+        isValid = false;
+        warnings.push(`Cooler Bracket Mismatch: Cooler does not include brackets for socket ${cpu.specs.socket}.`);
+      } else {
+        successNotes.push(`Cooler bracket verified for socket ${cpu.specs.socket}.`);
+      }
+
+      // Render Verdict
+      const box = document.getElementById('compat-verdict-box');
+      const icon = document.getElementById('compat-verdict-icon');
+      const title = document.getElementById('compat-verdict-title');
+      const list = document.getElementById('compat-verdict-checklist');
+
+      if (isValid) {
+        box.className = 'p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-950 space-y-2';
+        title.textContent = 'All Hardware 100% Compatible';
+        title.className = 'font-bold text-sm text-emerald-900';
+        list.innerHTML = successNotes.map(n => `<li>${n}</li>`).join('');
+      } else {
+        box.className = 'p-4 rounded-xl bg-red-50 border border-red-200 text-red-950 space-y-2';
+        title.textContent = 'Hardware Incompatibility Detected!';
+        title.className = 'font-bold text-sm text-red-700';
+        list.innerHTML = warnings.map(w => `<li class="text-red-700 font-semibold">${w}</li>`).join('');
+      }
+      lucide.createIcons();
+    }
+
+    // COMPONENT MODAL HANDLER
+    let currentModalCategory = 'CPU';
+    let currentModalBrand = 'ALL';
+
+    function openComponentModal(category) {
+      currentModalCategory = category;
+      currentModalBrand = 'ALL';
+      document.getElementById('modal-search-input').value = '';
+
+      const titles = {
+        CPU: 'Select Processor (CPU)',
+        Motherboard: 'Select Motherboard',
+        GPU: 'Select Graphics Card (GPU)',
+        RAM: 'Select Memory (RAM)',
+        SSD: 'Select Primary Storage (NVMe SSD)',
+        PSU: 'Select Power Supply Unit (PSU)',
+        Cabinet: 'Select Chassis / PC Case',
+        Cooler: 'Select CPU Cooling System'
+      };
+
+      document.getElementById('modal-title').textContent = titles[category] || `Select ${category}`;
+      document.getElementById('modal-category-badge').textContent = `Slot: ${category}`;
+
+      // Populate brand filters
+      const items = componentCatalog[category] || [];
+      const brands = [...new Set(items.map(i => i.brand))];
+      const brandContainer = document.getElementById('modal-brand-filters');
+      brandContainer.innerHTML = brands.map(b => `
+        <button onclick="setModalBrandFilter('${b}')" class="modal-brand-btn px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 font-medium whitespace-nowrap">
+          ${b}
+        </button>
+      `).join('');
+
+      renderModalComponents();
+      document.getElementById('component-modal').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeComponentModal() {
+      document.getElementById('component-modal').classList.add('hidden');
+    }
+
+    function setModalBrandFilter(brand) {
+      currentModalBrand = brand;
+      document.querySelectorAll('.modal-brand-btn').forEach(btn => {
+        if ((brand === 'ALL' && btn.textContent.trim() === 'All Brands') || btn.textContent.trim() === brand) {
+          btn.className = 'modal-brand-btn active px-3 py-1.5 rounded-lg bg-slate-900 text-white font-medium whitespace-nowrap';
+        } else {
+          btn.className = 'modal-brand-btn px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 font-medium whitespace-nowrap';
+        }
+      });
+      renderModalComponents();
+    }
+
+    function renderModalComponents() {
+      const search = (document.getElementById('modal-search-input').value || '').toLowerCase().trim();
+      const items = componentCatalog[currentModalCategory] || [];
+      const listContainer = document.getElementById('modal-items-list');
+
+      const filtered = items.filter(item => {
+        const matchesBrand = (currentModalBrand === 'ALL') || (item.brand === currentModalBrand);
+        const matchesSearch = item.name.toLowerCase().includes(search) ||
+          JSON.stringify(item.specs).toLowerCase().includes(search);
+        return matchesBrand && matchesSearch;
+      });
+
+      if (filtered.length === 0) {
+        listContainer.innerHTML = `
+          <div class="text-center py-10 text-slate-400 text-xs">
+            No components matched "${search}". Try another filter.
+          </div>
+        `;
+        return;
+      }
+
+      // Check current selected ID for category
+      const currentSelected = currentBuild[currentModalCategory.toLowerCase() === 'motherboard' ? 'mobo' : currentModalCategory.toLowerCase()];
+      const currentId = currentSelected ? currentSelected.id : '';
+
+      listContainer.innerHTML = filtered.map(item => {
+        const isSelected = item.id === currentId;
+        const specsSummary = Object.entries(item.specs || {})
+          .map(([k, v]) => `${k.replace(/([A-Z])/g, ' $1')}: <strong class="text-slate-800">${Array.isArray(v) ? v.join(', ') : v}</strong>`)
+          .join(' &middot; ');
+
+        return `
+          <div class="p-4 rounded-xl border ${isSelected ? 'border-red-500 bg-red-50/40 ring-1 ring-red-500' : 'border-slate-200 bg-white hover:border-slate-300'} transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div class="space-y-1">
+              <div class="flex items-center gap-2">
+                <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">${item.brand}</span>
+                ${isSelected ? '<span class="text-[10px] font-bold text-red-600 bg-red-100 px-2 py-0.5 rounded">Active in Rig</span>' : ''}
+              </div>
+              <h4 class="text-sm font-bold text-slate-900">${item.name}</h4>
+              <p class="text-xs text-slate-500">${specsSummary}</p>
+            </div>
+
+            <div class="flex items-center sm:flex-col sm:items-end justify-between gap-2 shrink-0 border-t sm:border-t-0 pt-2 sm:pt-0">
+              <span class="text-base font-bold font-mono text-slate-900 tabular-nums">${formatINR(item.price)}</span>
+              <button onclick="selectComponentForSlot('${item.id}')" class="px-4 py-2 text-xs font-semibold rounded-lg ${isSelected ? 'bg-slate-200 text-slate-600 cursor-default' : 'bg-red-600 text-white hover:bg-red-700 shadow-sm'} transition-colors">
+                ${isSelected ? 'Selected' : 'Select Part'}
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function selectComponentForSlot(itemId) {
+      const items = componentCatalog[currentModalCategory] || [];
+      const item = items.find(i => i.id === itemId);
+      if (!item) return;
+
+      const slotKey = currentModalCategory.toLowerCase() === 'motherboard' ? 'mobo' : currentModalCategory.toLowerCase();
+      currentBuild[slotKey] = {
+        id: item.id,
+        name: item.name,
+        brand: item.brand,
+        category: currentModalCategory,
+        price: item.price,
+        specs: item.specs || {}
+      };
+
+      closeComponentModal();
+      updateBuilderUI();
+    }
+
+    // PRESET LOADERS
+    function loadPreset(presetKey) {
+      if (presetKey === 'apex4k') {
+        currentBuild.cpu = componentCatalog.CPU.find(i => i.id === 'cpu-7800x3d') || currentBuild.cpu;
+        currentBuild.mobo = componentCatalog.Motherboard.find(i => i.id === 'mobo-b650-tomahawk') || currentBuild.mobo;
+        currentBuild.gpu = componentCatalog.GPU.find(i => i.id === 'gpu-rtx4090') || currentBuild.gpu;
+        currentBuild.ram = componentCatalog.RAM.find(i => i.id === 'ram-corsair-32gb') || currentBuild.ram;
+        currentBuild.ssd = componentCatalog.SSD.find(i => i.id === 'ssd-samsung-990pro') || currentBuild.ssd;
+        currentBuild.psu = componentCatalog.PSU.find(i => i.id === 'psu-corsair-rm850x') || currentBuild.psu;
+        currentBuild.cabinet = componentCatalog.Cabinet.find(i => i.id === 'case-nzxt-h7') || currentBuild.cabinet;
+        currentBuild.cooler = componentCatalog.Cooler.find(i => i.id === 'cooler-ak620') || currentBuild.cooler;
+      } else if (presetKey === 'workstation') {
+        currentBuild.cpu = componentCatalog.CPU.find(i => i.id === 'cpu-14900k') || currentBuild.cpu;
+        currentBuild.mobo = componentCatalog.Motherboard.find(i => i.id === 'mobo-z790-hero') || currentBuild.mobo;
+        currentBuild.gpu = componentCatalog.GPU.find(i => i.id === 'gpu-rtx4090') || currentBuild.gpu;
+        currentBuild.ram = componentCatalog.RAM.find(i => i.id === 'ram-gskill-64gb') || currentBuild.ram;
+        currentBuild.ssd = componentCatalog.SSD.find(i => i.id === 'ssd-crucial-t700') || currentBuild.ssd;
+        currentBuild.psu = componentCatalog.PSU.find(i => i.id === 'psu-corsair-rm1000x') || currentBuild.psu;
+        currentBuild.cabinet = componentCatalog.Cabinet.find(i => i.id === 'case-lianli-o11') || currentBuild.cabinet;
+        currentBuild.cooler = componentCatalog.Cooler.find(i => i.id === 'cooler-kraken360') || currentBuild.cooler;
+      } else if (presetKey === 'competitor') {
+        currentBuild.cpu = componentCatalog.CPU.find(i => i.id === 'cpu-7600x') || currentBuild.cpu;
+        currentBuild.mobo = componentCatalog.Motherboard.find(i => i.id === 'mobo-b650-tuf') || currentBuild.mobo;
+        currentBuild.gpu = componentCatalog.GPU.find(i => i.id === 'gpu-rtx4070tis') || currentBuild.gpu;
+        currentBuild.ram = componentCatalog.RAM.find(i => i.id === 'ram-corsair-32gb') || currentBuild.ram;
+        currentBuild.ssd = componentCatalog.SSD.find(i => i.id === 'ssd-kingston-1tb') || currentBuild.ssd;
+        currentBuild.psu = componentCatalog.PSU.find(i => i.id === 'psu-seasonic-750') || currentBuild.psu;
+        currentBuild.cabinet = componentCatalog.Cabinet.find(i => i.id === 'case-corsair-4000d') || currentBuild.cabinet;
+        currentBuild.cooler = componentCatalog.Cooler.find(i => i.id === 'cooler-ak620') || currentBuild.cooler;
+      }
+      updateBuilderUI();
+    }
+
+    function resetBuilder() {
+      loadPreset('apex4k');
+    }
+
+    // Check URL parameters for preset triggers
+    function checkUrlPreset() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const preset = urlParams.get('preset');
+      if (preset === 'phantom' || preset === 'apex4k') loadPreset('apex4k');
+      else if (preset === 'tensor' || preset === 'workstation') loadPreset('workstation');
+      else if (preset === 'competitor') loadPreset('competitor');
+    }
+
+    // CART STATE & METHODS
+    let cart = [];
+    try {
+      const saved = localStorage.getItem('buildflow_cart');
+      if (saved) cart = JSON.parse(saved);
+    } catch(e) {}
+
+    function updateCartUI() {
+      const counter = document.getElementById('cart-counter');
+      const itemsList = document.getElementById('cart-items');
+      const subtotalEl = document.getElementById('cart-subtotal');
+
+      const count = cart.reduce((acc, c) => acc + (c.quantity || 1), 0);
+      counter.textContent = count;
+
+      if (cart.length === 0) {
+        itemsList.innerHTML = `
+          <div class="text-center py-12 text-slate-400 text-sm">
+            <i data-lucide="package-open" class="w-8 h-8 mx-auto mb-2 text-slate-300"></i>
+            Your shopping cart is currently empty.
+          </div>
+        `;
+        subtotalEl.textContent = '₹0';
+      } else {
+        let subtotal = 0;
+        itemsList.innerHTML = cart.map(item => {
+          subtotal += item.price * (item.quantity || 1);
+          return `
+            <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-between text-xs">
+              <div class="space-y-0.5 max-w-[200px]">
+                <span class="font-semibold text-slate-900 block line-clamp-1">${item.title}</span>
+                <span class="text-slate-500 font-mono tabular-nums">${formatINR(item.price)} ${item.quantity > 1 ? `x ${item.quantity}` : ''}</span>
+              </div>
+              <button onclick="removeFromCart(${item.id})" class="text-slate-400 hover:text-red-600 p-1">
+                <i data-lucide="trash-2" class="w-4 h-4"></i>
+              </button>
+            </div>
+          `;
+        }).join('');
+        subtotalEl.textContent = formatINR(subtotal);
+      }
+      try {
+        localStorage.setItem('buildflow_cart', JSON.stringify(cart));
+      } catch(e) {}
+      lucide.createIcons();
+    }
+
+    function addCustomBuildToCart() {
+      let subtotal = 0;
+      Object.values(currentBuild).forEach(p => subtotal += p.price);
+
+      const rigTitle = `Custom Build (${currentBuild.cpu.name.split(' ')[0]} + ${currentBuild.gpu.name.split(' ')[1] || 'GPU'})`;
+      cart.push({
+        id: Date.now(),
+        title: rigTitle,
+        price: subtotal,
+        quantity: 1,
+        details: currentBuild
+      });
+
+      updateCartUI();
+      openCartDrawer();
+    }
+
+    function proceedToInstantCheckout() {
+      addCustomBuildToCart();
+      triggerCheckout();
+    }
+
+    function removeFromCart(id) {
+      cart = cart.filter(i => i.id !== id);
+      updateCartUI();
+    }
+
+    function openCartDrawer() {
+      document.getElementById('cart-drawer').classList.remove('translate-x-full');
+    }
+
+    function closeCartDrawer() {
+      document.getElementById('cart-drawer').classList.add('translate-x-full');
+    }
+
+    function triggerCheckout() {
+      if (cart.length === 0) {
+        alert('Your cart is empty. Please configure and add a custom rig to proceed.');
+        return;
+      }
+      const randomOrderId = 'BF-' + Math.floor(10000 + Math.random() * 90000);
+      alert(`🎉 Custom Rig Order Placed Successfully!\n\nOrder ID: ${randomOrderId}\nTotal: ${document.getElementById('cart-subtotal').textContent}\nPayment Mode: Pay-on-Dispatch / UPI\n\nYour order is now queued in the BuildFlow clean-room assembly pipeline!`);
+      cart = [];
+      updateCartUI();
+      closeCartDrawer();
+    }
+
+    // SAVE & SHARE SPECS
+    function saveAndShareBuild() {
+      const summary = `BuildFlow Custom PC Rig:\n- CPU: ${currentBuild.cpu.name}\n- Board: ${currentBuild.mobo.name}\n- GPU: ${currentBuild.gpu.name}\n- RAM: ${currentBuild.ram.name}\n- SSD: ${currentBuild.ssd.name}\n- PSU: ${currentBuild.psu.name}\n- Case: ${currentBuild.cabinet.name}\n- Cooler: ${currentBuild.cooler.name}\nTotal: ${document.getElementById('grand-total-rupees').textContent}`;
+      navigator.clipboard.writeText(summary).then(() => {
+        alert('📋 Full custom PC spec sheet copied to clipboard!\n\nYou can share this with friends, technicians, or save it for later.');
+      }).catch(() => {
+        alert(summary);
+      });
+    }
+
+    function printSpecSheet() {
+      window.print();
+    }
+
+    // INITIALIZATION
+    document.addEventListener('DOMContentLoaded', async () => {
+      await syncBackendComponents();
+      checkUrlPreset();
+      updateBuilderUI();
+      updateCartUI();
+
+      // Drawer trigger listeners
+      document.getElementById('open-cart-btn').addEventListener('click', openCartDrawer);
+      document.getElementById('close-cart-btn').addEventListener('click', closeCartDrawer);
+
+      lucide.createIcons();
+    });
+  </script>
+</body>
+</html>

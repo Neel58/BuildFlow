@@ -1,0 +1,8 @@
+{
+  "name": "BuildFlow",
+  "description": "Custom PC building platform API and backend system with compatibility checking, order tracking, and inventory management.",
+  "version": "1.0.0",
+  "capabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

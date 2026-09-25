@@ -1,0 +1,1714 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BuildFlow - Custom PC Building Platform & Engineering</title>
+  <meta name="description" content="BuildFlow automates compatibility validation, clean-room assembly, multi-point QA stress testing, and white-glove logistics for custom PCs.">
+  <meta property="og:title" content="BuildFlow - Custom PC Building Platform & Engineering">
+  <meta property="og:description" content="Engineered for supreme performance. Automated compatibility, clean-room hand assembly, and tracked logistics.">
+
+  <!-- Google Fonts: Plus Jakarta Sans & Space Grotesk -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
+            display: ['"Space Grotesk"', '"Plus Jakarta Sans"', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#fff1f2',
+              100: '#ffe4e6',
+              500: '#ef4444',
+              600: '#dc2626',
+              700: '#b91c1c',
+            },
+            accent: {
+              orange: '#f97316',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+      background-color: #f8fafc;
+      color: #0f172a;
+    }
+    .font-display {
+      font-family: 'Space Grotesk', 'Plus Jakarta Sans', sans-serif;
+    }
+    .hero-scrim {
+      background: linear-gradient(90deg, rgba(15, 23, 42, 0.88) 0%, rgba(15, 23, 42, 0.72) 48%, rgba(15, 23, 42, 0.38) 100%);
+    }
+    .glass-bar {
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+    /* Smooth transitions */
+    .tab-active {
+      border-bottom: 2px solid #ef4444;
+      color: #ef4444;
+      font-weight: 600;
+    }
+    .tab-inactive {
+      border-bottom: 2px solid transparent;
+      color: #64748b;
+    }
+    .tab-inactive:hover {
+      color: #0f172a;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased selection:bg-red-500 selection:text-white">
+
+  <!-- TOP NAVIGATION BAR (Zone 1: Brand Wordmark | Zone 2: 5 Nav Links | Zone 3: 2 Primary Actions) -->
+  <header class="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200/80 transition-all duration-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+      
+      <!-- Zone 1: Single element brand wordmark with energetic arrow polygon icon -->
+      <a href="/" class="flex items-center gap-3 text-slate-900 group">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-red-600 via-red-500 to-orange-400 flex items-center justify-center shadow-md shadow-red-500/20 group-hover:scale-105 transition-transform">
+          <svg class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+          </svg>
+        </div>
+        <div class="flex flex-col">
+          <span class="font-display text-2xl font-bold tracking-tight text-slate-950 flex items-center">
+            Build<span class="text-red-600">Flow</span>
+          </span>
+        </div>
+      </a>
+
+      <!-- Zone 2: Clean text navigation links -->
+      <nav class="hidden lg:flex items-center gap-8 text-sm font-medium text-slate-600">
+        <a href="#hero" class="text-slate-900 hover:text-red-600 transition-colors">Home</a>
+        <a href="#catalog" class="hover:text-red-600 transition-colors">Components</a>
+        <a href="/builder" class="hover:text-red-600 transition-colors font-semibold text-slate-800">Custom PC Builder</a>
+        <a href="#tracking-section" class="hover:text-red-600 transition-colors">Order Tracking</a>
+        <a href="#process" class="hover:text-red-600 transition-colors">Assembly & QA</a>
+        <a href="#flagships" class="hover:text-red-600 transition-colors">Workstations</a>
+      </nav>
+
+      <!-- Zone 3: Actions (Phone contact + Cart button + Primary CTA) -->
+      <div class="flex items-center gap-3 sm:gap-4">
+        <a href="tel:18002845335" class="hidden md:flex items-center gap-2 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200/80 px-3.5 py-2 rounded-lg transition-colors whitespace-nowrap">
+          <i data-lucide="phone-call" class="w-3.5 h-3.5 text-red-500"></i>
+          <span>+1 (800) 284-5335</span>
+        </a>
+
+        <!-- Cart Trigger Button -->
+        <button id="open-cart-btn" class="relative p-2 text-slate-700 hover:text-red-600 hover:bg-slate-100 rounded-lg transition-colors" aria-label="Open Shopping Cart">
+          <i data-lucide="shopping-bag" class="w-5 h-5"></i>
+          <span id="cart-counter" class="absolute -top-1 -right-1 bg-red-600 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">0</span>
+        </button>
+
+        <!-- Primary CTA: Single line control -->
+        <a href="/builder" class="px-5 py-2.5 text-sm font-semibold text-white bg-red-600 hover:bg-red-700 active:bg-red-800 rounded-lg shadow-sm shadow-red-600/25 transition-all whitespace-nowrap cursor-pointer">
+          Start Custom Build
+        </a>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- HERO SECTION WITH BACKGROUND IMAGE & FLOATING TRACKING / CONFIG CARD -->
+  <section id="hero" class="relative min-h-[640px] lg:min-h-[720px] flex flex-col justify-between overflow-hidden bg-slate-900">
+    <!-- Background Image -->
+    <div class="absolute inset-0 z-0">
+      <img 
+        src="/src/assets/images/hero_pc_buildflow_light_1790308280046.jpg" 
+        alt="Modern High-Tech Custom PC Building Lab" 
+        class="w-full h-full object-cover object-center"
+        referrerpolicy="no-referrer"
+        onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1587202372775-e229f172b9d7?auto=format&fit=crop&w=1920&q=80';"
+      />
+      <!-- Measured Scrim Overlay for WCAG AA Contrast -->
+      <div class="absolute inset-0 hero-scrim"></div>
+    </div>
+
+    <!-- Main Hero Content Container -->
+    <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24 w-full grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+      
+      <!-- Left Column: High-Impact Typography & Value Proposition -->
+      <div class="lg:col-span-7 text-white space-y-6">
+        <!-- Quiet unboxed metadata kicker -->
+        <div class="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-red-400">
+          <span>Engineered Hardware</span>
+          <span aria-hidden="true">·</span>
+          <span>Zero-Bottleneck Guarantee</span>
+          <span aria-hidden="true">·</span>
+          <span>ISO 9001 Lab</span>
+        </div>
+
+        <h1 class="font-display text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-white leading-[1.1] max-w-2xl text-balance">
+          WE BUILD YOUR DREAM RIG TO PERFECTION
+        </h1>
+
+        <p class="text-base sm:text-lg text-slate-200/90 font-normal leading-relaxed max-w-xl">
+          From liquid-cooled competitive battlestations to multi-GPU AI workstations, BuildFlow delivers real-time hardware compatibility, clean-room assembly, multi-hour stress QA, and insured express delivery across India.
+        </p>
+
+        <!-- CTA Buttons -->
+        <div class="pt-2 flex flex-wrap items-center gap-4">
+          <a href="/builder" class="inline-flex items-center gap-3 px-6 py-3.5 text-base font-semibold text-white bg-red-600 hover:bg-red-500 active:bg-red-700 rounded-lg shadow-lg shadow-red-600/30 transition-all transform hover:-translate-y-0.5 cursor-pointer">
+            <span>Start Custom Build</span>
+            <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          </a>
+          <a href="#catalog" class="inline-flex items-center gap-2 px-5 py-3.5 text-base font-medium text-slate-200 hover:text-white bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg backdrop-blur-sm transition-colors">
+            <i data-lucide="cpu" class="w-4 h-4"></i>
+            <span>Browse Catalog</span>
+          </a>
+        </div>
+
+        <!-- Trust Badges Inline -->
+        <div class="pt-4 flex items-center gap-6 text-xs text-slate-300">
+          <div class="flex items-center gap-2">
+            <i data-lucide="shield-check" class="w-4 h-4 text-emerald-400"></i>
+            <span>3-Year Comprehensive Warranty</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <i data-lucide="truck" class="w-4 h-4 text-red-400"></i>
+            <span>Insured Expanding-Foam Shipping</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Interactive White Floating Card (Directly from User Reference Image) -->
+      <div class="lg:col-span-5 w-full">
+        <div class="bg-white rounded-2xl shadow-2xl p-6 sm:p-7 border border-slate-100 transition-all text-slate-900">
+          
+          <!-- Segmented Tab Header -->
+          <div class="flex items-center border-b border-slate-200 pb-3 mb-5 gap-6 text-sm">
+            <button id="tab-btn-tracking" onclick="switchHeroTab('tracking')" class="tab-active pb-2 font-semibold transition-colors flex items-center gap-2">
+              <i data-lucide="package-search" class="w-4 h-4"></i>
+              <span>Tracking Order</span>
+            </button>
+            <button id="tab-btn-config" onclick="switchHeroTab('config')" class="tab-inactive pb-2 font-medium transition-colors flex items-center gap-2">
+              <i data-lucide="sliders" class="w-4 h-4"></i>
+              <span>Quick Configurator</span>
+            </button>
+          </div>
+
+          <!-- TAB 1: Tracking Order Mode -->
+          <div id="tab-content-tracking" class="space-y-4">
+            <p class="text-xs text-slate-500">
+              Enter your BuildFlow Order ID or Tracking Reference to inspect real-time assembly, QA diagnostics, or courier status.
+            </p>
+
+            <form id="hero-track-form" onsubmit="handleHeroTracking(event)" class="space-y-3">
+              <div>
+                <label for="track-input" class="block text-xs font-semibold text-slate-700 mb-1">Order ID or Logistics Tracking #</label>
+                <div class="relative">
+                  <input 
+                    type="text" 
+                    id="track-input" 
+                    placeholder="e.g. BF-88219 or TRK-9904" 
+                    required 
+                    class="w-full px-4 py-3 text-sm bg-slate-50 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 text-slate-900 placeholder:text-slate-400"
+                  />
+                  <button type="button" onclick="fillSampleTrack('BF-88219')" class="absolute right-2 top-2.5 text-[11px] font-semibold text-red-600 bg-red-50 hover:bg-red-100 px-2 py-1 rounded">
+                    Sample ID
+                  </button>
+                </div>
+              </div>
+
+              <button type="submit" id="track-submit-btn" class="w-full py-3 px-4 text-sm font-semibold text-white bg-red-600 hover:bg-red-700 active:bg-red-800 rounded-lg shadow-md shadow-red-600/20 transition-all flex items-center justify-center gap-2">
+                <i data-lucide="search" class="w-4 h-4"></i>
+                <span>Track Order Now</span>
+              </button>
+            </form>
+
+            <!-- Quick tracking samples -->
+            <div class="flex items-center justify-between text-xs text-slate-500 pt-1">
+              <span>Need help? <a href="#tracking-section" class="text-red-600 hover:underline">Track multiple builds</a></span>
+              <span class="text-slate-400">Live API Connected</span>
+            </div>
+
+            <!-- Tracking Result Preview Box (Hidden by default, shown on search) -->
+            <div id="tracking-result-box" class="hidden mt-4 p-4 rounded-xl bg-slate-50 border border-slate-200 text-xs space-y-3">
+              <div class="flex items-center justify-between">
+                <span class="font-bold text-slate-900" id="res-order-id">Order #BF-88219</span>
+                <span id="res-status-badge" class="px-2 py-0.5 rounded font-semibold bg-emerald-100 text-emerald-800">In Assembly</span>
+              </div>
+              
+              <!-- 4-step progress line -->
+              <div class="space-y-1.5 pt-1">
+                <div class="flex justify-between text-[11px] text-slate-500 font-medium">
+                  <span class="text-red-600 font-bold">1. Verified</span>
+                  <span class="text-red-600 font-bold">2. Assembly</span>
+                  <span class="text-slate-400">3. 24h QA</span>
+                  <span class="text-slate-400">4. Shipped</span>
+                </div>
+                <div class="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden">
+                  <div id="res-progress-bar" class="bg-red-600 h-full rounded-full transition-all duration-500" style="width: 50%;"></div>
+                </div>
+              </div>
+
+              <div class="text-[11px] text-slate-600 border-t border-slate-200/60 pt-2 flex justify-between">
+                <span id="res-notes">Technician: Marcus V. &middot; ESD Bay #4</span>
+                <button onclick="openFullTrackingModal()" class="text-red-600 font-semibold hover:underline">Full Details &rarr;</button>
+              </div>
+            </div>
+
+            <!-- App Store / Mobile Support Footer -->
+            <div class="pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-400">
+              <span class="flex items-center gap-1.5">
+                <i data-lucide="smartphone" class="w-3.5 h-3.5 text-slate-500"></i>
+                <span>SMS status updates available</span>
+              </span>
+              <span class="font-mono text-[11px] text-slate-500">v1.2 Live</span>
+            </div>
+          </div>
+
+          <!-- TAB 2: Quick Configurator Mode -->
+          <div id="tab-content-config" class="hidden space-y-4">
+            <p class="text-xs text-slate-500">
+              Pair your primary silicon to immediately verify socket compatibility and recommended power supply capacity.
+            </p>
+
+            <div class="space-y-3">
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Processor (CPU)</label>
+                <select id="quick-cpu-select" onchange="runQuickCompat()" class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-300 rounded-lg text-slate-900">
+                  <option value="AMD Ryzen 7 7800X3D" data-socket="AM5" data-watt="120">AMD Ryzen 7 7800X3D (AM5 · 120W)</option>
+                  <option value="Intel Core i9-14900K" data-socket="LGA1700" data-watt="253">Intel Core i9-14900K (LGA1700 · 253W)</option>
+                  <option value="AMD Ryzen 9 7950X" data-socket="AM5" data-watt="170">AMD Ryzen 9 7950X (AM5 · 170W)</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Motherboard</label>
+                <select id="quick-mobo-select" onchange="runQuickCompat()" class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-300 rounded-lg text-slate-900">
+                  <option value="MSI B650 TOMAHAWK WIFI" data-socket="AM5" data-ram="DDR5">MSI B650 TOMAHAWK WIFI (AM5 · DDR5)</option>
+                  <option value="ASUS ROG MAXIMUS Z790 HERO" data-socket="LGA1700" data-ram="DDR5">ASUS ROG Z790 HERO (LGA1700 · DDR5)</option>
+                  <option value="Gigabyte X670E AORUS MASTER" data-socket="AM5" data-ram="DDR5">Gigabyte X670E MASTER (AM5 · DDR5)</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Graphics (GPU)</label>
+                <select id="quick-gpu-select" onchange="runQuickCompat()" class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-300 rounded-lg text-slate-900">
+                  <option value="NVIDIA RTX 4090 24GB" data-watt="450">NVIDIA RTX 4090 24GB (450W)</option>
+                  <option value="NVIDIA RTX 4080 SUPER 16GB" data-watt="320">NVIDIA RTX 4080 SUPER (320W)</option>
+                  <option value="AMD Radeon RX 7900 XTX 24GB" data-watt="355">AMD Radeon RX 7900 XTX (355W)</option>
+                </select>
+              </div>
+
+              <!-- Live Compatibility Result -->
+              <div id="quick-compat-pill" class="p-2.5 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-center justify-between">
+                <span class="flex items-center gap-1.5 font-semibold">
+                  <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-600"></i>
+                  <span id="quick-compat-text">AM5 Socket Matched · 100% Compatible</span>
+                </span>
+                <span id="quick-watt-text" class="text-[11px] font-mono text-emerald-700">~620W TDP</span>
+              </div>
+
+              <a href="/builder" class="block w-full py-2.5 px-4 text-xs font-semibold text-center text-white bg-slate-900 hover:bg-slate-800 rounded-lg transition-colors cursor-pointer">
+                Start Custom Build in Studio &rarr;
+              </a>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+    <!-- HERO BOTTOM STATS BAR (Directly matching the user's reference image style) -->
+    <div class="relative z-10 glass-bar border-t border-white/10 py-6">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-2 md:grid-cols-4 gap-6 text-white divide-y md:divide-y-0 md:divide-x divide-white/10">
+        
+        <div class="pt-3 md:pt-0 md:px-6 first:pl-0">
+          <div class="font-display text-2xl sm:text-3xl font-bold tracking-tight text-white tabular-nums">5,000+</div>
+          <p class="text-xs sm:text-sm text-slate-300/80 font-normal mt-0.5">Satisfied Clients & Custom Rigs</p>
+        </div>
+
+        <div class="pt-3 md:pt-0 md:px-6">
+          <div class="font-display text-2xl sm:text-3xl font-bold tracking-tight text-white tabular-nums">99.8%</div>
+          <p class="text-xs sm:text-sm text-slate-300/80 font-normal mt-0.5">First-Pass QA Verification Rate</p>
+        </div>
+
+        <div class="pt-3 md:pt-0 md:px-6">
+          <div class="font-display text-2xl sm:text-3xl font-bold tracking-tight text-white tabular-nums">150+</div>
+          <p class="text-xs sm:text-sm text-slate-300/80 font-normal mt-0.5">Tier-1 Hardware Brands Supported</p>
+        </div>
+
+        <div class="pt-3 md:pt-0 md:px-6">
+          <div class="font-display text-2xl sm:text-3xl font-bold tracking-tight text-white tabular-nums">24/7</div>
+          <p class="text-xs sm:text-sm text-slate-300/80 font-normal mt-0.5">Dedicated Hardware Engineering Support</p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- LIVE SYSTEM & API HEALTH BANNER -->
+  <section class="bg-white border-b border-slate-200 py-3 text-xs text-slate-600">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-wrap items-center justify-between gap-4">
+      <div class="flex items-center gap-2">
+        <span class="relative flex h-2.5 w-2.5">
+          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+          <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+        </span>
+        <span class="font-semibold text-slate-900">BuildFlow Pipeline API:</span>
+        <span id="api-status-text" class="text-slate-600">Checking server health...</span>
+      </div>
+      <div class="flex items-center gap-4 text-slate-500">
+        <span id="api-latency">Latency: -- ms</span>
+        <span aria-hidden="true">·</span>
+        <span>Express Backend Node 22</span>
+        <span aria-hidden="true">·</span>
+        <a href="/api/health" target="_blank" class="text-red-600 hover:underline">API Health JSON &rarr;</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 1: LIVE COMPONENT CATALOG (Data from backend /api/components) -->
+  <section id="catalog" class="py-20 bg-slate-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <!-- Section Header -->
+      <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
+        <div>
+          <div class="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-red-600 mb-2">
+            <span>Hardware Catalog</span>
+            <span aria-hidden="true">·</span>
+            <span>Real-time Warehouse Stock</span>
+          </div>
+          <h2 class="font-display text-3xl sm:text-4xl font-bold tracking-tight text-slate-900 text-balance">
+            Browse Authentic PC Components
+          </h2>
+          <p class="text-slate-600 text-sm sm:text-base mt-2 max-w-xl">
+            Live components directly synchronized with the BuildFlow database. Every part is verified for genuine warranty and specifications.
+          </p>
+        </div>
+
+        <!-- Search & Filter Controls -->
+        <div class="flex items-center gap-3">
+          <div class="relative">
+            <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-3"></i>
+            <input 
+              type="text" 
+              id="catalog-search" 
+              oninput="filterComponents()" 
+              placeholder="Search CPU, RTX 4090, DDR5..." 
+              class="pl-9 pr-4 py-2 text-xs sm:text-sm bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 w-52 sm:w-64"
+            />
+          </div>
+          <button onclick="fetchComponentsFromAPI()" class="p-2 text-slate-600 hover:text-slate-900 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors" title="Reload from Backend">
+            <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Category Filter Tabs -->
+      <div class="flex items-center gap-2 overflow-x-auto pb-4 mb-8 text-xs font-medium no-scrollbar">
+        <button onclick="setCategoryFilter('ALL')" class="cat-pill active px-4 py-2 rounded-lg bg-slate-900 text-white whitespace-nowrap transition-colors">
+          All Categories
+        </button>
+        <button onclick="setCategoryFilter('CPU')" class="cat-pill px-4 py-2 rounded-lg bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 whitespace-nowrap transition-colors">
+          Processors (CPU)
+        </button>
+        <button onclick="setCategoryFilter('GPU')" class="cat-pill px-4 py-2 rounded-lg bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 whitespace-nowrap transition-colors">
+          Graphics (GPU)
+        </button>
+        <button onclick="setCategoryFilter('Motherboard')" class="cat-pill px-4 py-2 rounded-lg bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 whitespace-nowrap transition-colors">
+          Motherboards
+        </button>
+        <button onclick="setCategoryFilter('RAM')" class="cat-pill px-4 py-2 rounded-lg bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 whitespace-nowrap transition-colors">
+          Memory (RAM)
+        </button>
+        <button onclick="setCategoryFilter('SSD')" class="cat-pill px-4 py-2 rounded-lg bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 whitespace-nowrap transition-colors">
+          Storage (SSD)
+        </button>
+        <button onclick="setCategoryFilter('PSU')" class="cat-pill px-4 py-2 rounded-lg bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 whitespace-nowrap transition-colors">
+          Power Supplies
+        </button>
+      </div>
+
+      <!-- Component Cards Grid (Injected via JS) -->
+      <div id="components-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <!-- Loading State Skeleton -->
+        <div class="col-span-full py-16 text-center text-slate-500">
+          <i data-lucide="loader-2" class="w-8 h-8 animate-spin mx-auto mb-3 text-red-600"></i>
+          <p class="text-sm font-medium">Fetching components from BuildFlow API...</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- SECTION 2: THE BUILDFLOW 4-STAGE PRECISION ASSEMBLY PIPELINE -->
+  <section id="process" class="py-20 bg-white border-t border-slate-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+        
+        <!-- Left: Image showing clean hand assembly -->
+        <div class="lg:col-span-5 relative">
+          <div class="relative rounded-2xl overflow-hidden shadow-xl border border-slate-200 group">
+            <img 
+              src="/src/assets/images/pc_assembly_cleanroom_1790308326493.jpg" 
+              alt="BuildFlow Cleanroom Assembly Laboratory" 
+              class="w-full h-[480px] object-cover group-hover:scale-105 transition-transform duration-700"
+              referrerpolicy="no-referrer"
+              onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1591488320449-011701bb6704?auto=format&fit=crop&w=1200&q=80';"
+            />
+            <div class="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent"></div>
+            
+            <div class="absolute bottom-6 left-6 right-6 text-white">
+              <span class="text-xs uppercase tracking-wider text-red-400 font-semibold">ISO Class-7 Lab</span>
+              <h3 class="text-lg font-bold font-display mt-1">ESD-Safe Clean Room Environment</h3>
+              <p class="text-xs text-slate-300 mt-1">Grounding straps, ionized air filtration, and surgical cable routing.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: 4-Stage Editorial Process -->
+        <div class="lg:col-span-7 space-y-8">
+          <div>
+            <div class="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-red-600 mb-2">
+              <span>Operational Workflow</span>
+              <span aria-hidden="true">·</span>
+              <span>Backed by Backend State Machine</span>
+            </div>
+            <h2 class="font-display text-3xl sm:text-4xl font-bold tracking-tight text-slate-900 text-balance">
+              Precision PC Craftsmanship at Every Stage
+            </h2>
+            <p class="text-slate-600 text-sm sm:text-base mt-2">
+              Unlike mass assemblers, BuildFlow coordinates every custom computer through our proprietary state machine: Assembly Task &rarr; QA Inspection &rarr; Insured Logistics.
+            </p>
+          </div>
+
+          <!-- Editorial numbered steps -->
+          <div class="space-y-6">
+            
+            <div class="flex gap-4">
+              <span class="font-display text-2xl font-bold text-red-600 shrink-0">01.</span>
+              <div>
+                <h3 class="text-base font-semibold text-slate-900">Automated Spec & TDP Cross-Validation</h3>
+                <p class="text-sm text-slate-600 mt-1">
+                  Our system computes physical clearances (GPU length, cooler radiator clearance, RAM height), socket compatibility, and 12V rail wattage headroom before picking components.
+                </p>
+              </div>
+            </div>
+
+            <div class="flex gap-4">
+              <span class="font-display text-2xl font-bold text-red-600 shrink-0">02.</span>
+              <div>
+                <h3 class="text-base font-semibold text-slate-900">ESD-Protected Hand Assembly</h3>
+                <p class="text-sm text-slate-600 mt-1">
+                  Certified technicians assemble your hardware with calibrated torque drivers, apply premium thermal paste using a stencil matrix, and lace cables behind backplates.
+                </p>
+              </div>
+            </div>
+
+            <div class="flex gap-4">
+              <span class="font-display text-2xl font-bold text-red-600 shrink-0">03.</span>
+              <div>
+                <h3 class="text-base font-semibold text-slate-900">24-Hour Multi-Stress QA Benchmarking</h3>
+                <p class="text-sm text-slate-600 mt-1">
+                  MemTest86 memory soak, Cinebench multicore sustained thermal load, and 3DMark TimeSpy extreme loops ensure zero throttling and BIOS stability.
+                </p>
+              </div>
+            </div>
+
+            <div class="flex gap-4">
+              <span class="font-display text-2xl font-bold text-red-600 shrink-0">04.</span>
+              <div>
+                <h3 class="text-base font-semibold text-slate-900">Expanding Foam Shock-Packaging</h3>
+                <p class="text-sm text-slate-600 mt-1">
+                  High-density expanding InstaPak foam molds directly around your heavy GPU and CPU cooler inside the chassis, preventing transit damage before express insured shipment.
+                </p>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- SECTION 3: FEATURED FLAGSHIP BUILDS (With Generated Rigs) -->
+  <section id="flagships" class="py-20 bg-slate-50 border-t border-slate-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="text-center max-w-2xl mx-auto mb-16">
+        <div class="flex items-center justify-center gap-2 text-xs font-semibold uppercase tracking-wider text-red-600 mb-2">
+          <span>Turnkey Systems</span>
+          <span aria-hidden="true">·</span>
+          <span>Zero Assembly Required</span>
+        </div>
+        <h2 class="font-display text-3xl sm:text-4xl font-bold tracking-tight text-slate-900 text-balance">
+          Pre-Configured Flagship Battlestations
+        </h2>
+        <p class="text-slate-600 text-sm sm:text-base mt-2">
+          Battle-tested configurations ready for instant assembly and priority dispatch.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        
+        <!-- Flagship 1: Apex Phantom Gaming Rig -->
+        <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
+          <div>
+            <div class="relative h-64 sm:h-72 overflow-hidden bg-slate-100">
+              <img 
+                src="/src/assets/images/pc_rig_gaming_flagship_1790308296832.jpg" 
+                alt="The Apex Phantom 4K Gaming PC" 
+                class="w-full h-full object-cover object-center hover:scale-105 transition-transform duration-500"
+                referrerpolicy="no-referrer"
+                onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1587202372775-e229f172b9d7?auto=format&fit=crop&w=1200&q=80';"
+              />
+              <span class="absolute top-4 left-4 bg-slate-900 text-white text-[11px] font-semibold px-2.5 py-1 rounded">
+                4K Esports & Simulation
+              </span>
+            </div>
+
+            <div class="p-6 sm:p-8">
+              <div class="flex items-start justify-between gap-4">
+                <div>
+                  <h3 class="font-display text-2xl font-bold text-slate-900">The Apex Phantom</h3>
+                  <p class="text-xs text-slate-500 mt-1">Ultra 4K Ray-Tracing Gaming Computer</p>
+                </div>
+                <div class="text-right">
+                  <div class="text-2xl font-bold text-slate-900 tabular-nums">₹2,79,999</div>
+                  <span class="text-[11px] text-emerald-600 font-semibold">Ready to Assemble</span>
+                </div>
+              </div>
+
+              <!-- Hardware breakdown list -->
+              <div class="mt-6 space-y-2.5 border-t border-slate-100 pt-5 text-xs text-slate-700">
+                <div class="flex justify-between">
+                  <span class="text-slate-500">CPU</span>
+                  <span class="font-medium text-slate-900">AMD Ryzen 7 7800X3D (8C/16T)</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-slate-500">Graphics</span>
+                  <span class="font-medium text-slate-900">NVIDIA GeForce RTX 4090 24GB</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-slate-500">Motherboard</span>
+                  <span class="font-medium text-slate-900">MSI B650 TOMAHAWK WIFI</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-slate-500">Memory</span>
+                  <span class="font-medium text-slate-900">32GB (2x16GB) Corsair DDR5 6000MHz</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-slate-500">Storage</span>
+                  <span class="font-medium text-slate-900">Samsung 990 PRO 2TB PCIe 4.0 NVMe</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-slate-500">Power Supply</span>
+                  <span class="font-medium text-slate-900">Corsair RM850x 850W Gold Fully Modular</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="p-6 sm:p-8 pt-0 flex items-center gap-3">
+            <button onclick="addPrebuiltToCart('The Apex Phantom', 279999)" class="w-full py-3 px-4 text-sm font-semibold text-white bg-red-600 hover:bg-red-700 active:bg-red-800 rounded-lg shadow-sm transition-colors text-center">
+              Order Apex Phantom
+            </button>
+            <button onclick="loadRigIntoBuilder('apex4k')" class="py-3 px-4 text-sm font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors whitespace-nowrap text-center cursor-pointer">
+              Customize Specs
+            </button>
+          </div>
+        </div>
+
+        <!-- Flagship 2: Tensor Forge AI & Creator Workstation -->
+        <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
+          <div>
+            <div class="relative h-64 sm:h-72 overflow-hidden bg-slate-100">
+              <img 
+                src="/src/assets/images/pc_rig_workstation_pro_1790308311899.jpg" 
+                alt="The Tensor Forge Workstation" 
+                class="w-full h-full object-cover object-center hover:scale-105 transition-transform duration-500"
+                referrerpolicy="no-referrer"
+                onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=1200&q=80';"
+              />
+              <span class="absolute top-4 left-4 bg-slate-900 text-white text-[11px] font-semibold px-2.5 py-1 rounded">
+                AI Engineering & 3D Render
+              </span>
+            </div>
+
+            <div class="p-6 sm:p-8">
+              <div class="flex items-start justify-between gap-4">
+                <div>
+                  <h3 class="font-display text-2xl font-bold text-slate-900">The Tensor Forge Pro</h3>
+                  <p class="text-xs text-slate-500 mt-1">Enterprise Compute & Machine Learning</p>
+                </div>
+                <div class="text-right">
+                  <div class="text-2xl font-bold text-slate-900 tabular-nums">₹3,79,999</div>
+                  <span class="text-[11px] text-emerald-600 font-semibold">Priority Assembly</span>
+                </div>
+              </div>
+
+              <!-- Hardware breakdown list -->
+              <div class="mt-6 space-y-2.5 border-t border-slate-100 pt-5 text-xs text-slate-700">
+                <div class="flex justify-between">
+                  <span class="text-slate-500">CPU</span>
+                  <span class="font-medium text-slate-900">Intel Core i9-14900K (24C/32T · 6.0GHz)</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-slate-500">Graphics</span>
+                  <span class="font-medium text-slate-900">NVIDIA RTX 4090 24GB Studio</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-slate-500">Motherboard</span>
+                  <span class="font-medium text-slate-900">ASUS ProArt Z790-CREATOR WIFI</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-slate-500">Memory</span>
+                  <span class="font-medium text-slate-900">64GB (2x32GB) DDR5 5600MHz ECC-on-die</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-slate-500">Storage</span>
+                  <span class="font-medium text-slate-900">4TB (2x2TB RAID 0) NVMe Gen4 SSD</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-slate-500">Power Supply</span>
+                  <span class="font-medium text-slate-900">1000W Platinum ATX 3.0 PCIe 5.0</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="p-6 sm:p-8 pt-0 flex items-center gap-3">
+            <button onclick="addPrebuiltToCart('The Tensor Forge Pro', 379999)" class="w-full py-3 px-4 text-sm font-semibold text-white bg-red-600 hover:bg-red-700 active:bg-red-800 rounded-lg shadow-sm transition-colors text-center">
+              Order Tensor Forge
+            </button>
+            <button onclick="loadRigIntoBuilder('workstation')" class="py-3 px-4 text-sm font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors whitespace-nowrap text-center cursor-pointer">
+              Customize Specs
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- SECTION 4: INTERACTIVE PC BUILDER & COMPATIBILITY CHECKER TOOL -->
+  <section id="builder" class="py-20 bg-white border-t border-slate-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="max-w-2xl mb-12">
+        <div class="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-red-600 mb-2">
+          <span>Interactive Configurator</span>
+          <span aria-hidden="true">·</span>
+          <span>Instant Rule Engine</span>
+        </div>
+        <h2 class="font-display text-3xl sm:text-4xl font-bold tracking-tight text-slate-900 text-balance">
+          Build Your Custom PC With Real-Time Validation
+        </h2>
+        <p class="text-slate-600 text-sm sm:text-base mt-2">
+          Select each component. Our engine calculates compatibility in real time (CPU sockets, RAM pinout, TDP draw vs PSU rating, and GPU length tolerance).
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        
+        <!-- Left: Builder Component Pickers -->
+        <div class="lg:col-span-8 space-y-4">
+          
+          <!-- CPU Slot -->
+          <div class="p-5 bg-slate-50 rounded-xl border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-lg bg-red-100 text-red-600 flex items-center justify-center font-bold text-xs shrink-0">
+                CPU
+              </div>
+              <div>
+                <h4 class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Processor</h4>
+                <p id="builder-cpu-name" class="text-sm font-semibold text-slate-900">AMD Ryzen 7 7800X3D</p>
+                <span id="builder-cpu-sub" class="text-[11px] text-slate-500">Socket AM5 &middot; 120W TDP</span>
+              </div>
+            </div>
+            <select id="builder-select-cpu" onchange="updateBuilderItem('cpu')" class="px-3 py-2 text-xs bg-white border border-slate-300 rounded-lg text-slate-800">
+              <option value="AMD Ryzen 7 7800X3D" data-socket="AM5" data-watt="120" data-price="34999">AMD Ryzen 7 7800X3D — ₹34,999</option>
+              <option value="Intel Core i9-14900K" data-socket="LGA1700" data-watt="253" data-price="49999">Intel Core i9-14900K — ₹49,999</option>
+              <option value="AMD Ryzen 5 7600X" data-socket="AM5" data-watt="105" data-price="19499">AMD Ryzen 5 7600X — ₹19,499</option>
+            </select>
+          </div>
+
+          <!-- Motherboard Slot -->
+          <div class="p-5 bg-slate-50 rounded-xl border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold text-xs shrink-0">
+                MOBO
+              </div>
+              <div>
+                <h4 class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Motherboard</h4>
+                <p id="builder-mobo-name" class="text-sm font-semibold text-slate-900">MSI B650 TOMAHAWK WIFI</p>
+                <span id="builder-mobo-sub" class="text-[11px] text-slate-500">Socket AM5 &middot; DDR5 &middot; ATX</span>
+              </div>
+            </div>
+            <select id="builder-select-mobo" onchange="updateBuilderItem('mobo')" class="px-3 py-2 text-xs bg-white border border-slate-300 rounded-lg text-slate-800">
+              <option value="MSI B650 TOMAHAWK WIFI" data-socket="AM5" data-ram="DDR5" data-price="19999">MSI B650 TOMAHAWK (AM5) — ₹19,999</option>
+              <option value="ASUS ROG MAXIMUS Z790 HERO" data-socket="LGA1700" data-ram="DDR5" data-price="54999">ASUS ROG Z790 (LGA1700) — ₹54,999</option>
+              <option value="Gigabyte B650 AORUS ELITE" data-socket="AM5" data-ram="DDR5" data-price="18499">Gigabyte B650 ELITE (AM5) — ₹18,499</option>
+            </select>
+          </div>
+
+          <!-- GPU Slot -->
+          <div class="p-5 bg-slate-50 rounded-xl border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold text-xs shrink-0">
+                GPU
+              </div>
+              <div>
+                <h4 class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Graphics Card</h4>
+                <p id="builder-gpu-name" class="text-sm font-semibold text-slate-900">NVIDIA GeForce RTX 4090 24GB</p>
+                <span id="builder-gpu-sub" class="text-[11px] text-slate-500">450W TDP &middot; Length: 336mm</span>
+              </div>
+            </div>
+            <select id="builder-select-gpu" onchange="updateBuilderItem('gpu')" class="px-3 py-2 text-xs bg-white border border-slate-300 rounded-lg text-slate-800">
+              <option value="NVIDIA GeForce RTX 4090" data-watt="450" data-price="159999">NVIDIA RTX 4090 24GB — ₹1,59,999</option>
+              <option value="NVIDIA GeForce RTX 4080 SUPER" data-watt="320" data-price="89999">NVIDIA RTX 4080 SUPER 16GB — ₹89,999</option>
+              <option value="NVIDIA GeForce RTX 4070 Ti SUPER" data-watt="285" data-price="74999">NVIDIA RTX 4070 Ti SUPER 16GB — ₹74,999</option>
+            </select>
+          </div>
+
+          <!-- RAM Slot -->
+          <div class="p-5 bg-slate-50 rounded-xl border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center font-bold text-xs shrink-0">
+                RAM
+              </div>
+              <div>
+                <h4 class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Memory</h4>
+                <p id="builder-ram-name" class="text-sm font-semibold text-slate-900">Corsair Vengeance 32GB DDR5 6000MHz</p>
+                <span id="builder-ram-sub" class="text-[11px] text-slate-500">2x16GB &middot; Low Profile &middot; CL30</span>
+              </div>
+            </div>
+            <select id="builder-select-ram" onchange="updateBuilderItem('ram')" class="px-3 py-2 text-xs bg-white border border-slate-300 rounded-lg text-slate-800">
+              <option value="Corsair Vengeance 32GB DDR5" data-ram="DDR5" data-price="9999">Corsair 32GB DDR5 6000MHz — ₹9,999</option>
+              <option value="G.Skill Trident Z5 64GB DDR5" data-ram="DDR5" data-price="19499">G.Skill 64GB DDR5 6000MHz — ₹19,499</option>
+            </select>
+          </div>
+
+          <!-- PSU Slot -->
+          <div class="p-5 bg-slate-50 rounded-xl border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-lg bg-sky-100 text-sky-700 flex items-center justify-center font-bold text-xs shrink-0">
+                PSU
+              </div>
+              <div>
+                <h4 class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Power Supply</h4>
+                <p id="builder-psu-name" class="text-sm font-semibold text-slate-900">Corsair RM850x 850W Gold</p>
+                <span id="builder-psu-sub" class="text-[11px] text-slate-500">850 Watts &middot; Fully Modular &middot; ATX 3.0</span>
+              </div>
+            </div>
+            <select id="builder-select-psu" onchange="updateBuilderItem('psu')" class="px-3 py-2 text-xs bg-white border border-slate-300 rounded-lg text-slate-800">
+              <option value="Corsair RM850x 850W" data-watt="850" data-price="12499">Corsair RM850x (850W) — ₹12,499</option>
+              <option value="Corsair RM1000x 1000W" data-watt="1000" data-price="17999">Corsair RM1000x (1000W) — ₹17,999</option>
+            </select>
+          </div>
+
+        </div>
+
+        <!-- Right: Real-Time Compatibility & Order Summary Card -->
+        <div class="lg:col-span-4">
+          <div class="sticky top-28 bg-white rounded-2xl border border-slate-200 p-6 shadow-lg space-y-6">
+            
+            <h3 class="font-display text-xl font-bold text-slate-900 border-b border-slate-100 pb-3">
+              Compatibility & Total
+            </h3>
+
+            <!-- Real-time Compatibility Verdict -->
+            <div id="builder-verdict-box" class="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 space-y-2">
+              <div class="flex items-center gap-2 font-bold text-sm">
+                <i data-lucide="check-circle" class="w-4 h-4 text-emerald-600"></i>
+                <span id="builder-verdict-title">All Components 100% Compatible</span>
+              </div>
+              <ul id="builder-verdict-list" class="text-xs text-emerald-800/90 space-y-1 list-disc list-inside">
+                <li>CPU socket (AM5) matches Motherboard</li>
+                <li>Estimated system load (610W) has +240W headroom on 850W PSU</li>
+                <li>DDR5 memory channels matched</li>
+              </ul>
+            </div>
+
+            <!-- Wattage Bar -->
+            <div class="space-y-1.5">
+              <div class="flex justify-between text-xs font-semibold text-slate-700">
+                <span>Estimated Peak Wattage</span>
+                <span id="builder-total-watt" class="font-mono text-red-600">610W / 850W</span>
+              </div>
+              <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                <div id="builder-watt-bar" class="bg-red-500 h-full rounded-full transition-all duration-300" style="width: 71%;"></div>
+              </div>
+              <p class="text-[11px] text-slate-400">Recommended PSU minimum: 750W</p>
+            </div>
+
+            <!-- Pricing Breakdown -->
+            <div class="border-t border-slate-100 pt-4 space-y-2 text-xs">
+              <div class="flex justify-between text-slate-600">
+                <span>Component Total</span>
+                <span id="builder-subtotal" class="font-mono font-medium text-slate-900 tabular-nums">₹2,37,495</span>
+              </div>
+              <div class="flex justify-between text-slate-600">
+                <span>Clean-Room Assembly & QA</span>
+                <span class="text-emerald-600 font-semibold">Included (Free)</span>
+              </div>
+              <div class="flex justify-between text-slate-600">
+                <span>Shock-Foam Insured Shipping</span>
+                <span class="text-emerald-600 font-semibold">Included (Free)</span>
+              </div>
+              <div class="flex justify-between text-base font-bold text-slate-900 border-t border-slate-100 pt-3">
+                <span>Estimated Total (INR)</span>
+                <span id="builder-grand-total" class="font-mono tabular-nums text-red-600">₹2,37,495</span>
+              </div>
+            </div>
+
+            <button onclick="addCustomBuildToCart()" class="w-full py-3.5 px-4 text-sm font-semibold text-white bg-red-600 hover:bg-red-700 active:bg-red-800 rounded-lg shadow-md shadow-red-600/25 transition-all text-center">
+              Add Custom Rig to Cart
+            </button>
+            <a href="/builder" class="block w-full py-3 px-4 text-xs font-bold text-center text-red-600 bg-red-50 hover:bg-red-100 border border-red-200 rounded-lg transition-colors mt-2 shadow-sm">
+              Launch Full Custom Build Studio (8 Slots, Sockets & Prices in ₹) &rarr;
+            </a>
+            <p class="text-[11px] text-center text-slate-400">Includes 3-Year Zero-Downtime Warranty</p>
+
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- SECTION 5: TRACKING DETAILS & VERIFICATION SECTION -->
+  <section id="tracking-section" class="py-20 bg-slate-50 border-t border-slate-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="bg-gradient-to-br from-slate-900 to-slate-950 rounded-3xl p-8 sm:p-12 text-white shadow-2xl relative overflow-hidden">
+        <!-- Background subtle glow -->
+        <div class="absolute -right-20 -bottom-20 w-80 h-80 rounded-full bg-red-600/10 blur-3xl pointer-events-none"></div>
+
+        <div class="max-w-3xl space-y-6">
+          <div class="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-red-400">
+            <span>Real-Time Logistics & Assembly</span>
+            <span aria-hidden="true">·</span>
+            <span>API Route /api/orders & /api/logistics</span>
+          </div>
+
+          <h2 class="font-display text-3xl sm:text-4xl font-bold tracking-tight text-white text-balance">
+            Track Every Solder Joint & Shipping Milestone
+          </h2>
+
+          <p class="text-slate-300 text-sm sm:text-base leading-relaxed">
+            Every BuildFlow rig receives an unforgeable build certificate. Track when parts are picked off warehouse racks, watch technician assembly benchmarks, and inspect courier telemetry in one unified portal.
+          </p>
+
+          <!-- Input bar inside the banner -->
+          <div class="flex flex-col sm:flex-row gap-3 pt-2 max-w-xl">
+            <input 
+              type="text" 
+              id="full-track-input" 
+              placeholder="Enter Order ID (e.g. BF-88219)" 
+              class="px-4 py-3 text-sm bg-white/10 border border-white/20 rounded-lg text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-red-500"
+            />
+            <button onclick="handleBannerTracking()" class="px-6 py-3 text-sm font-semibold text-white bg-red-600 hover:bg-red-500 rounded-lg whitespace-nowrap transition-colors">
+              Inspect Live Status
+            </button>
+          </div>
+
+          <div class="flex items-center gap-4 text-xs text-slate-400 pt-2">
+            <span>Sample IDs to try:</span>
+            <button onclick="document.getElementById('full-track-input').value='BF-88219'; handleBannerTracking();" class="text-red-400 underline font-mono">BF-88219 (Assembly)</button>
+            <button onclick="document.getElementById('full-track-input').value='BF-91044'; handleBannerTracking();" class="text-red-400 underline font-mono">BF-91044 (Shipped)</button>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- SECTION 6: AUTHENTIC HARDWARE TESTIMONIALS -->
+  <section class="py-20 bg-white border-t border-slate-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="text-center max-w-2xl mx-auto mb-16">
+        <div class="flex items-center justify-center gap-2 text-xs font-semibold uppercase tracking-wider text-red-600 mb-2">
+          <span>Client Verdicts</span>
+          <span aria-hidden="true">·</span>
+          <span>Verified Deliveries</span>
+        </div>
+        <h2 class="font-display text-3xl sm:text-4xl font-bold tracking-tight text-slate-900 text-balance">
+          Trusted by Pro Gamers & AI Labs
+        </h2>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        
+        <div class="bg-slate-50 p-6 sm:p-8 rounded-2xl border border-slate-200 space-y-4">
+          <div class="flex items-center gap-1 text-amber-500">
+            <i data-lucide="star" class="w-4 h-4 fill-amber-500"></i>
+            <i data-lucide="star" class="w-4 h-4 fill-amber-500"></i>
+            <i data-lucide="star" class="w-4 h-4 fill-amber-500"></i>
+            <i data-lucide="star" class="w-4 h-4 fill-amber-500"></i>
+            <i data-lucide="star" class="w-4 h-4 fill-amber-500"></i>
+          </div>
+          <p class="text-sm text-slate-700 leading-relaxed">
+            "Cable management is a work of art. The 7800X3D and 4090 arrived packed in molded expanding foam — temps haven't touched 68°C even after 10 hours in Cyberpunk."
+          </p>
+          <div class="pt-2 border-t border-slate-200/60 flex items-center justify-between text-xs">
+            <div>
+              <span class="font-bold text-slate-900 block">David Chen</span>
+              <span class="text-slate-500">Apex Legends Predator</span>
+            </div>
+            <span class="text-emerald-700 bg-emerald-100 font-semibold px-2 py-0.5 rounded text-[11px]">Apex Phantom</span>
+          </div>
+        </div>
+
+        <div class="bg-slate-50 p-6 sm:p-8 rounded-2xl border border-slate-200 space-y-4">
+          <div class="flex items-center gap-1 text-amber-500">
+            <i data-lucide="star" class="w-4 h-4 fill-amber-500"></i>
+            <i data-lucide="star" class="w-4 h-4 fill-amber-500"></i>
+            <i data-lucide="star" class="w-4 h-4 fill-amber-500"></i>
+            <i data-lucide="star" class="w-4 h-4 fill-amber-500"></i>
+            <i data-lucide="star" class="w-4 h-4 fill-amber-500"></i>
+          </div>
+          <p class="text-sm text-slate-700 leading-relaxed">
+            "We deployed three Tensor Forge workstations for local LLM finetuning. The BIOS was perfectly tuned with XMP enabled and 24-hr QA logs attached. Unmatched professionalism."
+          </p>
+          <div class="pt-2 border-t border-slate-200/60 flex items-center justify-between text-xs">
+            <div>
+              <span class="font-bold text-slate-900 block">Dr. Sarah Vance</span>
+              <span class="text-slate-500">Lead AI Researcher, SynapseLab</span>
+            </div>
+            <span class="text-indigo-700 bg-indigo-100 font-semibold px-2 py-0.5 rounded text-[11px]">Tensor Forge</span>
+          </div>
+        </div>
+
+        <div class="bg-slate-50 p-6 sm:p-8 rounded-2xl border border-slate-200 space-y-4">
+          <div class="flex items-center gap-1 text-amber-500">
+            <i data-lucide="star" class="w-4 h-4 fill-amber-500"></i>
+            <i data-lucide="star" class="w-4 h-4 fill-amber-500"></i>
+            <i data-lucide="star" class="w-4 h-4 fill-amber-500"></i>
+            <i data-lucide="star" class="w-4 h-4 fill-amber-500"></i>
+            <i data-lucide="star" class="w-4 h-4 fill-amber-500"></i>
+          </div>
+          <p class="text-sm text-slate-700 leading-relaxed">
+            "The real-time order tracking feature kept our studio informed from motherboard seating to thermal stress tests. Delivery was rapid and seamless."
+          </p>
+          <div class="pt-2 border-t border-slate-200/60 flex items-center justify-between text-xs">
+            <div>
+              <span class="font-bold text-slate-900 block">Ethan Ross</span>
+              <span class="text-slate-500">VFX Director, Kinetik FX</span>
+            </div>
+            <span class="text-slate-800 bg-slate-200 font-semibold px-2 py-0.5 rounded text-[11px]">Custom Rig</span>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- SLIDE-OVER CART DRAWER -->
+  <div id="cart-drawer" class="fixed inset-0 z-50 pointer-events-none transition-all duration-300 opacity-0">
+    <div id="cart-backdrop" onclick="toggleCart(false)" class="absolute inset-0 bg-slate-950/40 backdrop-blur-sm pointer-events-auto"></div>
+    <div id="cart-panel" class="absolute right-0 top-0 bottom-0 w-full max-w-md bg-white shadow-2xl p-6 flex flex-col justify-between transform translate-x-full transition-transform duration-300 pointer-events-auto border-l border-slate-200">
+      
+      <div>
+        <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+          <div class="flex items-center gap-2">
+            <i data-lucide="shopping-bag" class="w-5 h-5 text-red-600"></i>
+            <h3 class="font-display text-lg font-bold text-slate-900">Your Build Cart</h3>
+          </div>
+          <button onclick="toggleCart(false)" class="text-slate-400 hover:text-slate-700 p-1">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+
+        <!-- Items list container -->
+        <div id="cart-items-container" class="py-6 space-y-4 max-h-[60vh] overflow-y-auto">
+          <p class="text-sm text-slate-500 text-center py-12">Your cart is currently empty. Add components or custom rigs to begin.</p>
+        </div>
+      </div>
+
+      <!-- Checkout Footer -->
+      <div class="border-t border-slate-200 pt-4 space-y-3">
+        <div class="flex justify-between text-sm font-semibold text-slate-900">
+          <span>Subtotal</span>
+          <span id="cart-subtotal" class="font-mono tabular-nums">₹0</span>
+        </div>
+        <p class="text-[11px] text-slate-500">Shipping and clean-room assembly calculated at checkout.</p>
+        <button onclick="handleCheckout()" class="w-full py-3 text-sm font-semibold text-white bg-red-600 hover:bg-red-700 active:bg-red-800 rounded-lg shadow-md shadow-red-600/20 transition-all flex items-center justify-center gap-2">
+          <span>Proceed to Verification & Checkout</span>
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ORDER TRACKING DETAILED MODAL -->
+  <div id="tracking-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm">
+    <div class="bg-white rounded-2xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-slate-200 space-y-6 animate-in fade-in zoom-in-95 duration-200">
+      
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <div>
+          <span class="text-xs font-semibold uppercase tracking-wider text-red-600">Order Telemetry</span>
+          <h3 class="font-display text-xl font-bold text-slate-900" id="modal-order-title">Order #BF-88219</h3>
+        </div>
+        <button onclick="closeTrackingModal()" class="text-slate-400 hover:text-slate-700 p-1">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="space-y-4 text-xs">
+        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2">
+          <div class="flex justify-between">
+            <span class="text-slate-500">Target Build:</span>
+            <span class="font-bold text-slate-900" id="modal-rig-name">Custom Gaming Rig (RTX 4090 + 7800X3D)</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-slate-500">Lead Technician:</span>
+            <span class="font-medium text-slate-900" id="modal-tech">Marcus Vance (Senior ESD Tech)</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-slate-500">Current Phase:</span>
+            <span class="text-red-600 font-bold" id="modal-phase">Assembly & Cable Routing</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-slate-500">Courier Tracking:</span>
+            <span class="font-mono text-slate-700" id="modal-tracking-num">TRK-FEDEX-882910</span>
+          </div>
+        </div>
+
+        <!-- Milestones list -->
+        <div class="space-y-3 pt-2">
+          <h4 class="font-bold text-slate-900 text-xs">Milestone Log</h4>
+          
+          <div class="flex items-start gap-3">
+            <div class="w-5 h-5 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[10px] shrink-0 mt-0.5">✓</div>
+            <div>
+              <p class="font-semibold text-slate-900">Payment Verified & Stock Allocated</p>
+              <p class="text-[11px] text-slate-500">All components reserved from warehouse inventory</p>
+            </div>
+          </div>
+
+          <div class="flex items-start gap-3">
+            <div class="w-5 h-5 rounded-full bg-red-600 text-white flex items-center justify-center text-[10px] shrink-0 mt-0.5">⚡</div>
+            <div>
+              <p class="font-semibold text-slate-900">In Clean-Room Assembly</p>
+              <p class="text-[11px] text-slate-500">Motherboard seated, thermal paste spread, 24-pin cable combed</p>
+            </div>
+          </div>
+
+          <div class="flex items-start gap-3 opacity-60">
+            <div class="w-5 h-5 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center text-[10px] shrink-0 mt-0.5">3</div>
+            <div>
+              <p class="font-semibold text-slate-900">24-Hour Stress QA & Acoustic Calibration</p>
+              <p class="text-[11px] text-slate-500">MemTest86, FurMark, TimeSpy stress validation</p>
+            </div>
+          </div>
+
+          <div class="flex items-start gap-3 opacity-60">
+            <div class="w-5 h-5 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center text-[10px] shrink-0 mt-0.5">4</div>
+            <div>
+              <p class="font-semibold text-slate-900">Packaging & Insured Delivery</p>
+              <p class="text-[11px] text-slate-500">Expanding foam installed & handed to courier</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <button onclick="closeTrackingModal()" class="w-full py-2.5 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg">
+        Close Telemetry Window
+      </button>
+
+    </div>
+  </div>
+
+  <!-- MODERN LIGHT THEME FOOTER -->
+  <footer class="bg-white border-t border-slate-200 text-slate-600 py-16 text-xs">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="grid grid-cols-1 md:grid-cols-5 gap-10 pb-12 border-b border-slate-100">
+        
+        <div class="md:col-span-2 space-y-4">
+          <div class="flex items-center gap-2.5">
+            <div class="w-7 h-7 rounded-lg bg-red-600 flex items-center justify-center">
+              <i data-lucide="zap" class="w-4 h-4 text-white"></i>
+            </div>
+            <span class="font-display text-xl font-bold tracking-tight text-slate-950">
+              Build<span class="text-red-600">Flow</span>
+            </span>
+          </div>
+          <p class="text-slate-500 text-xs leading-relaxed max-w-sm">
+            BuildFlow is an automated custom PC building and fulfillment platform. Engineered for zero bottlenecks, surgical cable management, and high-velocity logistics.
+          </p>
+          <div class="flex items-center gap-4 text-slate-400">
+            <span class="flex items-center gap-1.5"><i data-lucide="shield" class="w-4 h-4 text-emerald-600"></i> ISO 9001 Certified Lab</span>
+            <span class="flex items-center gap-1.5"><i data-lucide="server" class="w-4 h-4 text-red-600"></i> RESTful API Ready</span>
+          </div>
+        </div>
+
+        <div>
+          <h4 class="font-bold text-slate-900 uppercase tracking-wider text-[11px] mb-4">Hardware</h4>
+          <ul class="space-y-2.5">
+            <li><a href="#catalog" class="hover:text-red-600 transition-colors">Processors (CPU)</a></li>
+            <li><a href="#catalog" class="hover:text-red-600 transition-colors">Graphics Cards (GPU)</a></li>
+            <li><a href="#catalog" class="hover:text-red-600 transition-colors">Motherboards & Chipsets</a></li>
+            <li><a href="#catalog" class="hover:text-red-600 transition-colors">DDR5 High-Speed RAM</a></li>
+            <li><a href="#catalog" class="hover:text-red-600 transition-colors">PCIe Gen4/Gen5 Storage</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 class="font-bold text-slate-900 uppercase tracking-wider text-[11px] mb-4">Custom Rigs</h4>
+          <ul class="space-y-2.5">
+            <li><a href="#flagships" class="hover:text-red-600 transition-colors">The Apex Phantom (4K)</a></li>
+            <li><a href="#flagships" class="hover:text-red-600 transition-colors">The Tensor Forge (AI Workstation)</a></li>
+            <li><a href="/builder" class="hover:text-red-600 transition-colors">Custom PC Builder Studio</a></li>
+            <li><a href="#tracking-section" class="hover:text-red-600 transition-colors">Order Tracking Portal</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 class="font-bold text-slate-900 uppercase tracking-wider text-[11px] mb-4">API & Support</h4>
+          <ul class="space-y-2.5">
+            <li><a href="/api" target="_blank" class="hover:text-red-600 transition-colors">REST API Spec</a></li>
+            <li><a href="/api/health" target="_blank" class="hover:text-red-600 transition-colors">Service Health</a></li>
+            <li><a href="/api/components" target="_blank" class="hover:text-red-600 transition-colors">Components Endpoint</a></li>
+            <li><a href="#hero" class="hover:text-red-600 transition-colors">Warranty & Return Policy</a></li>
+            <li><a href="tel:18002845335" class="hover:text-red-600 transition-colors">+1 (800) 284-5335</a></li>
+          </ul>
+        </div>
+
+      </div>
+
+      <div class="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-slate-400 text-xs">
+        <p>&copy; 2026 BuildFlow Technologies Inc. All rights reserved.</p>
+        <div class="flex items-center gap-6">
+          <a href="#" class="hover:text-slate-600">Privacy Policy</a>
+          <a href="#" class="hover:text-slate-600">Terms of Assembly</a>
+          <a href="#" class="hover:text-slate-600">Security Invariants</a>
+        </div>
+      </div>
+
+    </div>
+  </footer>
+
+  <!-- JAVASCRIPT APPLICATION LOGIC -->
+  <script>
+    // State management
+    let componentsData = [];
+    let cart = [];
+    let currentCategory = 'ALL';
+
+    // Fallback components (rendered if database has not yet been seeded)
+    const fallbackCatalog = [
+      {
+        _id: 'c1',
+        name: 'AMD Ryzen 7 7800X3D',
+        category: 'CPU',
+        brand: 'AMD',
+        price: 399,
+        stock: 25,
+        specifications: { socket: 'AM5', powerDraw: 120, cores: '8 Cores / 16 Threads' }
+      },
+      {
+        _id: 'c2',
+        name: 'Intel Core i9-14900K',
+        category: 'CPU',
+        brand: 'Intel',
+        price: 589,
+        stock: 14,
+        specifications: { socket: 'LGA1700', powerDraw: 253, cores: '24 Cores / 32 Threads' }
+      },
+      {
+        _id: 'c3',
+        name: 'NVIDIA GeForce RTX 4090 24GB',
+        category: 'GPU',
+        brand: 'NVIDIA',
+        price: 1599,
+        stock: 6,
+        specifications: { powerDraw: 450, gpuLength: 336, vram: '24GB GDDR6X' }
+      },
+      {
+        _id: 'c4',
+        name: 'NVIDIA GeForce RTX 4080 SUPER 16GB',
+        category: 'GPU',
+        brand: 'NVIDIA',
+        price: 999,
+        stock: 18,
+        specifications: { powerDraw: 320, gpuLength: 310, vram: '16GB GDDR6X' }
+      },
+      {
+        _id: 'c5',
+        name: 'MSI B650 TOMAHAWK WIFI',
+        category: 'Motherboard',
+        brand: 'MSI',
+        price: 219,
+        stock: 30,
+        specifications: { socket: 'AM5', chipset: 'B650', formFactor: 'ATX', ramType: 'DDR5' }
+      },
+      {
+        _id: 'c6',
+        name: 'ASUS ROG MAXIMUS Z790 HERO',
+        category: 'Motherboard',
+        brand: 'ASUS',
+        price: 599,
+        stock: 12,
+        specifications: { socket: 'LGA1700', chipset: 'Z790', formFactor: 'ATX', ramType: 'DDR5' }
+      },
+      {
+        _id: 'c7',
+        name: 'Corsair Vengeance 32GB DDR5 6000MHz',
+        category: 'RAM',
+        brand: 'Corsair',
+        price: 115,
+        stock: 45,
+        specifications: { ramType: 'DDR5', capacity: '32GB (2x16GB)', speed: '6000MHz' }
+      },
+      {
+        _id: 'c8',
+        name: 'Samsung 990 PRO 2TB NVMe SSD',
+        category: 'SSD',
+        brand: 'Samsung',
+        price: 169,
+        stock: 40,
+        specifications: { storageInterface: 'M.2 NVMe PCIe 4.0', readSpeed: '7450 MB/s' }
+      },
+      {
+        _id: 'c9',
+        name: 'Corsair RM850x 850W Gold Modular',
+        category: 'PSU',
+        brand: 'Corsair',
+        price: 139,
+        stock: 32,
+        specifications: { wattage: 850, rating: '80+ Gold', modular: 'Fully Modular' }
+      }
+    ];
+
+    // Initialize application on DOM load
+    document.addEventListener('DOMContentLoaded', () => {
+      lucide.createIcons();
+      checkBackendHealth();
+      fetchComponentsFromAPI();
+      runQuickCompat();
+      updateBuilderTotals();
+    });
+
+    // 1. Health check to real /api/health endpoint
+    async function checkBackendHealth() {
+      const startTime = performance.now();
+      try {
+        const res = await fetch('/api/health');
+        const data = await res.json();
+        const duration = Math.round(performance.now() - startTime);
+        
+        document.getElementById('api-status-text').innerHTML = `<span class="text-emerald-600 font-semibold">Online (Uptime: ${Math.round(data.uptime || 0)}s)</span>`;
+        document.getElementById('api-latency').textContent = `Latency: ${duration} ms`;
+      } catch (err) {
+        document.getElementById('api-status-text').innerHTML = `<span class="text-amber-600 font-semibold">Offline Fallback Mode</span>`;
+        document.getElementById('api-latency').textContent = 'Mock Fallback Active';
+      }
+    }
+
+    // 2. Fetch components from real backend /api/components
+    async function fetchComponentsFromAPI() {
+      const grid = document.getElementById('components-grid');
+      try {
+        const res = await fetch('/api/components');
+        const data = await res.json();
+        
+        // Use database data if returned and non-empty, otherwise use fallback catalog
+        if (Array.isArray(data) && data.length > 0) {
+          componentsData = data;
+        } else {
+          componentsData = fallbackCatalog;
+        }
+      } catch (e) {
+        componentsData = fallbackCatalog;
+      }
+      renderComponents();
+    }
+
+    // Currency Formatter for Indian Rupees (INR)
+    function formatINR(val) {
+      const num = Number(val) || 0;
+      let inr = num;
+      if (num > 0 && num < 5000) {
+        inr = Math.round(num * 85);
+      }
+      return new Intl.NumberFormat('en-IN', {
+        style: 'currency',
+        currency: 'INR',
+        maximumFractionDigits: 0
+      }).format(inr);
+    }
+
+    // 3. Render component cards in catalog
+    function renderComponents() {
+      const grid = document.getElementById('components-grid');
+      const searchQuery = (document.getElementById('catalog-search')?.value || '').toLowerCase();
+      
+      const filtered = componentsData.filter(item => {
+        const matchesCategory = (currentCategory === 'ALL') || (item.category === currentCategory);
+        const matchesSearch = item.name.toLowerCase().includes(searchQuery) || item.brand.toLowerCase().includes(searchQuery);
+        return matchesCategory && matchesSearch;
+      });
+
+      if (filtered.length === 0) {
+        grid.innerHTML = `
+          <div class="col-span-full py-12 text-center text-slate-500">
+            <i data-lucide="package-x" class="w-8 h-8 mx-auto mb-2 text-slate-400"></i>
+            <p class="text-sm">No components found matching your search criteria.</p>
+          </div>
+        `;
+        lucide.createIcons();
+        return;
+      }
+
+      grid.innerHTML = filtered.map(item => {
+        const specs = item.specifications || {};
+        const specSummary = Object.entries(specs)
+          .slice(0, 2)
+          .map(([k, v]) => `${k.replace(/([A-Z])/g, ' $1')}: <span class="text-slate-900 font-medium">${v}</span>`)
+          .join(' &middot; ');
+
+        return `
+          <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm hover:shadow-md transition-all flex flex-col justify-between group">
+            <div>
+              <div class="flex items-center justify-between text-xs mb-2">
+                <span class="text-slate-500 font-semibold tracking-wider uppercase text-[11px]">${item.brand} &middot; ${item.category}</span>
+                <span class="px-2 py-0.5 rounded text-[10px] font-semibold ${item.stock > 10 ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'}">
+                  ${item.stock > 0 ? `${item.stock} in stock` : 'Special Order'}
+                </span>
+              </div>
+              <h3 class="font-bold text-sm text-slate-900 group-hover:text-red-600 transition-colors line-clamp-2">
+                ${item.name}
+              </h3>
+              <p class="text-xs text-slate-500 mt-2 line-clamp-1">
+                ${specSummary || 'OEM Certified Specifications'}
+              </p>
+            </div>
+
+            <div class="mt-5 pt-3 border-t border-slate-100 flex items-center justify-between">
+              <div>
+                <span class="text-xs text-slate-400 block text-[10px]">Price (INR)</span>
+                <span class="text-base font-bold text-slate-900 font-mono tabular-nums">${formatINR(item.price)}</span>
+              </div>
+              <button 
+                onclick="addToCart('${item.name.replace(/'/g, "\\'")}', ${item.price})" 
+                class="px-3 py-1.5 text-xs font-semibold text-white bg-slate-900 hover:bg-red-600 active:bg-red-700 rounded-lg transition-colors flex items-center gap-1.5"
+              >
+                <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+                <span>Add</span>
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      lucide.createIcons();
+    }
+
+    function setCategoryFilter(cat) {
+      currentCategory = cat;
+      document.querySelectorAll('.cat-pill').forEach(btn => {
+        if (btn.textContent.trim().toUpperCase().includes(cat === 'ALL' ? 'ALL' : cat)) {
+          btn.className = 'cat-pill active px-4 py-2 rounded-lg bg-slate-900 text-white whitespace-nowrap transition-colors';
+        } else {
+          btn.className = 'cat-pill px-4 py-2 rounded-lg bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 whitespace-nowrap transition-colors';
+        }
+      });
+      renderComponents();
+    }
+
+    function filterComponents() {
+      renderComponents();
+    }
+
+    // 4. Hero Tab Switcher (Direct from User Reference Image)
+    function switchHeroTab(tab) {
+      const trackBtn = document.getElementById('tab-btn-tracking');
+      const configBtn = document.getElementById('tab-btn-config');
+      const trackContent = document.getElementById('tab-content-tracking');
+      const configContent = document.getElementById('tab-content-config');
+
+      if (tab === 'tracking') {
+        trackBtn.className = 'tab-active pb-2 font-semibold transition-colors flex items-center gap-2';
+        configBtn.className = 'tab-inactive pb-2 font-medium transition-colors flex items-center gap-2';
+        trackContent.classList.remove('hidden');
+        configContent.classList.add('hidden');
+      } else {
+        configBtn.className = 'tab-active pb-2 font-semibold transition-colors flex items-center gap-2';
+        trackBtn.className = 'tab-inactive pb-2 font-medium transition-colors flex items-center gap-2';
+        configContent.classList.remove('hidden');
+        trackContent.classList.add('hidden');
+      }
+    }
+
+    function fillSampleTrack(id) {
+      document.getElementById('track-input').value = id;
+      handleHeroTracking(new Event('submit'));
+    }
+
+    // 5. Handle hero order tracking lookup
+    async function handleHeroTracking(e) {
+      if (e) e.preventDefault();
+      const val = document.getElementById('track-input').value.trim();
+      if (!val) return;
+
+      const resultBox = document.getElementById('tracking-result-box');
+      resultBox.classList.remove('hidden');
+
+      document.getElementById('res-order-id').textContent = `Order #${val}`;
+      
+      if (val.includes('9104') || val.toLowerCase().includes('ship')) {
+        document.getElementById('res-status-badge').textContent = 'Shipped & En Route';
+        document.getElementById('res-status-badge').className = 'px-2 py-0.5 rounded font-semibold bg-blue-100 text-blue-800';
+        document.getElementById('res-progress-bar').style.width = '85%';
+        document.getElementById('res-notes').textContent = 'Courier: FedEx Priority · Tracking: TRK-992144';
+      } else {
+        document.getElementById('res-status-badge').textContent = 'In Assembly';
+        document.getElementById('res-status-badge').className = 'px-2 py-0.5 rounded font-semibold bg-emerald-100 text-emerald-800';
+        document.getElementById('res-progress-bar').style.width = '50%';
+        document.getElementById('res-notes').textContent = 'Technician: Marcus V. · ESD Bay #4';
+      }
+    }
+
+    function handleBannerTracking() {
+      const val = document.getElementById('full-track-input').value.trim();
+      if (val) {
+        document.getElementById('modal-order-title').textContent = `Order #${val}`;
+        openFullTrackingModal();
+      }
+    }
+
+    // 6. Quick Compatibility checker on Hero Card
+    function runQuickCompat() {
+      const cpu = document.getElementById('quick-cpu-select');
+      const mobo = document.getElementById('quick-mobo-select');
+      const gpu = document.getElementById('quick-gpu-select');
+      if (!cpu || !mobo || !gpu) return;
+
+      const cpuSocket = cpu.options[cpu.selectedIndex].getAttribute('data-socket');
+      const moboSocket = mobo.options[mobo.selectedIndex].getAttribute('data-socket');
+      const cpuWatt = parseInt(cpu.options[cpu.selectedIndex].getAttribute('data-watt') || '120');
+      const gpuWatt = parseInt(gpu.options[gpu.selectedIndex].getAttribute('data-watt') || '300');
+      const totalWatt = cpuWatt + gpuWatt + 80;
+
+      const pill = document.getElementById('quick-compat-pill');
+      const text = document.getElementById('quick-compat-text');
+      const wattText = document.getElementById('quick-watt-text');
+
+      wattText.textContent = `~${totalWatt}W TDP`;
+
+      if (cpuSocket === moboSocket) {
+        pill.className = 'p-2.5 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-center justify-between';
+        text.textContent = `${cpuSocket} Socket Matched · 100% Compatible`;
+      } else {
+        pill.className = 'p-2.5 rounded-lg bg-red-50 border border-red-200 text-red-800 text-xs flex items-center justify-between';
+        text.textContent = `Socket Mismatch: CPU is ${cpuSocket}, Board is ${moboSocket}`;
+      }
+    }
+
+    // 7. Interactive PC Builder calculations
+    function updateBuilderItem(slot) {
+      const select = document.getElementById(`builder-select-${slot}`);
+      const opt = select.options[select.selectedIndex];
+      
+      if (slot === 'cpu') {
+        document.getElementById('builder-cpu-name').textContent = opt.value;
+        document.getElementById('builder-cpu-sub').textContent = `Socket ${opt.getAttribute('data-socket')} · ${opt.getAttribute('data-watt')}W TDP`;
+      } else if (slot === 'mobo') {
+        document.getElementById('builder-mobo-name').textContent = opt.value;
+        document.getElementById('builder-mobo-sub').textContent = `Socket ${opt.getAttribute('data-socket')} · ${opt.getAttribute('data-ram')} · ATX`;
+      } else if (slot === 'gpu') {
+        document.getElementById('builder-gpu-name').textContent = opt.value;
+        document.getElementById('builder-gpu-sub').textContent = `${opt.getAttribute('data-watt')}W TDP · Length: 336mm`;
+      } else if (slot === 'ram') {
+        document.getElementById('builder-ram-name').textContent = opt.value;
+      } else if (slot === 'psu') {
+        document.getElementById('builder-psu-name').textContent = opt.value;
+        document.getElementById('builder-psu-sub').textContent = `${opt.getAttribute('data-watt')}W · Fully Modular · ATX 3.0`;
+      }
+
+      updateBuilderTotals();
+    }
+
+    function updateBuilderTotals() {
+      const cpu = document.getElementById('builder-select-cpu');
+      const mobo = document.getElementById('builder-select-mobo');
+      const gpu = document.getElementById('builder-select-gpu');
+      const ram = document.getElementById('builder-select-ram');
+      const psu = document.getElementById('builder-select-psu');
+      if (!cpu || !mobo || !gpu) return;
+
+      const cpuPrice = parseFloat(cpu.options[cpu.selectedIndex].getAttribute('data-price') || 0);
+      const moboPrice = parseFloat(mobo.options[mobo.selectedIndex].getAttribute('data-price') || 0);
+      const gpuPrice = parseFloat(gpu.options[gpu.selectedIndex].getAttribute('data-price') || 0);
+      const ramPrice = parseFloat(ram.options[ram.selectedIndex].getAttribute('data-price') || 0);
+      const psuPrice = parseFloat(psu.options[psu.selectedIndex].getAttribute('data-price') || 0);
+      const total = cpuPrice + moboPrice + gpuPrice + ramPrice + psuPrice;
+
+      const cpuWatt = parseInt(cpu.options[cpu.selectedIndex].getAttribute('data-watt') || 120);
+      const gpuWatt = parseInt(gpu.options[gpu.selectedIndex].getAttribute('data-watt') || 450);
+      const psuCapacity = parseInt(psu.options[psu.selectedIndex].getAttribute('data-watt') || 850);
+      const totalWatt = cpuWatt + gpuWatt + 90;
+
+      document.getElementById('builder-subtotal').textContent = formatINR(total);
+      document.getElementById('builder-grand-total').textContent = formatINR(total);
+      document.getElementById('builder-total-watt').textContent = `${totalWatt}W / ${psuCapacity}W`;
+
+      const pct = Math.min(Math.round((totalWatt / psuCapacity) * 100), 100);
+      document.getElementById('builder-watt-bar').style.width = `${pct}%`;
+
+      // Check socket compatibility
+      const cpuSocket = cpu.options[cpu.selectedIndex].getAttribute('data-socket');
+      const moboSocket = mobo.options[mobo.selectedIndex].getAttribute('data-socket');
+      const verdictBox = document.getElementById('builder-verdict-box');
+      const verdictTitle = document.getElementById('builder-verdict-title');
+
+      if (cpuSocket === moboSocket) {
+        verdictBox.className = 'p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 space-y-2';
+        verdictTitle.textContent = 'All Components 100% Compatible';
+      } else {
+        verdictBox.className = 'p-4 rounded-xl bg-red-50 border border-red-200 text-red-900 space-y-2';
+        verdictTitle.textContent = `Socket Conflict: CPU (${cpuSocket}) != Motherboard (${moboSocket})`;
+      }
+    }
+
+    function addCustomBuildToCart() {
+      const cpu = document.getElementById('builder-select-cpu');
+      const mobo = document.getElementById('builder-select-mobo');
+      const gpu = document.getElementById('builder-select-gpu');
+      const ram = document.getElementById('builder-select-ram');
+      const psu = document.getElementById('builder-select-psu');
+      
+      const cpuPrice = parseFloat(cpu.options[cpu.selectedIndex].getAttribute('data-price') || 0);
+      const moboPrice = parseFloat(mobo.options[mobo.selectedIndex].getAttribute('data-price') || 0);
+      const gpuPrice = parseFloat(gpu.options[gpu.selectedIndex].getAttribute('data-price') || 0);
+      const ramPrice = parseFloat(ram.options[ram.selectedIndex].getAttribute('data-price') || 0);
+      const psuPrice = parseFloat(psu.options[psu.selectedIndex].getAttribute('data-price') || 0);
+      const total = cpuPrice + moboPrice + gpuPrice + ramPrice + psuPrice;
+
+      addToCart('Custom Rig (AMD 7800X3D + RTX 4090 BuildFlow Verified)', total);
+    }
+
+    function addPrebuiltToCart(name, price) {
+      addToCart(name, price);
+    }
+
+    function navigateToBuilder(e) {
+      if (e && e.preventDefault) e.preventDefault();
+      window.location.href = '/builder';
+    }
+
+    function loadRigIntoBuilder(rig) {
+      window.location.href = `/builder?preset=${rig}`;
+    }
+
+    // 8. Cart management & Drawer
+    function addToCart(title, price) {
+      cart.push({ title, price, id: Date.now() });
+      updateCartUI();
+      toggleCart(true);
+    }
+
+    function removeFromCart(id) {
+      cart = cart.filter(item => item.id !== id);
+      updateCartUI();
+    }
+
+    function updateCartUI() {
+      const counter = document.getElementById('cart-counter');
+      counter.textContent = cart.length;
+
+      const container = document.getElementById('cart-items-container');
+      const subtotalEl = document.getElementById('cart-subtotal');
+
+      if (cart.length === 0) {
+        container.innerHTML = `<p class="text-sm text-slate-500 text-center py-12">Your cart is currently empty. Add components or custom rigs to begin.</p>`;
+        subtotalEl.textContent = '₹0';
+        return;
+      }
+
+      let subtotal = 0;
+      container.innerHTML = cart.map(item => {
+        subtotal += Number(item.price);
+        return `
+          <div class="flex items-center justify-between p-3 bg-slate-50 rounded-lg border border-slate-100 text-xs">
+            <div class="pr-2">
+              <span class="font-semibold text-slate-900 block line-clamp-1">${item.title}</span>
+              <span class="text-slate-500 font-mono tabular-nums">${formatINR(item.price)}</span>
+            </div>
+            <button onclick="removeFromCart(${item.id})" class="text-slate-400 hover:text-red-600 p-1">
+              <i data-lucide="trash-2" class="w-4 h-4"></i>
+            </button>
+          </div>
+        `;
+      }).join('');
+
+      subtotalEl.textContent = formatINR(subtotal);
+      lucide.createIcons();
+    }
+
+    function toggleCart(show) {
+      const drawer = document.getElementById('cart-drawer');
+      const panel = document.getElementById('cart-panel');
+      if (show) {
+        drawer.classList.remove('opacity-0', 'pointer-events-none');
+        drawer.classList.add('opacity-100');
+        panel.classList.remove('translate-x-full');
+      } else {
+        drawer.classList.add('opacity-0', 'pointer-events-none');
+        drawer.classList.remove('opacity-100');
+        panel.classList.add('translate-x-full');
+      }
+    }
+
+    document.getElementById('open-cart-btn')?.addEventListener('click', () => toggleCart(true));
+
+    function handleCheckout() {
+      if (cart.length === 0) {
+        alert('Please add items to your cart before proceeding to checkout.');
+        return;
+      }
+      const randomOrderId = 'BF-' + Math.floor(10000 + Math.random() * 90000);
+      alert(`🎉 Order verified and queued for clean-room assembly!\n\nYour Order ID: ${randomOrderId}\nUse this ID in the hero tracking card to inspect real-time progress.`);
+      cart = [];
+      updateCartUI();
+      toggleCart(false);
+      document.getElementById('track-input').value = randomOrderId;
+      handleHeroTracking(null);
+    }
+
+    // 9. Tracking Modal
+    function openFullTrackingModal() {
+      document.getElementById('tracking-modal').classList.remove('hidden');
+    }
+
+    function closeTrackingModal() {
+      document.getElementById('tracking-modal').classList.add('hidden');
+    }
+  </script>
+</body>
+</html>
