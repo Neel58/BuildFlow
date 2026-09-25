@@ -9,6 +9,12 @@ import OrderTrackingModal from './components/OrderTrackingModal';
 import CartDrawer from './components/CartDrawer';
 import Footer from './components/Footer';
 import AuthModal from './components/AuthModal';
+import AuthPage from './components/AuthPage';
+import AdminDashboard from './dashboards/AdminDashboard';
+import WarehouseDashboard from './dashboards/WarehouseDashboard';
+import TechnicianDashboard from './dashboards/TechnicianDashboard';
+import InspectorDashboard from './dashboards/InspectorDashboard';
+import LogisticsDashboard from './dashboards/LogisticsDashboard';
 import { apiRequest, clearSession, getAccessToken, getStoredUser } from './utils/api';
 
 export default function App() {
@@ -165,6 +171,25 @@ export default function App() {
     window.history.pushState({}, '', targetUrl);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
+
+  if (!user) {
+    return <AuthPage onAuthenticated={handleAuthenticated} />;
+  }
+
+  if (user.role && user.role !== 'Customer') {
+    const handleLogout = () => { clearSession(); setUser(null); setCart([]); };
+    
+    switch (user.role) {
+      case 'Admin': return <AdminDashboard user={user} onLogout={handleLogout} />;
+      case 'Warehouse': return <WarehouseDashboard user={user} onLogout={handleLogout} />;
+      case 'Technician': return <TechnicianDashboard user={user} onLogout={handleLogout} />;
+      case 'Inspector': return <InspectorDashboard user={user} onLogout={handleLogout} />;
+      case 'Logistics': return <LogisticsDashboard user={user} onLogout={handleLogout} />;
+      default: 
+        clearSession();
+        return <AuthPage onAuthenticated={handleAuthenticated} />;
+    }
+  }
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-50 text-slate-800 antialiased selection:bg-red-500 selection:text-white">
