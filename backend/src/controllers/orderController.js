@@ -57,28 +57,11 @@ exports.checkout = async (req, res, next) => {
       calculatedTotal += price * item.quantity;
     }
 
-    // Reserve the stock atomically
-    const reservedIds = [];
+    // Reserve the stock
     for (const reserveReq of componentsToReserve) {
-      const updated = await Component.findOneAndUpdate(
-        { 
-          _id: reserveReq.componentId,
-          $expr: { $gte: [ { $subtract: ["$stock", "$reservedStock"] }, reserveReq.quantity ] }
-        },
-        { $inc: { reservedStock: reserveReq.quantity } },
-        { new: true }
-      );
-      
-      if (!updated) {
-        // Rollback previous reservations
-        for (const rollback of reservedIds) {
-          await Component.findByIdAndUpdate(rollback.componentId, {
-            $inc: { reservedStock: -rollback.quantity }
-          });
-        }
-        return res.status(400).json({ message: 'Insufficient stock or race condition detected for a component' });
-      }
-      reservedIds.push(reserveReq);
+      await Component.findByIdAndUpdate(reserveReq.componentId, {
+        $inc: { reservedStock: reserveReq.quantity }
+      });
     }
 
     // Generate Stripe PaymentIntent
@@ -131,7 +114,7 @@ exports.confirmPayment = async (req, res, next) => {
       return res.status(400).json({ message: 'Order is already processed' });
     }
 
-    order.status = 'Payment Verified';
+    order.status = 'Assembly Queue';
     await order.save();
 
     // Empty Cart

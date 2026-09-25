@@ -34,12 +34,11 @@ const auditLogSchema = new mongoose.Schema({
 });
 
 // Middleware pre-save to mirror actor and performedBy, targetId and targetEntity
-auditLogSchema.pre('save', function(next) {
+auditLogSchema.pre('save', function() {
   if (this.actor && !this.performedBy) this.performedBy = this.actor;
   if (this.performedBy && !this.actor) this.actor = this.performedBy;
   if (this.targetId && !this.targetEntity) this.targetEntity = this.targetId;
   if (this.targetEntity && !this.targetId) this.targetId = this.targetEntity;
-  next();
 });
 
 module.exports = mongoose.model('AuditLog', auditLogSchema);

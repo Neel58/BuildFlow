@@ -23,14 +23,13 @@ const cartItemSchema = new mongoose.Schema({
 });
 
 // Ensure either component or custom build is provided based on itemType
-cartItemSchema.pre('validate', function(next) {
+cartItemSchema.pre('validate', function() {
   if (this.itemType === 'Component' && !this.componentId) {
-    return next(new Error('Component ID is required when itemType is Component'));
+    throw new Error('Component ID is required when itemType is Component');
   }
   if (this.itemType === 'CustomBuild' && !this.customBuildId) {
-    return next(new Error('CustomBuild ID is required when itemType is CustomBuild'));
+    throw new Error('CustomBuild ID is required when itemType is CustomBuild');
   }
-  next();
 });
 
 const cartSchema = new mongoose.Schema({

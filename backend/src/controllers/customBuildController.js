@@ -1,5 +1,6 @@
 const CustomBuild = require('../models/CustomBuild');
 const Component = require('../models/Component');
+const mongoose = require('mongoose');
 const crypto = require('crypto');
 const { checkCompatibility } = require('../utils/compatibilityCheck');
 
@@ -7,6 +8,10 @@ const { checkCompatibility } = require('../utils/compatibilityCheck');
 exports.saveBuild = async (req, res, next) => {
   try {
     const { name, componentIds } = req.body;
+
+    if (componentIds && (!Array.isArray(componentIds) || componentIds.some((id) => !mongoose.Types.ObjectId.isValid(id)))) {
+      return res.status(400).json({ message: 'componentIds must contain valid component IDs' });
+    }
     
     let totalPrice = 0;
     let isCompatible = true;
@@ -74,6 +79,10 @@ exports.getBuildById = async (req, res, next) => {
 exports.updateBuild = async (req, res, next) => {
   try {
     const { name, componentIds } = req.body;
+
+    if (componentIds && (!Array.isArray(componentIds) || componentIds.some((id) => !mongoose.Types.ObjectId.isValid(id)))) {
+      return res.status(400).json({ message: 'componentIds must contain valid component IDs' });
+    }
     
     let totalPrice = 0;
     let isCompatible = true;

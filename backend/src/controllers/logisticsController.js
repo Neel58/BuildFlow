@@ -27,12 +27,6 @@ exports.confirmPackaging = async (req, res, next) => {
       return res.status(400).json({ message: 'Order is not in Packaging state' });
     }
 
-    const QATask = require('../models/QATask');
-    const qa = await QATask.findOne({ order: orderId });
-    if (!qa || qa.decision !== 'Passed') {
-      return res.status(400).json({ message: 'Order has not passed QA' });
-    }
-
     let task = await LogisticsTask.findOne({ order: orderId });
     if (!task) {
       task = new LogisticsTask({

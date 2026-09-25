@@ -110,10 +110,10 @@ exports.updateUserProfile = async (req, res, next) => {
     if (address) user.address = address;
 
     const updatedUser = await user.save();
-    const userResponse = updatedUser.toObject();
-    delete userResponse.password;
-    delete userResponse.refreshToken;
-    res.json(userResponse);
+    const safeUser = updatedUser.toObject();
+    delete safeUser.password;
+    delete safeUser.refreshToken;
+    res.json(safeUser);
   } catch (error) {
     next(error);
   }
@@ -128,7 +128,7 @@ exports.getUsers = async (req, res, next) => {
       query.role = role;
     }
 
-    const users = await User.find(query).select('-password');
+    const users = await User.find(query).select('-password -refreshToken');
     res.json(users);
   } catch (error) {
     next(error);
