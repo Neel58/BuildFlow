@@ -17,10 +17,6 @@ export default defineConfig({
         target: 'http://localhost:5000',
         changeOrigin: true,
       },
-      '/src/assets': {
-        target: 'http://localhost:5000',
-        changeOrigin: true,
-      }
     },
   },
   build: {

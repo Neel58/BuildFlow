@@ -149,63 +149,43 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleSelectRole = (role) => {
-    if (role === 'Customer') {
-      const session = {
-        _id: 'usr_customer',
-        firstName: 'Guest',
-        lastName: 'Customer',
-        email: 'customer@buildflow.dev',
-        role: 'Customer',
-        accessToken: 'cust_token'
-      };
-      setSession(session);
-      setUser(session);
-      showToast('Switched to Customer Storefront & PC Studio');
-    } else {
-      const session = {
-        _id: 'usr_' + role.toLowerCase(),
-        firstName: role,
-        lastName: 'Lead',
-        email: `${role.toLowerCase()}@buildflow.dev`,
-        role: role,
-        accessToken: `${role.toLowerCase()}_token`
-      };
-      setSession(session);
-      setUser(session);
-      showToast(`Switched to ${role} Station`);
+  // RequireRole: renders children only if user has the required role, else redirects to store.
+  // This is defense-in-depth — user.role only comes from a real verified login (real JWT).
+  const RequireRole = ({ role, children }) => {
+    if (!user || user.role !== role) {
+      navigate('/');
+      return null;
     }
+    return children;
   };
 
+  const handleLogout = () => { clearSession(); setUser(null); setCart([]); navigate('/'); };
+  const handleBackToStore = () => { navigate('/'); };
+
   if (user?.role && user.role !== 'Customer') {
-    const handleLogout = () => { clearSession(); setUser(null); setCart([]); };
-    const handleBackToStore = () => handleSelectRole('Customer');
-    
     return (
       <div className="flex flex-col min-h-screen">
+        {/* Read-only station header — role comes from real JWT, cannot be changed here */}
         <div className="bg-slate-900 text-white px-4 py-2 text-xs flex items-center justify-between border-b border-slate-800">
           <div className="flex items-center gap-3">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
             <span>Station Mode: <strong className="text-red-400 uppercase">{user.role}</strong></span>
-            <select
-              value={user.role}
-              onChange={(e) => handleSelectRole(e.target.value)}
-              className="bg-slate-800 border border-slate-700 text-slate-200 text-xs rounded-md px-2 py-0.5 focus:outline-none cursor-pointer"
-            >
-              <option value="Customer">Switch to Customer Store</option>
-              <option value="Admin">Admin Station</option>
-              <option value="Logistics">Logistics Station</option>
-              <option value="Technician">Technician Station</option>
-              <option value="Inspector">Inspector Station</option>
-              <option value="Warehouse">Warehouse Station</option>
-            </select>
+            <span className="text-slate-500">({user.email})</span>
           </div>
-          <button 
-            onClick={handleBackToStore}
-            className="text-xs font-semibold bg-red-600 hover:bg-red-500 text-white px-3 py-1 rounded-lg transition-colors cursor-pointer"
-          >
-            &larr; Switch to Customer Store & Builder
-          </button>
+          <div className="flex items-center gap-2">
+            <button 
+              onClick={handleBackToStore}
+              className="text-xs font-semibold bg-slate-700 hover:bg-slate-600 text-white px-3 py-1 rounded-lg transition-colors cursor-pointer"
+            >
+              &larr; Store
+            </button>
+            <button 
+              onClick={handleLogout}
+              className="text-xs font-semibold bg-red-600 hover:bg-red-500 text-white px-3 py-1 rounded-lg transition-colors cursor-pointer"
+            >
+              Sign Out
+            </button>
+          </div>
         </div>
         <div className="flex-1">
           {user.role === 'Admin' && <AdminDashboard user={user} onLogout={handleLogout} onBackToStore={handleBackToStore} />}
@@ -234,8 +214,7 @@ export default function App() {
         onOpenCart={() => setIsCartOpen(true)}
         onOpenAuth={() => setIsAuthOpen(true)}
         user={user}
-        onLogout={() => { clearSession(); setUser(null); setCart([]); navigate('/'); }}
-        onSelectRole={handleSelectRole}
+        onLogout={handleLogout}
       />
 
       {/* Content Switching via React Router */}

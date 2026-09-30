@@ -17,7 +17,10 @@ const generateRefreshToken = (id) => {
 
 exports.registerUser = async (req, res, next) => {
   try {
-    const { firstName, lastName, email, password, role } = req.body;
+    // NOTE: 'role' is intentionally NOT destructured from req.body.
+    // All new registrations are forced to 'Customer' regardless of what
+    // the client sends. Role elevation only via PUT /api/users/:id/role (Admin only).
+    const { firstName, lastName, email, password } = req.body;
     
     // Check for existing user
     const userExists = await User.findOne({ email });
@@ -30,7 +33,7 @@ exports.registerUser = async (req, res, next) => {
       lastName,
       email,
       password,
-      role
+      role: 'Customer'  // SECURITY: always forced; never from req.body
     });
 
     res.status(201).json({

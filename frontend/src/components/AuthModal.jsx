@@ -1,12 +1,26 @@
 import React, { useState } from 'react';
-import { LogIn, UserPlus, X } from 'lucide-react';
+import { LogIn, UserPlus, X, Zap } from 'lucide-react';
 import { login, register } from '../utils/api';
+
+// Demo accounts — all created by seedUsers.js with real bcrypt hashes.
+// Clicking these performs a REAL POST /api/auth/login, returns a real JWT.
+const DEMO_ACCOUNTS = [
+  { role: 'Customer',   label: 'Customer',    icon: '🛒', email: 'customer@buildflow.dev'   },
+  { role: 'Technician', label: 'Technician',  icon: '🔧', email: 'technician@buildflow.dev' },
+  { role: 'Inspector',  label: 'QA Inspector',icon: '📋', email: 'inspector@buildflow.dev'  },
+  { role: 'Warehouse',  label: 'Warehouse',   icon: '📦', email: 'warehouse@buildflow.dev'  },
+  { role: 'Logistics',  label: 'Logistics',   icon: '🚚', email: 'logistics@buildflow.dev'  },
+  { role: 'Admin',      label: 'Admin',       icon: '⚡', email: 'admin@buildflow.dev'      },
+];
+
+const DEMO_PASSWORD = 'Demo@1234';
 
 export default function AuthModal({ isOpen, onClose, onAuthenticated }) {
   const [mode, setMode] = useState('login');
   const [form, setForm] = useState({ firstName: '', lastName: '', email: '', password: '' });
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [demoLoading, setDemoLoading] = useState(null); // email of demo acct being loaded
 
   if (!isOpen) return null;
 
@@ -30,6 +44,21 @@ export default function AuthModal({ isOpen, onClose, onAuthenticated }) {
       setError(submitError.message);
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  // Real login for demo accounts — performs actual POST /api/auth/login, returns real JWT
+  const handleDemoLogin = async (acct) => {
+    setError('');
+    setDemoLoading(acct.email);
+    try {
+      const session = await login({ email: acct.email, password: DEMO_PASSWORD });
+      onAuthenticated(session);
+      onClose();
+    } catch (err) {
+      setError(`Demo login failed for ${acct.role}: ${err.message}. Ensure seedUsers.js has been run.`);
+    } finally {
+      setDemoLoading(null);
     }
   };
 
@@ -66,39 +95,25 @@ export default function AuthModal({ isOpen, onClose, onAuthenticated }) {
           {mode === 'login' ? 'Need an account? Register' : 'Already have an account? Sign in'}
         </button>
 
-        {/* 1-Click Role Testing */}
+        {/* Quick Demo Login — performs REAL POST /api/auth/login for each seeded account */}
         <div className="mt-5 pt-4 border-t border-slate-100">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-2 text-center">
-            Or test with 1-Click Role Access:
-          </span>
+          <div className="flex items-center gap-1.5 mb-2 justify-center">
+            <Zap className="w-3 h-3 text-amber-500" />
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+              Quick Demo Login (real JWT auth):
+            </span>
+          </div>
           <div className="grid grid-cols-3 gap-2">
-            {[
-              { role: 'Customer', label: 'Customer', icon: '🛒' },
-              { role: 'Technician', label: 'Technician', icon: '🔧' },
-              { role: 'Inspector', label: 'QA Inspector', icon: '📋' },
-              { role: 'Warehouse', label: 'Warehouse', icon: '📦' },
-              { role: 'Logistics', label: 'Logistics', icon: '🚚' },
-              { role: 'Admin', label: 'Admin', icon: '⚡' }
-            ].map(r => (
+            {DEMO_ACCOUNTS.map(acct => (
               <button
-                key={r.role}
+                key={acct.role}
                 type="button"
-                onClick={() => {
-                  const demoSession = {
-                    _id: 'demo_' + r.role.toLowerCase(),
-                    firstName: r.role,
-                    lastName: 'User',
-                    email: `${r.role.toLowerCase()}@buildflow.dev`,
-                    role: r.role,
-                    accessToken: 'demo_token'
-                  };
-                  onAuthenticated(demoSession);
-                  onClose();
-                }}
-                className="p-2 border border-slate-200 hover:border-red-500 hover:bg-red-50 rounded-lg text-[11px] font-semibold text-slate-700 flex flex-col items-center gap-0.5 transition-colors cursor-pointer"
+                disabled={demoLoading !== null}
+                onClick={() => handleDemoLogin(acct)}
+                className="p-2 border border-slate-200 hover:border-red-500 hover:bg-red-50 rounded-lg text-[11px] font-semibold text-slate-700 flex flex-col items-center gap-0.5 transition-colors cursor-pointer disabled:opacity-50"
               >
-                <span>{r.icon}</span>
-                <span>{r.label}</span>
+                <span>{demoLoading === acct.email ? '⏳' : acct.icon}</span>
+                <span>{acct.label}</span>
               </button>
             ))}
           </div>
