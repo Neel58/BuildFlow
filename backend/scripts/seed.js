@@ -1,99 +1,40 @@
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
+const { autoSeedDatabase } = require('../src/config/autoSeed');
 const Component = require('../src/models/Component');
 const User = require('../src/models/User');
+const Order = require('../src/models/Order');
+const AssemblyTask = require('../src/models/AssemblyTask');
+const QATask = require('../src/models/QATask');
+const LogisticsTask = require('../src/models/LogisticsTask');
+const AuditLog = require('../src/models/AuditLog');
 
 dotenv.config();
 
-const componentsData = [
-  {
-    name: 'AMD Ryzen 7 7800X3D',
-    category: 'CPU',
-    brand: 'AMD',
-    price: 399,
-    stock: 25,
-    specifications: { socket: 'AM5', powerDraw: 120 }
-  },
-  {
-    name: 'Intel Core i9-14900K',
-    category: 'CPU',
-    brand: 'Intel',
-    price: 589,
-    stock: 15,
-    specifications: { socket: 'LGA1700', powerDraw: 253 }
-  },
-  {
-    name: 'NVIDIA RTX 4090',
-    category: 'GPU',
-    brand: 'NVIDIA',
-    price: 1599,
-    stock: 5,
-    specifications: { powerDraw: 450, gpuLength: 336 }
-  },
-  {
-    name: 'MSI B650 TOMAHAWK WIFI',
-    category: 'Motherboard',
-    brand: 'MSI',
-    price: 219,
-    stock: 30,
-    specifications: { socket: 'AM5', chipset: 'B650', formFactor: 'ATX', ramType: 'DDR5' }
-  },
-  {
-    name: 'Corsair Vengeance 32GB DDR5 6000MHz',
-    category: 'RAM',
-    brand: 'Corsair',
-    price: 115,
-    stock: 50,
-    specifications: { ramType: 'DDR5' }
-  },
-  {
-    name: 'Samsung 990 PRO 2TB',
-    category: 'SSD',
-    brand: 'Samsung',
-    price: 169,
-    stock: 40,
-    specifications: { storageInterface: 'M.2 NVMe' }
-  },
-  {
-    name: 'Corsair RM850x',
-    category: 'PSU',
-    brand: 'Corsair',
-    price: 149,
-    stock: 20,
-    specifications: { wattage: 850 }
-  },
-  {
-    name: 'NZXT H7 Flow',
-    category: 'Cabinet',
-    brand: 'NZXT',
-    price: 129,
-    stock: 15,
-    specifications: { formFactor: 'ATX', maxGpuLength: 400 }
-  },
-  {
-    name: 'DeepCool AK620 Digital',
-    category: 'Cooler',
-    brand: 'DeepCool',
-    price: 59,
-    stock: 20,
-    specifications: { coolerSocketSupport: ['AM5', 'LGA1700'] }
-  }
-];
-
 const seedDB = async () => {
   try {
-    await mongoose.connect(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/buildflow');
-    console.log('MongoDB Connected for Seeding');
+    const connUri = process.env.MONGO_URI || process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/buildflow';
+    await mongoose.connect(connUri);
+    console.log('[BuildFlow Seed] MongoDB Connected for Seeding');
 
-    await Component.deleteMany();
-    console.log('Cleared existing components');
+    console.log('[BuildFlow Seed] Clearing existing collections...');
+    await Promise.all([
+      Component.deleteMany({}),
+      User.deleteMany({}),
+      Order.deleteMany({}),
+      AssemblyTask.deleteMany({}),
+      QATask.deleteMany({}),
+      LogisticsTask.deleteMany({}),
+      AuditLog.deleteMany({})
+    ]);
 
-    await Component.insertMany(componentsData);
-    console.log('Successfully seeded components');
+    console.log('[BuildFlow Seed] Populating complete BuildFlow database...');
+    await autoSeedDatabase();
 
+    console.log('[BuildFlow Seed] Seeding completed successfully!');
     process.exit(0);
   } catch (error) {
-    console.error(`Error with seeding data: ${error}`);
+    console.error(`[BuildFlow Seed] Error: ${error.message}`);
     process.exit(1);
   }
 };

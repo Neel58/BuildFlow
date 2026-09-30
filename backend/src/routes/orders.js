@@ -20,7 +20,7 @@ router.put('/:id/status', authorize('Admin'), orderController.updateOrderStatus)
 router.route('/')
   .post(orderController.checkout)
   .get((req, res, next) => {
-    if (req.user && req.user.role === 'Admin') {
+    if (req.user && ['Admin', 'Logistics', 'Warehouse', 'Technician', 'Inspector'].includes(req.user.role)) {
       return orderController.getAllOrders(req, res, next);
     }
     return orderController.getUserOrders(req, res, next);

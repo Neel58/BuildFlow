@@ -4,28 +4,19 @@ const logisticsController = require('../controllers/logisticsController');
 const { protect } = require('../middleware/auth');
 const { authorize } = require('../middleware/rbac');
 
+// Tracking endpoint is open / customer viewable
+router.get('/:orderId/tracking', logisticsController.getTracking);
+
 router.use(protect);
 
-router.route('/queue')
-  .get(logisticsController.getQueue);
+router.get('/all', authorize('Admin', 'Logistics', 'Warehouse'), logisticsController.getAllLogistics);
+router.get('/queue', authorize('Admin', 'Logistics', 'Warehouse'), logisticsController.getQueue);
 
-router.route('/:orderId/package')
-  .post(authorize('Admin'), logisticsController.confirmPackaging);
+router.post('/:orderId/package', authorize('Admin', 'Logistics', 'Warehouse'), logisticsController.confirmPackaging);
+router.post('/:orderId/shipment', authorize('Admin', 'Logistics'), logisticsController.shipOrder);
+router.post('/:orderId/ship', authorize('Admin', 'Logistics'), logisticsController.shipOrder);
 
-// Support both /shipment (as in api's.md) and /ship
-router.route('/:orderId/shipment')
-  .post(authorize('Admin'), logisticsController.shipOrder);
-
-router.route('/:orderId/ship')
-  .post(authorize('Admin'), logisticsController.shipOrder);
-
-router.route('/:orderId/tracking')
-  .get(logisticsController.getTracking);
-
-router.route('/:orderId/failed-delivery')
-  .put(authorize('Admin'), logisticsController.failedDelivery);
-
-router.route('/:orderId/delivery-status')
-  .put(logisticsController.updateDeliveryStatus);
+router.put('/:orderId/failed-delivery', authorize('Admin', 'Logistics'), logisticsController.failedDelivery);
+router.put('/:orderId/delivery-status', authorize('Admin', 'Logistics'), logisticsController.updateDeliveryStatus);
 
 module.exports = router;

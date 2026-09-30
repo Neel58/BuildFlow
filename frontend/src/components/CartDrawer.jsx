@@ -43,9 +43,9 @@ export default function CartDrawer({ isOpen, onClose, cart, onRemoveItem, onChec
                   <p className="text-[11px] text-slate-400 mt-1">Configure a custom rig or add components to get started.</p>
                 </div>
               ) : (
-                cart.map(item => (
+                cart.map((item, idx) => (
                   <div 
-                    key={item.id}
+                    key={item.id || item.backendId || item._id || `cart-${idx}`}
                     className="p-3.5 bg-slate-50 border border-slate-200/80 rounded-xl flex items-center justify-between gap-3 text-xs"
                   >
                     <div className="space-y-0.5 max-w-[240px]">

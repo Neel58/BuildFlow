@@ -1,9 +1,10 @@
 const mongoose = require('mongoose');
+const { autoSeedDatabase } = require('./autoSeed');
 
 const connectDB = async () => {
-  const connUri = process.env.MONGO_URI || process.env.MONGODB_URI || 'mongodb://localhost:27017/buildflow';
+  const connUri = process.env.MONGO_URI || process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/buildflow';
 
-  mongoose.set('bufferCommands', false); // CRITICAL: fail fast, don't hang
+  mongoose.set('bufferCommands', false); // fail fast if offline, don't hang
 
   const options = {
     autoIndex: true,
@@ -13,9 +14,11 @@ const connectDB = async () => {
 
   try {
     const conn = await mongoose.connect(connUri, options);
-    console.log(`MongoDB Connected: ${conn.connection.host}`);
+    console.log(`[BuildFlow] MongoDB Connected: ${conn.connection.host}`);
+    // Check and populate database if clean / first-time connection
+    await autoSeedDatabase();
   } catch (error) {
-    console.warn(`[AI Studio] MongoDB not connected (${error.message}) — offline fallback active`);
+    console.warn(`[BuildFlow] MongoDB not connected (${error.message}) — resilient in-memory fallback active`);
   }
 };
 

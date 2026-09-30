@@ -7,9 +7,18 @@ exports.getComponents = async (req, res, next) => {
 
     let query = {};
 
-    if (category) query.category = category;
-    if (brand) query.brand = brand;
-    if (search) query.name = { $regex: search, $options: 'i' };
+    if (category && category !== 'ALL') {
+      query.category = { $regex: new RegExp(`^${category}$`, 'i') };
+    }
+    if (brand && brand !== 'ALL') {
+      query.brand = { $regex: new RegExp(`^${brand}$`, 'i') };
+    }
+    if (search) {
+      query.$or = [
+        { name: { $regex: search, $options: 'i' } },
+        { brand: { $regex: search, $options: 'i' } }
+      ];
+    }
     
     if (minPrice || maxPrice) {
       query.price = {};
@@ -21,8 +30,13 @@ exports.getComponents = async (req, res, next) => {
     if (chipset) query['specifications.chipset'] = chipset;
     if (ramType) query['specifications.ramType'] = ramType;
 
-    const components = await Component.find(query);
-    res.json(components);
+    const components = await Component.find(query).lean();
+    const formatted = components.map(c => ({
+      ...c,
+      availableStock: Math.max(0, (c.stock || 0) - (c.reservedStock || 0))
+    }));
+
+    res.json(formatted);
   } catch (error) {
     next(error);
   }
@@ -30,8 +44,9 @@ exports.getComponents = async (req, res, next) => {
 
 exports.getComponentById = async (req, res, next) => {
   try {
-    const component = await Component.findById(req.params.id);
+    const component = await Component.findById(req.params.id).lean();
     if (!component) return res.status(404).json({ message: 'Component not found' });
+    component.availableStock = Math.max(0, (component.stock || 0) - (component.reservedStock || 0));
     res.json(component);
   } catch (error) {
     next(error);
@@ -48,9 +63,8 @@ exports.createComponent = async (req, res, next) => {
       await AuditLog.create({
         action: 'COMPONENT_CREATED',
         actor: req.user._id,
-        targetId: savedComponent._id,
+        targetId: savedComponent._id.toString(),
         entityType: 'Component',
-        newValue: savedComponent,
         description: `Created component ${savedComponent.name}`
       });
     }
@@ -77,7 +91,7 @@ exports.updateComponent = async (req, res, next) => {
       await AuditLog.create({
         action: 'COMPONENT_UPDATED',
         actor: req.user._id,
-        targetId: updatedComponent._id,
+        targetId: updatedComponent._id.toString(),
         entityType: 'Component',
         changes: { previous: oldComponent, updated: updatedComponent },
         description: `Updated component ${updatedComponent.name}`

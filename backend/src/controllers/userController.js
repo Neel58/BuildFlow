@@ -1,6 +1,14 @@
+const mongoose = require('mongoose');
 const User = require('../models/User');
 const AuditLog = require('../models/AuditLog');
 const crypto = require('crypto');
+
+const findUserSafe = (id) => {
+  if (mongoose.Types.ObjectId.isValid(id)) {
+    return User.findOne({ $or: [{ _id: id }, { email: id }] });
+  }
+  return User.findOne({ email: id });
+};
 
 // Request password reset token
 exports.requestPasswordReset = async (req, res, next) => {
@@ -18,13 +26,11 @@ exports.requestPasswordReset = async (req, res, next) => {
     // Generate token
     const resetToken = crypto.randomBytes(20).toString('hex');
 
-    // Hash token and store in database
     user.resetPasswordToken = crypto
       .createHash('sha256')
       .update(resetToken)
       .digest('hex');
 
-    // Set expire to 10 minutes
     user.resetPasswordExpire = Date.now() + 10 * 60 * 1000;
 
     await user.save({ validateBeforeSave: false });
@@ -63,7 +69,6 @@ exports.verifyPasswordReset = async (req, res, next) => {
       return res.status(400).json({ message: 'Invalid or expired password reset token' });
     }
 
-    // Set new password
     user.password = targetPassword;
     user.resetPasswordToken = undefined;
     user.resetPasswordExpire = undefined;
@@ -79,7 +84,7 @@ exports.verifyPasswordReset = async (req, res, next) => {
 // Retrieve user profile
 exports.getUserProfile = async (req, res, next) => {
   try {
-    const user = await User.findById(req.params.id).select('-password -refreshToken');
+    const user = await findUserSafe(req.params.id).select('-password -refreshToken');
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
@@ -92,13 +97,12 @@ exports.getUserProfile = async (req, res, next) => {
 // Update user profile
 exports.updateUserProfile = async (req, res, next) => {
   try {
-    const user = await User.findById(req.params.id);
+    const user = await findUserSafe(req.params.id);
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    // Ensure users can only update their own profile unless Admin
-    if (req.user.role !== 'Admin' && req.user._id.toString() !== req.params.id) {
+    if (req.user.role !== 'Admin' && req.user._id.toString() !== user._id.toString()) {
       return res.status(403).json({ message: 'Not authorized to update this profile' });
     }
 
@@ -124,7 +128,7 @@ exports.getUsers = async (req, res, next) => {
   try {
     const { role } = req.query;
     let query = {};
-    if (role) {
+    if (role && role !== 'ALL') {
       query.role = role;
     }
 
@@ -143,7 +147,7 @@ exports.updateUserRole = async (req, res, next) => {
       return res.status(400).json({ message: 'Role is required' });
     }
 
-    const user = await User.findById(req.params.id);
+    const user = await findUserSafe(req.params.id);
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
@@ -152,11 +156,10 @@ exports.updateUserRole = async (req, res, next) => {
     user.role = role;
     await user.save();
 
-    // Log to AuditLog
     await AuditLog.create({
       action: 'USER_ROLE_CHANGE',
-      actor: req.user._id,
-      targetId: user._id,
+      actor: req.user ? req.user._id : null,
+      targetId: user._id.toString(),
       entityType: 'User',
       changes: { oldRole, newRole: role },
       description: `User ${user.email} role updated from ${oldRole} to ${role}`
@@ -171,7 +174,7 @@ exports.updateUserRole = async (req, res, next) => {
 // Admin: Deactivate user account
 exports.deactivateUser = async (req, res, next) => {
   try {
-    const user = await User.findById(req.params.id);
+    const user = await findUserSafe(req.params.id);
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
@@ -181,8 +184,8 @@ exports.deactivateUser = async (req, res, next) => {
 
     await AuditLog.create({
       action: 'USER_DEACTIVATE',
-      actor: req.user._id,
-      targetId: user._id,
+      actor: req.user ? req.user._id : null,
+      targetId: user._id.toString(),
       entityType: 'User',
       description: `User ${user.email} account deactivated`
     });
@@ -196,14 +199,19 @@ exports.deactivateUser = async (req, res, next) => {
 // Admin: Delete user account
 exports.deleteUser = async (req, res, next) => {
   try {
-    const user = await User.findByIdAndDelete(req.params.id);
+    let user;
+    if (mongoose.Types.ObjectId.isValid(req.params.id)) {
+      user = await User.findByIdAndDelete(req.params.id);
+    } else {
+      user = await User.findOneAndDelete({ email: req.params.id });
+    }
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
 
     await AuditLog.create({
       action: 'USER_DELETE',
-      actor: req.user._id,
+      actor: req.user ? req.user._id : null,
       targetId: req.params.id,
       entityType: 'User',
       description: `User ${user.email} deleted`

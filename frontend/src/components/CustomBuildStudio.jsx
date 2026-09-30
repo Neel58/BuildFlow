@@ -5,10 +5,11 @@ import {
   Layers, Disc, Fan, Box, Zap
 } from 'lucide-react';
 import { formatINR } from '../utils/format';
+import { defaultRig, componentCatalog as fallbackCatalog, presets } from '../data/initialData';
 
 export default function CustomBuildStudio({ onBackToHome, onAddToCart, presetToLoad }) {
-  const [currentBuild, setCurrentBuild] = useState(null);
-  const [componentCatalog, setComponentCatalog] = useState({});
+  const [currentBuild, setCurrentBuild] = useState(defaultRig);
+  const [componentCatalog, setComponentCatalog] = useState(fallbackCatalog);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [activeModalSlot, setActiveModalSlot] = useState(null); // 'CPU', 'Motherboard', etc.
@@ -21,47 +22,80 @@ export default function CustomBuildStudio({ onBackToHome, onAddToCart, presetToL
         const response = await fetch('/api/components');
         if (!response.ok) throw new Error('Unable to load builder components');
         const data = await response.json();
-        const grouped = data.reduce((groups, component) => {
-          const normalized = {
-            ...component,
-            id: String(component._id),
-            specs: component.specifications || {}
-          };
-          (groups[normalized.category] ||= []).push(normalized);
-          return groups;
-        }, {});
-        setComponentCatalog(grouped);
-        setCurrentBuild({
-          cpu: grouped.CPU?.[0],
-          mobo: grouped.Motherboard?.[0],
-          gpu: grouped.GPU?.[0],
-          ram: grouped.RAM?.[0],
-          ssd: grouped.SSD?.[0],
-          psu: grouped.PSU?.[0],
-          cabinet: grouped.Cabinet?.[0],
-          cooler: grouped.Cooler?.[0]
-        });
+        if (Array.isArray(data) && data.length > 0) {
+          const grouped = data.reduce((groups, component) => {
+            const normalized = {
+              ...component,
+              id: String(component._id || component.id),
+              specs: component.specifications || component.specs || {}
+            };
+            (groups[normalized.category] ||= []).push(normalized);
+            return groups;
+          }, {});
+          setComponentCatalog(prev => ({ ...prev, ...grouped }));
+          
+          const urlPreset = new URLSearchParams(window.location.search).get('preset');
+          const effectivePreset = presetToLoad || urlPreset;
+
+          if (effectivePreset && presets[effectivePreset]) {
+            applyPreset(presets[effectivePreset], grouped);
+          } else {
+            setCurrentBuild({
+              cpu: grouped.CPU?.[0] || defaultRig.cpu,
+              mobo: grouped.Motherboard?.[0] || defaultRig.mobo,
+              gpu: grouped.GPU?.[0] || defaultRig.gpu,
+              ram: grouped.RAM?.[0] || defaultRig.ram,
+              ssd: grouped.SSD?.[0] || defaultRig.ssd,
+              psu: grouped.PSU?.[0] || defaultRig.psu,
+              cabinet: grouped.Cabinet?.[0] || defaultRig.cabinet,
+              cooler: grouped.Cooler?.[0] || defaultRig.cooler
+            });
+          }
+        } else {
+          // Use defaultRig and fallbackCatalog
+          const urlPreset = new URLSearchParams(window.location.search).get('preset');
+          const effectivePreset = presetToLoad || urlPreset;
+          if (effectivePreset && presets[effectivePreset]) {
+            applyPreset(presets[effectivePreset], fallbackCatalog);
+          } else {
+            setCurrentBuild(defaultRig);
+          }
+        }
       } catch (loadError) {
-        setError(loadError.message);
+        console.warn('Using local engineering catalog:', loadError.message);
+        const urlPreset = new URLSearchParams(window.location.search).get('preset');
+        const effectivePreset = presetToLoad || urlPreset;
+        if (effectivePreset && presets[effectivePreset]) {
+          applyPreset(presets[effectivePreset], fallbackCatalog);
+        } else {
+          setCurrentBuild(defaultRig);
+        }
       } finally {
         setLoading(false);
       }
     }
+
+    function applyPreset(preset, catalog) {
+      const allComponents = Object.values(catalog).flat();
+      const findComp = (id) => allComponents.find(c => c.id === id || c._id === id);
+      
+      setCurrentBuild({
+        cpu: findComp(preset.slots.cpu) || defaultRig.cpu,
+        mobo: findComp(preset.slots.mobo) || defaultRig.mobo,
+        gpu: findComp(preset.slots.gpu) || defaultRig.gpu,
+        ram: findComp(preset.slots.ram) || defaultRig.ram,
+        ssd: findComp(preset.slots.ssd) || defaultRig.ssd,
+        psu: findComp(preset.slots.psu) || defaultRig.psu,
+        cabinet: findComp(preset.slots.cabinet) || defaultRig.cabinet,
+        cooler: findComp(preset.slots.cooler) || defaultRig.cooler
+      });
+    }
+
     loadComponents();
-  }, []);
+  }, [presetToLoad]);
 
   const resetToDefault = () => {
-    if (!componentCatalog) return;
-    setCurrentBuild({
-      cpu: componentCatalog.CPU?.[0],
-      mobo: componentCatalog.Motherboard?.[0],
-      gpu: componentCatalog.GPU?.[0],
-      ram: componentCatalog.RAM?.[0],
-      ssd: componentCatalog.SSD?.[0],
-      psu: componentCatalog.PSU?.[0],
-      cabinet: componentCatalog.Cabinet?.[0],
-      cooler: componentCatalog.Cooler?.[0]
-    });
+    setCurrentBuild(defaultRig);
   };
 
   if (loading) return <div className="min-h-screen flex items-center justify-center text-sm text-slate-500">Loading builder inventory from the database...</div>;
@@ -440,13 +474,13 @@ export default function CustomBuildStudio({ onBackToHome, onAddToCart, presetToL
                                         JSON.stringify(item.specs).toLowerCase().includes(modalSearch.toLowerCase());
                   return matchesBrand && matchesSearch;
                 })
-                .map(comp => {
+                .map((comp, idx) => {
                   const slotKey = activeModalSlot.toLowerCase() === 'motherboard' ? 'mobo' : activeModalSlot.toLowerCase();
-                  const isCurrent = currentBuild[slotKey]?.id === comp.id;
+                  const isCurrent = (currentBuild[slotKey]?.id === comp.id) || (currentBuild[slotKey]?._id === comp._id);
 
                   return (
                     <div 
-                      key={comp.id}
+                      key={comp._id || comp.id || `slot-comp-${idx}`}
                       className={`p-4 rounded-xl border transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${
                         isCurrent ? 'border-red-500 bg-red-50/40 ring-1 ring-red-500' : 'border-slate-200 bg-white hover:border-slate-300'
                       }`}

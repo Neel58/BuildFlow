@@ -1,5 +1,6 @@
 import React from 'react';
-import { Zap, PhoneCall, ShieldCheck, Mail, MapPin } from 'lucide-react';
+import { Zap, PhoneCall, ShieldCheck, Mail, MapPin, Shield, Archive } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 export default function Footer({ onNavigate }) {
   return (
@@ -62,8 +63,26 @@ export default function Footer({ onNavigate }) {
         </div>
 
         <div>
-          <h4 className="font-bold text-slate-900 uppercase tracking-wider text-[11px] mb-4">Backend & API</h4>
+          <h4 className="font-bold text-slate-900 uppercase tracking-wider text-[11px] mb-4">Operations & Staff</h4>
           <ul className="space-y-2.5">
+            <li>
+              <Link to="/admin" className="text-red-600 font-bold hover:text-red-700 transition-colors flex items-center gap-1.5">
+                <Shield className="w-3.5 h-3.5" />
+                <span>Admin Operations Console</span>
+              </Link>
+            </li>
+            <li>
+              <Link to="/logistics" className="text-slate-800 font-semibold hover:text-red-600 transition-colors flex items-center gap-1.5">
+                <ShieldCheck className="w-3.5 h-3.5 text-blue-600" />
+                <span>Logistics & Dispatch Terminal</span>
+              </Link>
+            </li>
+            <li>
+              <Link to="/warehouse" className="text-slate-800 font-semibold hover:text-amber-600 transition-colors flex items-center gap-1.5">
+                <Archive className="w-3.5 h-3.5 text-amber-600" />
+                <span>Warehouse & Inventory Depot</span>
+              </Link>
+            </li>
             <li><a href="/api" target="_blank" className="hover:text-red-600 transition-colors">REST API Spec</a></li>
             <li><a href="/api/health" target="_blank" className="hover:text-red-600 transition-colors">Service Health (UP)</a></li>
             <li><a href="/api/components" target="_blank" className="hover:text-red-600 transition-colors">Components Endpoint</a></li>

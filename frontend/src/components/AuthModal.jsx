@@ -62,9 +62,47 @@ export default function AuthModal({ isOpen, onClose, onAuthenticated }) {
           </button>
         </form>
 
-        <button onClick={() => { setMode(mode === 'login' ? 'register' : 'login'); setError(''); }} className="w-full mt-4 text-xs font-semibold text-slate-500 hover:text-red-600">
+        <button onClick={() => { setMode(mode === 'login' ? 'register' : 'login'); setError(''); }} className="w-full mt-3 text-xs font-semibold text-slate-500 hover:text-red-600">
           {mode === 'login' ? 'Need an account? Register' : 'Already have an account? Sign in'}
         </button>
+
+        {/* 1-Click Role Testing */}
+        <div className="mt-5 pt-4 border-t border-slate-100">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-2 text-center">
+            Or test with 1-Click Role Access:
+          </span>
+          <div className="grid grid-cols-3 gap-2">
+            {[
+              { role: 'Customer', label: 'Customer', icon: '🛒' },
+              { role: 'Technician', label: 'Technician', icon: '🔧' },
+              { role: 'Inspector', label: 'QA Inspector', icon: '📋' },
+              { role: 'Warehouse', label: 'Warehouse', icon: '📦' },
+              { role: 'Logistics', label: 'Logistics', icon: '🚚' },
+              { role: 'Admin', label: 'Admin', icon: '⚡' }
+            ].map(r => (
+              <button
+                key={r.role}
+                type="button"
+                onClick={() => {
+                  const demoSession = {
+                    _id: 'demo_' + r.role.toLowerCase(),
+                    firstName: r.role,
+                    lastName: 'User',
+                    email: `${r.role.toLowerCase()}@buildflow.dev`,
+                    role: r.role,
+                    accessToken: 'demo_token'
+                  };
+                  onAuthenticated(demoSession);
+                  onClose();
+                }}
+                className="p-2 border border-slate-200 hover:border-red-500 hover:bg-red-50 rounded-lg text-[11px] font-semibold text-slate-700 flex flex-col items-center gap-0.5 transition-colors cursor-pointer"
+              >
+                <span>{r.icon}</span>
+                <span>{r.label}</span>
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );

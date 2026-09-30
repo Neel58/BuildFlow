@@ -4,7 +4,7 @@ const orderItemSchema = new mongoose.Schema({
   itemType: {
     type: String,
     enum: ['Component', 'CustomBuild'],
-    required: true
+    default: 'Component'
   },
   componentId: {
     type: mongoose.Schema.Types.ObjectId,
@@ -14,54 +14,69 @@ const orderItemSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'CustomBuild'
   },
+  name: String,
+  title: String,
   quantity: {
     type: Number,
     required: true,
-    min: 1
+    min: 1,
+    default: 1
   },
   priceAtPurchase: {
     type: Number,
-    required: true
+    default: 0
+  },
+  price: {
+    type: Number,
+    default: 0
   }
-});
-
-// Ensure either component or custom build is provided based on itemType
-orderItemSchema.pre('validate', function() {
-  if (this.itemType === 'Component' && !this.componentId) {
-    throw new Error('Component ID is required when itemType is Component');
-  }
-  if (this.itemType === 'CustomBuild' && !this.customBuildId) {
-    throw new Error('CustomBuild ID is required when itemType is CustomBuild');
-  }
-});
+}, { _id: false });
 
 const orderSchema = new mongoose.Schema({
+  orderId: {
+    type: String,
+    index: true
+  },
   user: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true
+    ref: 'User'
+  },
+  customer: {
+    type: mongoose.Schema.Types.Mixed
   },
   items: [orderItemSchema],
   totalAmount: {
     type: Number,
     required: true
   },
+  totalPrice: {
+    type: Number
+  },
   status: {
     type: String,
     enum: [
       'Pending', 
       'Payment Verified', 
+      'PaymentConfirmed',
       'Warehouse Allocating', 
       'Assembly Queue', 
       'In Assembly',
+      'InAssembly',
       'QA Inspection', 
+      'QualityInspection',
       'QA Failed', 
       'Packaging', 
+      'Ready to Ship',
       'Shipped', 
+      'Out for Delivery',
       'Delivered',
       'Cancelled'
     ],
     default: 'Pending'
+  },
+  paymentStatus: {
+    type: String,
+    default: 'Completed'
   },
   shippingAddress: {
     street: String,
@@ -72,10 +87,13 @@ const orderSchema = new mongoose.Schema({
   },
   paymentIntentId: String,
   trackingNumber: String,
+  carrier: String,
   assemblyNotes: String,
-  qaNotes: String
+  qaNotes: String,
+  notes: String
 }, {
-  timestamps: true
+  timestamps: true,
+  strict: false
 });
 
 module.exports = mongoose.model('Order', orderSchema);

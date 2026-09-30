@@ -2,21 +2,23 @@ const express = require('express');
 const router = express.Router();
 const assemblyController = require('../controllers/assemblyController');
 const { protect } = require('../middleware/auth');
+const { authorize } = require('../middleware/rbac');
 
-// Apply auth middleware to all assembly routes
-// In a real application, you would also add role-based access control here (e.g. restrict to 'technician' and 'admin')
 router.use(protect);
 
-router.route('/queue')
-  .get(assemblyController.getQueue);
+router.get('/tasks', authorize('Admin', 'Technician', 'Inspector'), assemblyController.getTasks);
+router.get('/queue', authorize('Admin', 'Technician', 'Inspector'), assemblyController.getQueue);
+
+router.get('/:orderId', authorize('Admin', 'Technician', 'Inspector'), assemblyController.getTaskDetails);
 
 router.route('/:orderId/assign')
-  .put(assemblyController.assignOrder);
+  .put(authorize('Admin', 'Technician'), assemblyController.assignOrder)
+  .post(authorize('Admin', 'Technician'), assemblyController.assignOrder);
 
-router.route('/:orderId/progress')
-  .post(assemblyController.recordProgress);
-
-router.route('/:orderId/complete')
-  .put(assemblyController.completeAssembly);
+router.post('/:orderId/progress', authorize('Admin', 'Technician'), assemblyController.recordProgress);
+router.put('/:orderId/milestone', authorize('Admin', 'Technician'), assemblyController.updateMilestone);
+router.put('/:orderId/checklist', authorize('Admin', 'Technician'), assemblyController.updateChecklist);
+router.put('/:orderId/bios', authorize('Admin', 'Technician'), assemblyController.updateBios);
+router.put('/:orderId/complete', authorize('Admin', 'Technician'), assemblyController.completeAssembly);
 
 module.exports = router;

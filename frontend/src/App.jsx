@@ -15,7 +15,7 @@ import WarehouseDashboard from './dashboards/WarehouseDashboard';
 import TechnicianDashboard from './dashboards/TechnicianDashboard';
 import InspectorDashboard from './dashboards/InspectorDashboard';
 import LogisticsDashboard from './dashboards/LogisticsDashboard';
-import { apiRequest, clearSession, getAccessToken, getStoredUser } from './utils/api';
+import { apiRequest, clearSession, getAccessToken, getStoredUser, setSession } from './utils/api';
 import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 
 export default function App() {
@@ -149,23 +149,73 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  if (!user) {
-    return <AuthPage onAuthenticated={handleAuthenticated} />;
-  }
-
-  if (user.role && user.role !== 'Customer') {
-    const handleLogout = () => { clearSession(); setUser(null); setCart([]); };
-    
-    switch (user.role) {
-      case 'Admin': return <AdminDashboard user={user} onLogout={handleLogout} />;
-      case 'Warehouse': return <WarehouseDashboard user={user} onLogout={handleLogout} />;
-      case 'Technician': return <TechnicianDashboard user={user} onLogout={handleLogout} />;
-      case 'Inspector': return <InspectorDashboard user={user} onLogout={handleLogout} />;
-      case 'Logistics': return <LogisticsDashboard user={user} onLogout={handleLogout} />;
-      default: 
-        clearSession();
-        return <AuthPage onAuthenticated={handleAuthenticated} />;
+  const handleSelectRole = (role) => {
+    if (role === 'Customer') {
+      const session = {
+        _id: 'usr_customer',
+        firstName: 'Guest',
+        lastName: 'Customer',
+        email: 'customer@buildflow.dev',
+        role: 'Customer',
+        accessToken: 'cust_token'
+      };
+      setSession(session);
+      setUser(session);
+      showToast('Switched to Customer Storefront & PC Studio');
+    } else {
+      const session = {
+        _id: 'usr_' + role.toLowerCase(),
+        firstName: role,
+        lastName: 'Lead',
+        email: `${role.toLowerCase()}@buildflow.dev`,
+        role: role,
+        accessToken: `${role.toLowerCase()}_token`
+      };
+      setSession(session);
+      setUser(session);
+      showToast(`Switched to ${role} Station`);
     }
+  };
+
+  if (user?.role && user.role !== 'Customer') {
+    const handleLogout = () => { clearSession(); setUser(null); setCart([]); };
+    const handleBackToStore = () => handleSelectRole('Customer');
+    
+    return (
+      <div className="flex flex-col min-h-screen">
+        <div className="bg-slate-900 text-white px-4 py-2 text-xs flex items-center justify-between border-b border-slate-800">
+          <div className="flex items-center gap-3">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span>Station Mode: <strong className="text-red-400 uppercase">{user.role}</strong></span>
+            <select
+              value={user.role}
+              onChange={(e) => handleSelectRole(e.target.value)}
+              className="bg-slate-800 border border-slate-700 text-slate-200 text-xs rounded-md px-2 py-0.5 focus:outline-none cursor-pointer"
+            >
+              <option value="Customer">Switch to Customer Store</option>
+              <option value="Admin">Admin Station</option>
+              <option value="Logistics">Logistics Station</option>
+              <option value="Technician">Technician Station</option>
+              <option value="Inspector">Inspector Station</option>
+              <option value="Warehouse">Warehouse Station</option>
+            </select>
+          </div>
+          <button 
+            onClick={handleBackToStore}
+            className="text-xs font-semibold bg-red-600 hover:bg-red-500 text-white px-3 py-1 rounded-lg transition-colors cursor-pointer"
+          >
+            &larr; Switch to Customer Store & Builder
+          </button>
+        </div>
+        <div className="flex-1">
+          {user.role === 'Admin' && <AdminDashboard user={user} onLogout={handleLogout} onBackToStore={handleBackToStore} />}
+          {user.role === 'Warehouse' && <WarehouseDashboard user={user} onLogout={handleLogout} onBackToStore={handleBackToStore} />}
+          {user.role === 'Technician' && <TechnicianDashboard user={user} onLogout={handleLogout} onBackToStore={handleBackToStore} />}
+          {user.role === 'Inspector' && <InspectorDashboard user={user} onLogout={handleLogout} onBackToStore={handleBackToStore} />}
+          {user.role === 'Logistics' && <LogisticsDashboard user={user} onLogout={handleLogout} onBackToStore={handleBackToStore} />}
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -185,6 +235,7 @@ export default function App() {
         onOpenAuth={() => setIsAuthOpen(true)}
         user={user}
         onLogout={() => { clearSession(); setUser(null); setCart([]); navigate('/'); }}
+        onSelectRole={handleSelectRole}
       />
 
       {/* Content Switching via React Router */}
@@ -192,7 +243,11 @@ export default function App() {
         <Routes>
           <Route path="/" element={
             <>
-              <HeroSection onStartCustomBuild={() => navigate('/builder')} />
+              <HeroSection 
+                onStartCustomBuild={() => navigate('/builder')} 
+                onCustomizePreset={navigateToBuilderWithPreset}
+                onAddToCart={handleAddToCart}
+              />
               <PipelineStages />
               <FlagshipBuilds onAddToCart={handleAddToCart} onCustomizePreset={navigateToBuilderWithPreset} />
               <section className="py-14 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white">
@@ -263,6 +318,54 @@ export default function App() {
               </button>
             </div>
           } />
+
+          <Route path="/admin" element={
+            <AdminDashboard 
+              user={user?.role === 'Admin' ? user : { firstName: 'Alex', lastName: 'Vance', email: 'admin@buildflow.dev', role: 'Admin' }} 
+              onLogout={() => { clearSession(); setUser(null); setCart([]); navigate('/'); }} 
+              onBackToStore={() => { handleSelectRole('Customer'); navigate('/'); }} 
+            />
+          } />
+
+          <Route path="/technician" element={
+            <TechnicianDashboard 
+              user={user?.role === 'Technician' ? user : { firstName: 'Marcus', lastName: 'Chen', email: 'technician@buildflow.dev', role: 'Technician', badgeId: 'TECH-409' }} 
+              onLogout={() => { clearSession(); setUser(null); setCart([]); navigate('/'); }} 
+              onBackToStore={() => { handleSelectRole('Customer'); navigate('/'); }} 
+            />
+          } />
+
+          <Route path="/assembly" element={<Navigate to="/technician" replace />} />
+
+          <Route path="/inspector" element={
+            <InspectorDashboard 
+              user={user?.role === 'Inspector' ? user : { firstName: 'Priya', lastName: 'Sharma', email: 'inspector@buildflow.dev', role: 'Inspector' }} 
+              onLogout={() => { clearSession(); setUser(null); setCart([]); navigate('/'); }} 
+              onBackToStore={() => { handleSelectRole('Customer'); navigate('/'); }} 
+            />
+          } />
+
+          <Route path="/qa" element={<Navigate to="/inspector" replace />} />
+
+          <Route path="/logistics" element={
+            <LogisticsDashboard 
+              user={user?.role === 'Logistics' ? user : { firstName: 'Rohan', lastName: 'Verma', email: 'logistics@buildflow.dev', role: 'Logistics' }} 
+              onLogout={() => { clearSession(); setUser(null); setCart([]); navigate('/'); }} 
+              onBackToStore={() => { handleSelectRole('Customer'); navigate('/'); }} 
+            />
+          } />
+
+          <Route path="/dispatch" element={<Navigate to="/logistics" replace />} />
+
+          <Route path="/warehouse" element={
+            <WarehouseDashboard 
+              user={user?.role === 'Warehouse' ? user : { firstName: 'David', lastName: 'Miller', email: 'warehouse@buildflow.dev', role: 'Warehouse' }} 
+              onLogout={() => { clearSession(); setUser(null); setCart([]); navigate('/'); }} 
+              onBackToStore={() => { handleSelectRole('Customer'); navigate('/'); }} 
+            />
+          } />
+
+          <Route path="/inventory" element={<Navigate to="/warehouse" replace />} />
 
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

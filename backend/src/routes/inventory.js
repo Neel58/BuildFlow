@@ -6,6 +6,10 @@ const { authorize } = require('../middleware/rbac');
 
 router.use(protect);
 
+router.get('/picks', authorize('Admin', 'Warehouse', 'Technician'), inventoryController.getPicks);
+router.post('/pick-item', authorize('Admin', 'Warehouse', 'Technician'), inventoryController.pickItem);
+router.post('/intake', authorize('Admin', 'Warehouse'), inventoryController.intakeStock);
+
 router.get('/low-stock', inventoryController.getLowStock);
 router.get('/', inventoryController.getInventory);
 router.get('/:componentId', inventoryController.getComponentInventory);

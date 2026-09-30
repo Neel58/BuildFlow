@@ -6,12 +6,10 @@ const auditLogSchema = new mongoose.Schema({
     required: true
   },
   actor: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
+    type: mongoose.Schema.Types.Mixed
   },
   performedBy: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
+    type: mongoose.Schema.Types.Mixed
   },
   targetId: {
     type: mongoose.Schema.Types.Mixed
@@ -20,7 +18,8 @@ const auditLogSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.Mixed
   },
   entityType: {
-    type: String
+    type: String,
+    default: 'System'
   },
   changes: mongoose.Schema.Types.Mixed,
   previousValue: mongoose.Schema.Types.Mixed,
@@ -29,11 +28,11 @@ const auditLogSchema = new mongoose.Schema({
   ipAddress: String
 }, {
   timestamps: true,
+  strict: false,
   toJSON: { virtuals: true },
   toObject: { virtuals: true }
 });
 
-// Middleware pre-save to mirror actor and performedBy, targetId and targetEntity
 auditLogSchema.pre('save', function() {
   if (this.actor && !this.performedBy) this.performedBy = this.actor;
   if (this.performedBy && !this.actor) this.actor = this.performedBy;

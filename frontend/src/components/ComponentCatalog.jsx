@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { formatINR } from '../utils/format';
 import { Search, ShoppingBag, Layers } from 'lucide-react';
+import { componentCatalog as fallbackCatalog } from '../data/initialData';
 
 export default function ComponentCatalog({ onAddToCart, onConfigureInStudio }) {
   const [selectedCategory, setSelectedCategory] = useState('ALL');
@@ -9,6 +10,19 @@ export default function ComponentCatalog({ onAddToCart, onConfigureInStudio }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  const getFallbackList = () => {
+    return Object.entries(fallbackCatalog).flatMap(([cat, items]) => 
+      items.map(i => ({ 
+        ...i, 
+        _id: i.id, 
+        category: cat, 
+        specifications: i.specs || {},
+        stock: 25,
+        availableStock: 25
+      }))
+    );
+  };
+
   useEffect(() => {
     async function fetchComponents() {
       try {
@@ -16,10 +30,14 @@ export default function ComponentCatalog({ onAddToCart, onConfigureInStudio }) {
         const res = await fetch('/api/components');
         if (!res.ok) throw new Error('Unable to load components');
         const data = await res.json();
-        if (!Array.isArray(data)) throw new Error('Invalid component response');
-        setComponents(data);
+        if (Array.isArray(data) && data.length > 0) {
+          setComponents(data);
+        } else {
+          setComponents(getFallbackList());
+        }
       } catch (err) {
-        setError(err.message);
+        console.warn('Using local components catalog:', err.message);
+        setComponents(getFallbackList());
       } finally {
         setLoading(false);
       }
@@ -28,10 +46,11 @@ export default function ComponentCatalog({ onAddToCart, onConfigureInStudio }) {
   }, []);
 
   const displayList = components.filter(item => {
-    const matchesCategory = selectedCategory === 'ALL' || item.category === selectedCategory;
-    const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          item.brand.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          JSON.stringify(item.specifications).toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesCategory = selectedCategory === 'ALL' || (item.category || '').toUpperCase() === selectedCategory.toUpperCase();
+    const specsStr = JSON.stringify(item.specifications || item.specs || {}).toLowerCase();
+    const matchesSearch = (item.name || '').toLowerCase().includes(searchQuery.toLowerCase()) || 
+                          (item.brand || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          specsStr.includes(searchQuery.toLowerCase());
     return matchesCategory && matchesSearch;
   });
 
@@ -94,9 +113,9 @@ export default function ComponentCatalog({ onAddToCart, onConfigureInStudio }) {
 
         {/* Components Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {displayList.map((item) => (
+          {displayList.map((item, idx) => (
             <div 
-              key={item.id}
+              key={item._id || item.id || `comp-${idx}`}
               className="bg-slate-50 rounded-2xl border border-slate-200 p-6 flex flex-col justify-between hover:border-slate-300 hover:shadow-xs transition-all"
             >
               <div>

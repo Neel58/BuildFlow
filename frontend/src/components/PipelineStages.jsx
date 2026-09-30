@@ -1,5 +1,6 @@
 import React from 'react';
-import { Cpu, ShieldCheck, Flame, Truck } from 'lucide-react';
+import { Cpu, ShieldCheck, Flame, Truck, Award, CheckCircle2 } from 'lucide-react';
+import cleanroomImg from '../assets/images/pc_assembly_cleanroom_1790308326493.jpg';
 
 export default function PipelineStages() {
   const steps = [
@@ -79,6 +80,47 @@ export default function PipelineStages() {
               </div>
             </div>
           ))}
+        </div>
+
+        {/* Cleanroom Lab Visual Showcase */}
+        <div className="mt-12 bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm grid grid-cols-1 lg:grid-cols-12 items-center">
+          <div className="lg:col-span-5 h-64 lg:h-full min-h-[260px] relative">
+            <img 
+              src={cleanroomImg} 
+              alt="BuildFlow Cleanroom Assembly Laboratory" 
+              className="w-full h-full object-cover"
+              onError={(e) => {
+                e.currentTarget.onerror = null;
+                e.currentTarget.src = 'https://images.unsplash.com/photo-1591488320449-011701bb6704?auto=format&fit=crop&w=1000&q=80';
+              }}
+            />
+          </div>
+          <div className="lg:col-span-7 p-8 lg:p-10 space-y-4">
+            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-red-600">
+              <Award className="w-4 h-4" />
+              <span>Cleanroom Laboratory Specs</span>
+            </div>
+            <h3 className="font-display text-2xl font-bold text-slate-900">
+              ESD-Safe Assembly & 32-Point Diagnostic Matrix
+            </h3>
+            <p className="text-sm text-slate-600 leading-relaxed">
+              Every build is assembled in our HEPA-filtered cleanroom with grounded anti-static wriststraps and conductive workbenches. Cable routing is tailored per chassis for maximum unobstructed laminar airflow.
+            </p>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 pt-2">
+              <div className="border border-slate-100 rounded-xl p-3 bg-slate-50">
+                <span className="text-[10px] uppercase font-bold text-slate-400 block">Thermal Testing</span>
+                <span className="text-sm font-bold text-slate-800">48-Hr Burn-in</span>
+              </div>
+              <div className="border border-slate-100 rounded-xl p-3 bg-slate-50">
+                <span className="text-[10px] uppercase font-bold text-slate-400 block">Memory Tuning</span>
+                <span className="text-sm font-bold text-slate-800">EXPO / XMP</span>
+              </div>
+              <div className="border border-slate-100 rounded-xl p-3 bg-slate-50">
+                <span className="text-[10px] uppercase font-bold text-slate-400 block">Insured Packaging</span>
+                <span className="text-sm font-bold text-slate-800">Instapak Foam</span>
+              </div>
+            </div>
+          </div>
         </div>
 
       </div>

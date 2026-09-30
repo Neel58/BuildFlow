@@ -88,15 +88,22 @@ const requiredRoutes = [
   { method: 'POST', path: '/api/inventory/release' },
   { method: 'GET', path: '/api/inventory/low-stock' },
 
+  { method: 'GET', path: '/api/inventory/picks' },
+  { method: 'POST', path: '/api/inventory/intake' },
+  { method: 'POST', path: '/api/inventory/pick-item' },
+
+  { method: 'GET', path: '/api/assembly/tasks' },
   { method: 'GET', path: '/api/assembly/queue' },
   { method: 'PUT', path: `/api/assembly/${mockId}/assign` },
   { method: 'POST', path: `/api/assembly/${mockId}/progress` },
   { method: 'PUT', path: `/api/assembly/${mockId}/complete` },
 
+  { method: 'GET', path: '/api/qa/tasks' },
   { method: 'GET', path: '/api/qa/queue' },
   { method: 'POST', path: `/api/qa/${mockId}/report` },
   { method: 'PUT', path: `/api/qa/${mockId}/decision` },
 
+  { method: 'GET', path: '/api/logistics/all' },
   { method: 'POST', path: `/api/logistics/${mockId}/package` },
   { method: 'POST', path: `/api/logistics/${mockId}/shipment` },
   { method: 'GET', path: `/api/logistics/${mockId}/tracking` },
