@@ -16,9 +16,11 @@ import TechnicianDashboard from './dashboards/TechnicianDashboard';
 import InspectorDashboard from './dashboards/InspectorDashboard';
 import LogisticsDashboard from './dashboards/LogisticsDashboard';
 import { apiRequest, clearSession, getAccessToken, getStoredUser } from './utils/api';
+import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 
 export default function App() {
-  const [currentRoute, setCurrentRoute] = useState('home');
+  const navigate = useNavigate();
+  const location = useLocation();
   const [activePreset, setActivePreset] = useState(null);
   const [cart, setCart] = useState([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -27,29 +29,6 @@ export default function App() {
   const [notification, setNotification] = useState(null);
   const [user, setUser] = useState(getStoredUser);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
-
-  // Initialize Route & Preset from URL
-  useEffect(() => {
-    const handleUrlSync = () => {
-      const path = window.location.pathname;
-      const params = new URLSearchParams(window.location.search);
-      const presetParam = params.get('preset');
-
-      if (presetParam) {
-        setActivePreset(presetParam);
-      }
-
-      if (path === '/builder' || path === '/custom-build' || path.startsWith('/builder')) {
-        setCurrentRoute('builder');
-      } else {
-        setCurrentRoute('home');
-      }
-    };
-
-    handleUrlSync();
-    window.addEventListener('popstate', handleUrlSync);
-    return () => window.removeEventListener('popstate', handleUrlSync);
-  }, []);
 
   useEffect(() => {
     if (!getAccessToken()) return;
@@ -160,15 +139,13 @@ export default function App() {
 
   const navigateToBuilderWithPreset = (presetKey) => {
     setActivePreset(presetKey);
-    setCurrentRoute('builder');
-    window.history.pushState({}, '', `/builder?preset=${presetKey}`);
+    navigate(`/builder?preset=${presetKey}`);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const navigateToRoute = (route) => {
-    setCurrentRoute(route);
-    const targetUrl = route === 'builder' ? '/builder' : '/';
-    window.history.pushState({}, '', targetUrl);
+    if (route === 'builder') navigate('/builder');
+    else navigate('/');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -203,63 +180,92 @@ export default function App() {
 
       {/* Main Navigation */}
       <Navbar 
-        currentRoute={currentRoute}
-        setCurrentRoute={navigateToRoute}
         cartCount={cart.reduce((sum, i) => sum + (i.quantity || 1), 0)}
         onOpenCart={() => setIsCartOpen(true)}
         onOpenAuth={() => setIsAuthOpen(true)}
         user={user}
-        onLogout={() => { clearSession(); setUser(null); setCart([]); }}
+        onLogout={() => { clearSession(); setUser(null); setCart([]); navigate('/'); }}
       />
 
-      {/* Content Switching */}
+      {/* Content Switching via React Router */}
       <main className="flex-1">
-        {currentRoute === 'builder' ? (
-          <CustomBuildStudio 
-            onBackToHome={() => navigateToRoute('home')}
-            onAddToCart={handleAddToCart}
-            presetToLoad={activePreset}
-          />
-        ) : (
-          <>
-            <HeroSection 
-              onStartCustomBuild={() => navigateToRoute('builder')}
-            />
-
-            <PipelineStages />
-
-            <FlagshipBuilds 
-              onAddToCart={handleAddToCart}
-              onCustomizePreset={navigateToBuilderWithPreset}
-            />
-
-            {/* Quick Studio Callout Banner on Homepage */}
-            <section className="py-14 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white">
-              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row md:items-center justify-between gap-6">
-                <div>
-                  <span className="text-xs font-bold uppercase tracking-wider text-red-400 block mb-1">Interactive Studio</span>
-                  <h3 className="font-display text-2xl sm:text-3xl font-bold">
-                    Need Custom Specs with 8 Dedicated Hardware Slots?
-                  </h3>
-                  <p className="text-sm text-slate-300 mt-1 max-w-xl">
-                    Configure AM5/LGA1700 sockets, DDR5 speeds, PCIe 5.0 storage, chassis clearances, and PSU wattage headroom in real time with Indian Rupee (₹) pricing.
-                  </p>
+        <Routes>
+          <Route path="/" element={
+            <>
+              <HeroSection onStartCustomBuild={() => navigate('/builder')} />
+              <PipelineStages />
+              <FlagshipBuilds onAddToCart={handleAddToCart} onCustomizePreset={navigateToBuilderWithPreset} />
+              <section className="py-14 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row md:items-center justify-between gap-6">
+                  <div>
+                    <span className="text-xs font-bold uppercase tracking-wider text-red-400 block mb-1">Interactive Studio</span>
+                    <h3 className="font-display text-2xl sm:text-3xl font-bold">
+                      Need Custom Specs with 8 Dedicated Hardware Slots?
+                    </h3>
+                    <p className="text-sm text-slate-300 mt-1 max-w-xl">
+                      Configure AM5/LGA1700 sockets, DDR5 speeds, PCIe 5.0 storage, chassis clearances, and PSU wattage headroom in real time with Indian Rupee (₹) pricing.
+                    </p>
+                  </div>
+                  <button 
+                    onClick={() => navigate('/builder')}
+                    className="px-6 py-3.5 text-sm font-semibold text-white bg-red-600 hover:bg-red-500 active:bg-red-700 rounded-xl shadow-lg shadow-red-600/30 transition-all whitespace-nowrap cursor-pointer shrink-0"
+                  >
+                    Start Custom Build Studio &rarr;
+                  </button>
                 </div>
-                <button 
-                  onClick={() => navigateToRoute('builder')}
-                  className="px-6 py-3.5 text-sm font-semibold text-white bg-red-600 hover:bg-red-500 active:bg-red-700 rounded-xl shadow-lg shadow-red-600/30 transition-all whitespace-nowrap cursor-pointer shrink-0"
-                >
-                  Start Custom Build Studio &rarr;
-                </button>
-              </div>
-            </section>
+              </section>
+              <ComponentCatalog onAddToCart={handleAddToCart} onConfigureInStudio={() => navigate('/builder')} />
+            </>
+          } />
 
-            <ComponentCatalog 
+          <Route path="/builder" element={
+            <CustomBuildStudio 
+              onBackToHome={() => navigate('/')}
               onAddToCart={handleAddToCart}
-              onConfigureInStudio={() => navigateToRoute('builder')}
+              presetToLoad={activePreset}
             />
-          </>
-        )}
+          } />
+
+          <Route path="/components" element={
+            <div className="pt-8">
+              <ComponentCatalog onAddToCart={handleAddToCart} onConfigureInStudio={() => navigate('/builder')} />
+            </div>
+          } />
+
+          <Route path="/workstations" element={
+            <div className="pt-8">
+              <FlagshipBuilds onAddToCart={handleAddToCart} onCustomizePreset={navigateToBuilderWithPreset} />
+            </div>
+          } />
+
+          <Route path="/assembly-qa" element={
+            <div className="pt-8">
+              <PipelineStages />
+            </div>
+          } />
+
+          <Route path="/orders" element={
+            <div className="py-20 flex flex-col items-center justify-center text-center">
+              <h2 className="text-3xl font-bold text-slate-900 mb-4">Track Your Orders</h2>
+              <p className="text-slate-600 mb-8 max-w-md">Enter your tracking number or view your recent orders to see their current assembly and shipping status.</p>
+              <button onClick={() => setIsTrackingOpen(true)} className="px-6 py-3 bg-slate-900 text-white rounded-xl shadow-md hover:bg-slate-800 font-semibold">
+                Open Tracking Tool
+              </button>
+            </div>
+          } />
+
+          <Route path="/checkout" element={
+            <div className="py-20 flex flex-col items-center justify-center text-center max-w-2xl mx-auto px-4">
+              <h2 className="text-3xl font-bold text-slate-900 mb-4">Complete Your Order</h2>
+              <p className="text-slate-600 mb-8">Review your items and proceed with secure payment to queue your custom build for assembly.</p>
+              <button onClick={handleCheckout} className="px-8 py-4 bg-red-600 text-white rounded-xl shadow-xl shadow-red-600/20 hover:bg-red-700 font-bold text-lg w-full sm:w-auto">
+                Confirm & Pay Securely
+              </button>
+            </div>
+          } />
+
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
       </main>
 
       {/* Cart Drawer */}

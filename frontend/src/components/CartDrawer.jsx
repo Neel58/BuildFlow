@@ -1,8 +1,10 @@
 import React from 'react';
 import { formatINR } from '../utils/format';
 import { X, Trash2, ArrowRight, PackageOpen, CheckCircle } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 export default function CartDrawer({ isOpen, onClose, cart, onRemoveItem, onCheckout }) {
+  const navigate = useNavigate();
   if (!isOpen) return null;
 
   const subtotal = cart.reduce((sum, item) => sum + (item.price * (item.quantity || 1)), 0);
@@ -77,7 +79,10 @@ export default function CartDrawer({ isOpen, onClose, cart, onRemoveItem, onChec
               Clean-room hand assembly, 48-hr QA stress testing, and insured express delivery included free of charge.
             </p>
             <button 
-              onClick={onCheckout}
+              onClick={() => {
+                onClose();
+                navigate('/checkout');
+              }}
               disabled={cart.length === 0}
               className={`w-full py-3.5 px-4 text-sm font-semibold text-white rounded-xl shadow-sm transition-all flex items-center justify-center gap-2 cursor-pointer ${
                 cart.length === 0 ? 'bg-slate-300 cursor-not-allowed' : 'bg-red-600 hover:bg-red-700 active:bg-red-800 shadow-red-600/25'
