@@ -17,6 +17,122 @@ import InspectorDashboard from './dashboards/InspectorDashboard';
 import LogisticsDashboard from './dashboards/LogisticsDashboard';
 import { apiRequest, clearSession, getAccessToken, getStoredUser, setSession } from './utils/api';
 import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
+import { Lock, ShieldAlert } from 'lucide-react';
+
+export const getRoleDestination = (role) => {
+  switch (role) {
+    case 'Admin': return '/admin';
+    case 'Technician': return '/technician';
+    case 'Inspector': return '/inspector';
+    case 'Warehouse': return '/warehouse';
+    case 'Logistics': return '/logistics';
+    case 'Customer':
+    default: return '/';
+  }
+};
+
+function RoleProtectedRoute({ user, allowedRoles, onOpenAuth, onLogout, children }) {
+  const navigate = useNavigate();
+
+  if (!user) {
+    return (
+      <div className="min-h-[70vh] flex items-center justify-center p-4">
+        <div className="max-w-md w-full bg-white rounded-2xl p-8 border border-slate-200 shadow-xl text-center">
+          <div className="w-14 h-14 mx-auto mb-4 rounded-2xl bg-red-50 flex items-center justify-center text-red-600">
+            <Lock className="w-7 h-7" />
+          </div>
+          <h2 className="font-display text-2xl font-bold text-slate-900 mb-2">Station Access Required</h2>
+          <p className="text-sm text-slate-500 mb-6">
+            This operational console requires authenticated station credentials with role: <strong className="text-slate-800">{allowedRoles.join(' or ')}</strong>.
+          </p>
+          <div className="flex flex-col gap-2.5">
+            <button 
+              onClick={onOpenAuth}
+              className="w-full py-3 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-xl transition-colors cursor-pointer shadow-md shadow-red-600/20"
+            >
+              Sign In to Station
+            </button>
+            <button 
+              onClick={() => navigate('/')}
+              className="w-full py-2.5 border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold rounded-xl text-sm transition-colors cursor-pointer"
+            >
+              Back to Store
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!allowedRoles.includes(user.role)) {
+    const userDestination = getRoleDestination(user.role);
+    return (
+      <div className="min-h-[70vh] flex items-center justify-center p-4">
+        <div className="max-w-md w-full bg-white rounded-2xl p-8 border border-amber-200 shadow-xl text-center">
+          <div className="w-14 h-14 mx-auto mb-4 rounded-2xl bg-amber-50 flex items-center justify-center text-amber-600">
+            <ShieldAlert className="w-7 h-7" />
+          </div>
+          <span className="text-[11px] font-bold uppercase tracking-wider text-amber-600 bg-amber-50 px-2.5 py-1 rounded-full border border-amber-200">
+            Access Restricted (RBAC)
+          </span>
+          <h2 className="font-display text-2xl font-bold text-slate-900 mt-3 mb-2">Unauthorized Station</h2>
+          <p className="text-sm text-slate-500 mb-2">
+            You are currently signed in as <strong className="text-slate-900 font-bold">{user.role}</strong> ({user.email}).
+          </p>
+          <p className="text-xs text-slate-400 mb-6">
+            This console is restricted to <span className="font-semibold text-slate-700">{allowedRoles.join(' or ')}</span> personnel only.
+          </p>
+          <div className="flex flex-col gap-2.5">
+            {user.role !== 'Customer' && (
+              <button 
+                onClick={() => navigate(userDestination)}
+                className="w-full py-3 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-xl transition-colors cursor-pointer text-sm shadow-md"
+              >
+                Go to Your Station ({user.role}) &rarr;
+              </button>
+            )}
+            <button 
+              onClick={() => navigate('/')}
+              className="w-full py-2.5 border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold rounded-xl text-sm transition-colors cursor-pointer"
+            >
+              Return to Storefront
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-col min-h-screen">
+      {/* Station Mode Header Banner */}
+      <div className="bg-slate-900 text-white px-4 py-2.5 text-xs flex items-center justify-between border-b border-slate-800">
+        <div className="flex items-center gap-3">
+          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span>Station Mode: <strong className="text-red-400 uppercase tracking-wide">{user.role}</strong></span>
+          <span className="text-slate-500 hidden sm:inline">({user.email})</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <button 
+            onClick={() => navigate('/')}
+            className="text-xs font-semibold bg-slate-700 hover:bg-slate-600 text-white px-3 py-1 rounded-lg transition-colors cursor-pointer"
+          >
+            &larr; Store
+          </button>
+          <button 
+            onClick={onLogout}
+            className="text-xs font-semibold bg-red-600 hover:bg-red-500 text-white px-3 py-1 rounded-lg transition-colors cursor-pointer"
+          >
+            Sign Out
+          </button>
+        </div>
+      </div>
+      <div className="flex-1">
+        {children}
+      </div>
+    </div>
+  );
+}
 
 export default function App() {
   const navigate = useNavigate();
@@ -53,7 +169,11 @@ export default function App() {
       price: item.componentId?.price || item.customBuildId?.totalPrice || 0,
       quantity: item.quantity,
       itemType: item.itemType
-    }))));
+    })))).catch(() => {});
+    
+    showToast(`Signed in as ${session.firstName || ''} (${session.role || 'Customer'})`);
+    const destination = getRoleDestination(session.role);
+    navigate(destination);
   };
 
   const showToast = (msg) => {
@@ -149,54 +269,16 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // RequireRole: renders children only if user has the required role, else redirects to store.
-  // This is defense-in-depth — user.role only comes from a real verified login (real JWT).
-  const RequireRole = ({ role, children }) => {
-    if (!user || user.role !== role) {
-      navigate('/');
-      return null;
-    }
-    return children;
+  const handleLogout = () => { 
+    clearSession(); 
+    setUser(null); 
+    setCart([]); 
+    navigate('/'); 
+    showToast('Signed out successfully.');
   };
-
-  const handleLogout = () => { clearSession(); setUser(null); setCart([]); navigate('/'); };
-  const handleBackToStore = () => { navigate('/'); };
-
-  if (user?.role && user.role !== 'Customer') {
-    return (
-      <div className="flex flex-col min-h-screen">
-        {/* Read-only station header — role comes from real JWT, cannot be changed here */}
-        <div className="bg-slate-900 text-white px-4 py-2 text-xs flex items-center justify-between border-b border-slate-800">
-          <div className="flex items-center gap-3">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-            <span>Station Mode: <strong className="text-red-400 uppercase">{user.role}</strong></span>
-            <span className="text-slate-500">({user.email})</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <button 
-              onClick={handleBackToStore}
-              className="text-xs font-semibold bg-slate-700 hover:bg-slate-600 text-white px-3 py-1 rounded-lg transition-colors cursor-pointer"
-            >
-              &larr; Store
-            </button>
-            <button 
-              onClick={handleLogout}
-              className="text-xs font-semibold bg-red-600 hover:bg-red-500 text-white px-3 py-1 rounded-lg transition-colors cursor-pointer"
-            >
-              Sign Out
-            </button>
-          </div>
-        </div>
-        <div className="flex-1">
-          {user.role === 'Admin' && <AdminDashboard user={user} onLogout={handleLogout} onBackToStore={handleBackToStore} />}
-          {user.role === 'Warehouse' && <WarehouseDashboard user={user} onLogout={handleLogout} onBackToStore={handleBackToStore} />}
-          {user.role === 'Technician' && <TechnicianDashboard user={user} onLogout={handleLogout} onBackToStore={handleBackToStore} />}
-          {user.role === 'Inspector' && <InspectorDashboard user={user} onLogout={handleLogout} onBackToStore={handleBackToStore} />}
-          {user.role === 'Logistics' && <LogisticsDashboard user={user} onLogout={handleLogout} onBackToStore={handleBackToStore} />}
-        </div>
-      </div>
-    );
-  }
+  const handleBackToStore = () => { 
+    navigate('/'); 
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-50 text-slate-800 antialiased selection:bg-red-500 selection:text-white">
@@ -298,53 +380,45 @@ export default function App() {
             </div>
           } />
 
+          {/* CURATED ROLE-BASED OPERATIONAL STATIONS (RBAC PROTECTED) */}
           <Route path="/admin" element={
-            <AdminDashboard 
-              user={user?.role === 'Admin' ? user : { firstName: 'Alex', lastName: 'Vance', email: 'admin@buildflow.dev', role: 'Admin' }} 
-              onLogout={() => { clearSession(); setUser(null); setCart([]); navigate('/'); }} 
-              onBackToStore={() => { handleSelectRole('Customer'); navigate('/'); }} 
-            />
+            <RoleProtectedRoute user={user} allowedRoles={['Admin']} onOpenAuth={() => setIsAuthOpen(true)} onLogout={handleLogout}>
+              <AdminDashboard user={user} onLogout={handleLogout} onBackToStore={handleBackToStore} />
+            </RoleProtectedRoute>
           } />
 
           <Route path="/technician" element={
-            <TechnicianDashboard 
-              user={user?.role === 'Technician' ? user : { firstName: 'Marcus', lastName: 'Chen', email: 'technician@buildflow.dev', role: 'Technician', badgeId: 'TECH-409' }} 
-              onLogout={() => { clearSession(); setUser(null); setCart([]); navigate('/'); }} 
-              onBackToStore={() => { handleSelectRole('Customer'); navigate('/'); }} 
-            />
+            <RoleProtectedRoute user={user} allowedRoles={['Technician', 'Admin']} onOpenAuth={() => setIsAuthOpen(true)} onLogout={handleLogout}>
+              <TechnicianDashboard user={user} onLogout={handleLogout} onBackToStore={handleBackToStore} />
+            </RoleProtectedRoute>
           } />
-
           <Route path="/assembly" element={<Navigate to="/technician" replace />} />
 
           <Route path="/inspector" element={
-            <InspectorDashboard 
-              user={user?.role === 'Inspector' ? user : { firstName: 'Priya', lastName: 'Sharma', email: 'inspector@buildflow.dev', role: 'Inspector' }} 
-              onLogout={() => { clearSession(); setUser(null); setCart([]); navigate('/'); }} 
-              onBackToStore={() => { handleSelectRole('Customer'); navigate('/'); }} 
-            />
+            <RoleProtectedRoute user={user} allowedRoles={['Inspector', 'Admin']} onOpenAuth={() => setIsAuthOpen(true)} onLogout={handleLogout}>
+              <InspectorDashboard user={user} onLogout={handleLogout} onBackToStore={handleBackToStore} />
+            </RoleProtectedRoute>
           } />
-
           <Route path="/qa" element={<Navigate to="/inspector" replace />} />
 
-          <Route path="/logistics" element={
-            <LogisticsDashboard 
-              user={user?.role === 'Logistics' ? user : { firstName: 'Rohan', lastName: 'Verma', email: 'logistics@buildflow.dev', role: 'Logistics' }} 
-              onLogout={() => { clearSession(); setUser(null); setCart([]); navigate('/'); }} 
-              onBackToStore={() => { handleSelectRole('Customer'); navigate('/'); }} 
-            />
+          <Route path="/warehouse" element={
+            <RoleProtectedRoute user={user} allowedRoles={['Warehouse', 'Admin']} onOpenAuth={() => setIsAuthOpen(true)} onLogout={handleLogout}>
+              <WarehouseDashboard user={user} onLogout={handleLogout} onBackToStore={handleBackToStore} />
+            </RoleProtectedRoute>
           } />
+          <Route path="/inventory" element={<Navigate to="/warehouse" replace />} />
 
+          <Route path="/logistics" element={
+            <RoleProtectedRoute user={user} allowedRoles={['Logistics', 'Admin']} onOpenAuth={() => setIsAuthOpen(true)} onLogout={handleLogout}>
+              <LogisticsDashboard user={user} onLogout={handleLogout} onBackToStore={handleBackToStore} />
+            </RoleProtectedRoute>
+          } />
           <Route path="/dispatch" element={<Navigate to="/logistics" replace />} />
 
-          <Route path="/warehouse" element={
-            <WarehouseDashboard 
-              user={user?.role === 'Warehouse' ? user : { firstName: 'David', lastName: 'Miller', email: 'warehouse@buildflow.dev', role: 'Warehouse' }} 
-              onLogout={() => { clearSession(); setUser(null); setCart([]); navigate('/'); }} 
-              onBackToStore={() => { handleSelectRole('Customer'); navigate('/'); }} 
-            />
-          } />
-
-          <Route path="/inventory" element={<Navigate to="/warehouse" replace />} />
+          {/* Full Page Dedicated Auth Routes */}
+          <Route path="/auth" element={<AuthPage onAuthenticated={handleAuthenticated} />} />
+          <Route path="/login" element={<AuthPage onAuthenticated={handleAuthenticated} />} />
+          <Route path="/register" element={<AuthPage onAuthenticated={handleAuthenticated} />} />
 
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

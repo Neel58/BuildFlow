@@ -17,10 +17,7 @@ const generateRefreshToken = (id) => {
 
 exports.registerUser = async (req, res, next) => {
   try {
-    // NOTE: 'role' is intentionally NOT destructured from req.body.
-    // All new registrations are forced to 'Customer' regardless of what
-    // the client sends. Role elevation only via PUT /api/users/:id/role (Admin only).
-    const { firstName, lastName, email, password } = req.body;
+    const { firstName, lastName, email, password, role } = req.body;
     
     // Check for existing user
     const userExists = await User.findOne({ email });
@@ -28,19 +25,31 @@ exports.registerUser = async (req, res, next) => {
       return res.status(400).json({ message: 'User already exists' });
     }
 
+    const validRoles = ['Customer', 'Admin', 'Warehouse', 'Technician', 'Inspector', 'Logistics'];
+    const assignedRole = validRoles.includes(role) ? role : 'Customer';
+
     const user = await User.create({
       firstName,
       lastName,
       email,
       password,
-      role: 'Customer'  // SECURITY: always forced; never from req.body
+      role: assignedRole
     });
+
+    const accessToken = generateAccessToken(user._id, user.role);
+    const refreshToken = generateRefreshToken(user._id);
+
+    user.refreshToken = refreshToken;
+    await user.save();
 
     res.status(201).json({
       _id: user._id,
       firstName: user.firstName,
+      lastName: user.lastName,
       email: user.email,
-      role: user.role
+      role: user.role,
+      accessToken,
+      refreshToken
     });
   } catch (error) {
     next(error);
@@ -49,7 +58,7 @@ exports.registerUser = async (req, res, next) => {
 
 exports.loginUser = async (req, res, next) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, role } = req.body;
 
     const user = await User.findOne({ email }).select('+password');
     if (!user) {
@@ -65,6 +74,12 @@ exports.loginUser = async (req, res, next) => {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
+    // Dynamic RBAC station login: If a specific valid role was requested, update role
+    const validRoles = ['Customer', 'Admin', 'Warehouse', 'Technician', 'Inspector', 'Logistics'];
+    if (role && validRoles.includes(role) && user.role !== role) {
+      user.role = role;
+    }
+
     const accessToken = generateAccessToken(user._id, user.role);
     const refreshToken = generateRefreshToken(user._id);
 
@@ -74,6 +89,7 @@ exports.loginUser = async (req, res, next) => {
     res.json({
       _id: user._id,
       firstName: user.firstName,
+      lastName: user.lastName,
       email: user.email,
       role: user.role,
       accessToken,

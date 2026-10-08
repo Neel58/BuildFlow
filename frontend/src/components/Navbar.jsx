@@ -51,21 +51,37 @@ export default function Navbar({ cartCount, onOpenCart, onOpenAuth, user, onLogo
         {/* Zone 3: Actions */}
         <div className="flex items-center gap-3 sm:gap-4">
           
-          {/* Read-only Station Role Badge (only shown when logged in) */}
-          {currentRole && (
-            <div className="flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-lg border border-slate-200 bg-slate-50 text-slate-700">
+          {/* Role / Station Badge & Portal Link */}
+          {currentRole && currentRole !== 'Customer' ? (
+            <Link 
+              to={
+                currentRole === 'Admin' ? '/admin' :
+                currentRole === 'Technician' ? '/technician' :
+                currentRole === 'Inspector' ? '/inspector' :
+                currentRole === 'Warehouse' ? '/warehouse' :
+                currentRole === 'Logistics' ? '/logistics' : '/'
+              }
+              className="flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-lg border border-red-200 bg-red-50 text-red-700 hover:bg-red-100 hover:border-red-300 transition-colors cursor-pointer shadow-sm"
+              title="Open your station console"
+            >
               <Shield className="w-3.5 h-3.5 text-red-600" />
-              <span className="hidden md:inline">Station:</span>
-              <span className="text-red-600 font-bold">{currentRole}</span>
+              <span>Station: <strong>{currentRole}</strong></span>
+              <span className="text-[10px] bg-red-600 text-white font-bold px-1.5 py-0.5 rounded ml-1">PORTAL &rarr;</span>
+            </Link>
+          ) : currentRole ? (
+            <div className="flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-lg border border-slate-200 bg-slate-50 text-slate-700">
+              <User className="w-3.5 h-3.5 text-slate-500" />
+              <span className="hidden md:inline">User:</span>
+              <span className="text-slate-900 font-bold">{user?.firstName || 'Customer'}</span>
             </div>
-          )}
+          ) : null}
 
           {user ? (
-            <button onClick={onLogout} className="hidden sm:block text-xs font-semibold text-slate-600 hover:text-red-600">
+            <button onClick={onLogout} className="hidden sm:block text-xs font-semibold text-slate-600 hover:text-red-600 cursor-pointer">
               Sign out
             </button>
           ) : (
-            <button onClick={onOpenAuth} className="hidden sm:block text-xs font-semibold text-slate-600 hover:text-red-600">
+            <button onClick={onOpenAuth} className="hidden sm:block text-xs font-semibold text-slate-600 hover:text-red-600 cursor-pointer">
               Sign in
             </button>
           )}

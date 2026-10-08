@@ -77,7 +77,19 @@ export default function CustomBuildStudio({ onBackToHome, onAddToCart, presetToL
 
     function applyPreset(preset, catalog) {
       const allComponents = Object.values(catalog).flat();
-      const findComp = (id) => allComponents.find(c => c.id === id || c._id === id);
+      const allFallback = Object.values(fallbackCatalog).flat();
+      
+      const findComp = (id) => {
+        let found = allComponents.find(c => c.id === id || c._id === id);
+        if (found) return found;
+        
+        const mockComp = allFallback.find(c => c.id === id);
+        if (mockComp) {
+          found = allComponents.find(c => c.name === mockComp.name);
+          if (found) return found;
+        }
+        return undefined;
+      };
       
       setCurrentBuild({
         cpu: findComp(preset.slots.cpu) || defaultRig.cpu,

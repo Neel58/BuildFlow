@@ -49,10 +49,14 @@ export async function login(credentials) {
 }
 
 export async function register(details) {
-  return apiRequest('/api/auth/register', {
+  const session = await apiRequest('/api/auth/register', {
     method: 'POST',
     body: JSON.stringify(details)
   });
+  if (session && session.accessToken) {
+    setSession(session);
+  }
+  return session;
 }
 
 export async function logout() {
