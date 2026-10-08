@@ -12,6 +12,8 @@ import CartDrawer from './components/CartDrawer';
 import Footer from './components/Footer';
 import AuthModal from './components/AuthModal';
 import AuthPage from './components/AuthPage';
+import AboutUs from './components/AboutUs';
+import FAQ from './components/FAQ';
 import AdminDashboard from './dashboards/AdminDashboard';
 import WarehouseDashboard from './dashboards/WarehouseDashboard';
 import TechnicianDashboard from './dashboards/TechnicianDashboard';
@@ -384,6 +386,14 @@ export default function App() {
               setActiveTrackingId(id);
               setIsTrackingOpen(true);
             }} />
+          } />
+
+          <Route path="/about" element={
+            <AboutUs />
+          } />
+
+          <Route path="/faq" element={
+            <FAQ />
           } />
 
           {/* CURATED ROLE-BASED OPERATIONAL STATIONS (RBAC PROTECTED) */}

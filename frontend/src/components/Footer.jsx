@@ -63,6 +63,22 @@ export default function Footer({ onNavigate }) {
         </div>
 
         <div>
+          <h4 className="font-bold text-slate-900 uppercase tracking-wider text-[11px] mb-4">Company</h4>
+          <ul className="space-y-2.5">
+            <li>
+              <Link to="/about" className="hover:text-red-600 transition-colors cursor-pointer">
+                About Us
+              </Link>
+            </li>
+            <li>
+              <Link to="/faq" className="hover:text-red-600 transition-colors cursor-pointer">
+                FAQ
+              </Link>
+            </li>
+          </ul>
+        </div>
+
+        <div>
           <h4 className="font-bold text-slate-900 uppercase tracking-wider text-[11px] mb-4">Operations & Staff</h4>
           <ul className="space-y-2.5">
             <li>
@@ -83,9 +99,7 @@ export default function Footer({ onNavigate }) {
                 <span>Warehouse & Inventory Depot</span>
               </Link>
             </li>
-            <li><a href="/api" target="_blank" className="hover:text-red-600 transition-colors">REST API Spec</a></li>
-            <li><a href="/api/health" target="_blank" className="hover:text-red-600 transition-colors">Service Health (UP)</a></li>
-            <li><a href="/api/components" target="_blank" className="hover:text-red-600 transition-colors">Components Endpoint</a></li>
+
             <li>
               <a href="tel:18002845335" className="hover:text-red-600 transition-colors font-medium flex items-center gap-1.5 text-slate-900">
                 <PhoneCall className="w-3.5 h-3.5 text-red-500" />

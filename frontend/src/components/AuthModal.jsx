@@ -86,7 +86,7 @@ export default function AuthModal({ isOpen, onClose, onAuthenticated }) {
           <div>
             <div className="flex items-center gap-2">
               <span className="text-[11px] font-bold uppercase tracking-wider text-red-600 bg-red-50 px-2 py-0.5 rounded border border-red-100">
-                RBAC Access Portal
+                Secure Portal
               </span>
             </div>
             <h2 className="font-display text-2xl font-bold text-slate-900 mt-1">
@@ -134,7 +134,6 @@ export default function AuthModal({ isOpen, onClose, onAuthenticated }) {
           <div>
             <label className="block text-[11px] font-semibold text-slate-700 mb-1 flex items-center justify-between">
               <span>{mode === 'login' ? 'Select Target Role / Portal' : 'Select Account Role'}</span>
-              <span className="text-[10px] text-red-600 font-bold uppercase">Required for RBAC</span>
             </label>
             <div className="relative">
               <select 
