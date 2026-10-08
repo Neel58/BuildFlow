@@ -127,15 +127,43 @@ exports.getTaskDetails = async (req, res, next) => {
     }).populate('order').lean();
 
     if (!task) {
-      // Find order to generate task representation
-      const order = await Order.findOne({ $or: [{ orderId }, { _id: orderId.length === 24 ? orderId : null }] }).lean();
+      const order = await Order.findOne({ $or: [{ orderId }, { _id: orderId.length === 24 ? orderId : null }] })
+        .populate('items.componentId')
+        .populate({ path: 'items.customBuildId', populate: { path: 'components' } })
+        .lean();
       if (!order) return res.status(404).json({ message: 'Task or order not found' });
+      
+      let components = [];
+      if (order && order.items) {
+        order.items.forEach(item => {
+          if (item.customBuildId && item.customBuildId.components) {
+            item.customBuildId.components.forEach(comp => {
+              components.push({ name: comp.name, category: comp.category, id: comp._id });
+            });
+          } else if (item.componentId) {
+            components.push({ name: item.componentId.name, category: item.componentId.category, id: item.componentId._id });
+          }
+        });
+      }
+
+      let realChecklist = DEFAULT_CHECKLIST;
+      if (components.length > 0) {
+        realChecklist = components.map((comp, idx) => ({
+          slot: comp.category || `Slot-${idx}`,
+          name: comp.name,
+          bin: `B-0${(idx % 9) + 1}-${idx % 4 + 1}`,
+          serialNumber: `SN-${comp.category?.substring(0,3).toUpperCase() || 'CMP'}-${Math.floor(Math.random()*9000)+1000}`,
+          verified: false,
+          scanned: false
+        }));
+      }
+
       task = {
         orderId: order.orderId || order._id.toString(),
         rigName: order.items?.[0]?.name || 'Custom Battlestation',
         customer: order.customer,
         status: ['In Assembly', 'InAssembly'].includes(order.status) ? 'In Progress' : 'Pending',
-        componentsChecklist: DEFAULT_CHECKLIST,
+        componentsChecklist: realChecklist,
         milestones: DEFAULT_MILESTONES
       };
     }
@@ -152,7 +180,10 @@ exports.assignOrder = async (req, res, next) => {
     const { orderId } = req.params;
     const { bayNumber = 'Bay 02 - Clean ESD Bench', technicianName = 'Marcus Chen', notes } = req.body || {};
 
-    const order = await Order.findOne({ $or: [{ orderId }, { _id: orderId.length === 24 ? orderId : null }] });
+    const order = await Order.findOne({ $or: [{ orderId }, { _id: orderId.length === 24 ? orderId : null }] })
+      .populate('items.componentId')
+      .populate({ path: 'items.customBuildId', populate: { path: 'components' } });
+
     if (order) {
       order.status = 'In Assembly';
       if (notes) order.notes = notes;
@@ -161,6 +192,31 @@ exports.assignOrder = async (req, res, next) => {
 
     let task = await AssemblyTask.findOne({ $or: [{ orderId }, { order: order?._id }] });
     if (!task) {
+      let components = [];
+      if (order && order.items) {
+        order.items.forEach(item => {
+          if (item.customBuildId && item.customBuildId.components) {
+            item.customBuildId.components.forEach(comp => {
+              components.push({ name: comp.name, category: comp.category, id: comp._id });
+            });
+          } else if (item.componentId) {
+            components.push({ name: item.componentId.name, category: item.componentId.category, id: item.componentId._id });
+          }
+        });
+      }
+
+      let realChecklist = DEFAULT_CHECKLIST;
+      if (components.length > 0) {
+        realChecklist = components.map((comp, idx) => ({
+          slot: comp.category || `Slot-${idx}`,
+          name: comp.name,
+          bin: `B-0${(idx % 9) + 1}-${idx % 4 + 1}`,
+          serialNumber: `SN-${comp.category?.substring(0,3).toUpperCase() || 'CMP'}-${Math.floor(Math.random()*9000)+1000}`,
+          verified: false,
+          scanned: false
+        }));
+      }
+
       task = new AssemblyTask({
         order: order?._id,
         orderId,
@@ -171,7 +227,7 @@ exports.assignOrder = async (req, res, next) => {
         rigName: order?.items?.[0]?.name || 'Custom Precision Rig',
         customer: order?.customer,
         startedAt: new Date(),
-        componentsChecklist: DEFAULT_CHECKLIST,
+        componentsChecklist: realChecklist,
         milestones: DEFAULT_MILESTONES,
         progressLogs: [
           { id: 'pl_' + Date.now(), log: `Order claimed at ${bayNumber} by ${technicianName}`, timestamp: new Date(), tech: technicianName }
@@ -345,7 +401,14 @@ exports.completeAssembly = async (req, res, next) => {
         priority: (order?.totalAmount || 0) > 300000 ? 'CRITICAL' : 'STANDARD',
         technicianName,
         chamberNumber: targetQaChamber,
-        components: [
+        components: (task && task.componentsChecklist && task.componentsChecklist.length) 
+          ? task.componentsChecklist.map(c => ({
+              slot: c.slot,
+              name: c.name,
+              serialNumber: c.serialNumber,
+              status: 'Verified'
+            }))
+          : [
           { slot: 'CPU', name: 'AMD Ryzen 7 7800X3D', serialNumber: 'SN-CPU-7800X-4412', status: 'Verified' },
           { slot: 'Motherboard', name: 'MSI MAG B650 TOMAHAWK WIFI', serialNumber: 'SN-MB-B650-3301', status: 'Verified' },
           { slot: 'GPU', name: 'NVIDIA GeForce RTX 4070 Ti SUPER 16GB', serialNumber: 'SN-GPU-4070TIS-1982', status: 'Verified' },

@@ -266,10 +266,22 @@ export default function AdminDashboard({ user, onLogout, onBackToStore }) {
     }
   };
 
-  // --- Handlers: Reports Export ---
-  const handleDownloadReport = (type, format) => {
-    window.open(`/api/reports/export?type=${type}&format=${format}`, '_blank');
-    showToast(`Generating ${type} report (${format.toUpperCase()})...`);
+  const handleDownloadReport = async (type, format) => {
+    try {
+      showToast(`Generating ${type} report (${format.toUpperCase()})...`);
+      const res = await apiRequest(`/api/reports/export?type=${type}&format=${format}`);
+      const blob = new Blob([res], { type: format === 'csv' ? 'text/csv' : 'application/json' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${type}_report.${format}`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      showToast(err.message || 'Failed to download report', 'error');
+    }
     setReportModalOpen(false);
   };
 

@@ -6,6 +6,8 @@ import FlagshipBuilds from './components/FlagshipBuilds';
 import ComponentCatalog from './components/ComponentCatalog';
 import PipelineStages from './components/PipelineStages';
 import OrderTrackingModal from './components/OrderTrackingModal';
+import CheckoutPage from './components/CheckoutPage';
+import OrderSuccessPage from './components/OrderSuccessPage';
 import CartDrawer from './components/CartDrawer';
 import Footer from './components/Footer';
 import AuthModal from './components/AuthModal';
@@ -194,6 +196,10 @@ export default function App() {
       let itemId = item._id;
       let itemType = 'Component';
       if (item.type === 'customBuild') {
+        if (!item.componentIds || item.componentIds.length === 0 || item.componentIds.some(id => !id)) {
+          showToast('Some components in your build are not from the database. Please select valid parts in the Studio.');
+          return;
+        }
         const build = await apiRequest('/api/builds', {
           method: 'POST',
           body: JSON.stringify({ name: item.name, componentIds: item.componentIds })
@@ -236,12 +242,12 @@ export default function App() {
     }
   };
 
-  const handleCheckout = async () => {
+  const handleCheckout = async (formData) => {
     if (cart.length === 0) return;
     try {
       const result = await apiRequest('/api/orders/checkout', {
         method: 'POST',
-        body: JSON.stringify({})
+        body: JSON.stringify({ shippingDetails: formData })
       });
       const confirmed = await apiRequest('/api/orders/confirm-payment', {
         method: 'POST',
@@ -249,11 +255,10 @@ export default function App() {
       });
       setCart([]);
       setIsCartOpen(false);
-      setActiveTrackingId(confirmed.order._id);
-      setIsTrackingOpen(true);
-      showToast('Order created and queued from the backend.');
+      navigate(`/order-success/${confirmed.order._id}`);
     } catch (error) {
       showToast(error.message);
+      throw error;
     }
   };
 
@@ -371,13 +376,14 @@ export default function App() {
           } />
 
           <Route path="/checkout" element={
-            <div className="py-20 flex flex-col items-center justify-center text-center max-w-2xl mx-auto px-4">
-              <h2 className="text-3xl font-bold text-slate-900 mb-4">Complete Your Order</h2>
-              <p className="text-slate-600 mb-8">Review your items and proceed with secure payment to queue your custom build for assembly.</p>
-              <button onClick={handleCheckout} className="px-8 py-4 bg-red-600 text-white rounded-xl shadow-xl shadow-red-600/20 hover:bg-red-700 font-bold text-lg w-full sm:w-auto">
-                Confirm & Pay Securely
-              </button>
-            </div>
+            <CheckoutPage cart={cart} onCheckout={handleCheckout} />
+          } />
+
+          <Route path="/order-success/:orderId" element={
+            <OrderSuccessPage onOpenTracking={(id) => {
+              setActiveTrackingId(id);
+              setIsTrackingOpen(true);
+            }} />
           } />
 
           {/* CURATED ROLE-BASED OPERATIONAL STATIONS (RBAC PROTECTED) */}

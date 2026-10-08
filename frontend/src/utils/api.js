@@ -28,7 +28,10 @@ export async function apiRequest(path, options = {}) {
   const accessToken = getAccessToken();
   if (accessToken) headers.set('Authorization', `Bearer ${accessToken}`);
 
-  const response = await fetch(path, { ...options, headers });
+  const baseUrl = import.meta.env.VITE_API_BASE_URL || '';
+  const url = path.startsWith('http') ? path : `${baseUrl}${path}`;
+
+  const response = await fetch(url, { ...options, headers });
   const contentType = response.headers.get('content-type') || '';
   const payload = contentType.includes('application/json') ? await response.json() : await response.text();
 

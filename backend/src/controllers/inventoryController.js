@@ -50,10 +50,13 @@ exports.adjustStock = async (req, res, next) => {
     if (!component) return res.status(404).json({ message: 'Component not found' });
 
     const previousStock = component.stock;
-    if (typeof newStock === 'number') {
-      component.stock = newStock;
-    } else if (typeof adjustment === 'number') {
-      component.stock += adjustment;
+    const parsedNewStock = Number(newStock);
+    const parsedAdjustment = Number(adjustment);
+
+    if (!isNaN(parsedNewStock) && newStock !== undefined && newStock !== null) {
+      component.stock = parsedNewStock;
+    } else if (!isNaN(parsedAdjustment) && adjustment !== undefined && adjustment !== null) {
+      component.stock += parsedAdjustment;
     } else {
       return res.status(400).json({ message: 'Provide newStock or adjustment amount' });
     }

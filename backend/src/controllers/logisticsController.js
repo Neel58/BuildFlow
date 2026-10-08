@@ -126,7 +126,7 @@ exports.confirmPackaging = async (req, res, next) => {
     const { orderId } = req.params;
     const { packagingDetails, weightKg, packageDimensions, serviceType } = req.body || {};
 
-    const order = await Order.findOne({ $or: [{ _id: orderId }, { orderId: orderId }] });
+    const order = await Order.findOne({ $or: [{ _id: orderId.length === 24 ? orderId : null }, { orderId: orderId }] });
     if (order) {
       order.status = 'Ready to Ship';
       await order.save();
@@ -184,7 +184,7 @@ exports.shipOrder = async (req, res, next) => {
     const finalTracking = trackingNumber || `IND-EXPRESS-${orderId.replace('ORD-', '')}`;
     const finalCourier = courier || 'BlueDart Air Express';
 
-    let task = await LogisticsTask.findOne({ $or: [{ order: orderId }, { orderId: orderId }, { _id: orderId }] });
+    let task = await LogisticsTask.findOne({ $or: [{ order: orderId.length === 24 ? orderId : null }, { orderId: orderId }, { _id: orderId.length === 24 ? orderId : null }] });
     if (!task) {
       task = new LogisticsTask({
         orderId,
@@ -205,7 +205,7 @@ exports.shipOrder = async (req, res, next) => {
     }
     await task.save();
 
-    const order = await Order.findOne({ $or: [{ _id: orderId }, { orderId: orderId }] });
+    const order = await Order.findOne({ $or: [{ _id: orderId.length === 24 ? orderId : null }, { orderId: orderId }] });
     if (order) {
       order.status = 'Shipped';
       order.trackingNumber = finalTracking;
@@ -277,7 +277,7 @@ exports.failedDelivery = async (req, res, next) => {
     const { orderId } = req.params;
     const { reason, returnToWarehouse } = req.body || {};
 
-    let task = await LogisticsTask.findOne({ $or: [{ order: orderId }, { orderId: orderId }, { _id: orderId }] });
+    let task = await LogisticsTask.findOne({ $or: [{ order: orderId.length === 24 ? orderId : null }, { orderId: orderId }, { _id: orderId.length === 24 ? orderId : null }] });
     if (!task) {
       task = new LogisticsTask({ orderId, status: 'Failed Delivery', failureReason: reason || 'Consignee unavailable' });
     } else {
@@ -306,7 +306,7 @@ exports.updateDeliveryStatus = async (req, res, next) => {
     const { orderId } = req.params;
     const { status, timestamp } = req.body || {};
 
-    let task = await LogisticsTask.findOne({ $or: [{ order: orderId }, { orderId: orderId }, { _id: orderId }] });
+    let task = await LogisticsTask.findOne({ $or: [{ order: orderId.length === 24 ? orderId : null }, { orderId: orderId }, { _id: orderId.length === 24 ? orderId : null }] });
     if (!task) {
       task = new LogisticsTask({ orderId, status: status || 'Shipped' });
     } else {
@@ -315,7 +315,7 @@ exports.updateDeliveryStatus = async (req, res, next) => {
     }
     await task.save();
 
-    const order = await Order.findOne({ $or: [{ _id: orderId }, { orderId: orderId }] });
+    const order = await Order.findOne({ $or: [{ _id: orderId.length === 24 ? orderId : null }, { orderId: orderId }] });
     if (order && status) {
       order.status = status;
       await order.save();

@@ -153,10 +153,22 @@ export default function WarehouseDashboard({ user, onLogout, onBackToStore }) {
     }
   };
 
-  // --- Handlers: Export Warehouse Ledger ---
-  const handleExportLedger = (format = 'csv') => {
-    window.open(`/api/reports/export?type=inventory&format=${format}`, '_blank');
-    showToast(`Downloading Warehouse Inventory Ledger (${format.toUpperCase()})...`);
+  const handleExportLedger = async (format = 'csv') => {
+    try {
+      showToast(`Downloading Warehouse Inventory Ledger (${format.toUpperCase()})...`);
+      const res = await apiRequest(`/api/reports/export?type=inventory&format=${format}`);
+      const blob = new Blob([res], { type: format === 'csv' ? 'text/csv' : 'application/json' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `inventory_ledger.${format}`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      showToast(err.message || 'Failed to download report', 'error');
+    }
   };
 
   // Warehouse Calculations

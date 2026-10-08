@@ -210,10 +210,22 @@ export default function LogisticsDashboard({ user, onLogout, onBackToStore }) {
     }
   };
 
-  // --- Handlers: Export Manifest CSV ---
-  const handleExportManifest = (format = 'csv') => {
-    window.open(`/api/reports/export?type=orders&format=${format}`, '_blank');
-    showToast(`Exporting daily dispatch manifest (${format.toUpperCase()})...`);
+  const handleExportManifest = async (format = 'csv') => {
+    try {
+      showToast(`Exporting daily dispatch manifest (${format.toUpperCase()})...`);
+      const res = await apiRequest(`/api/reports/export?type=orders&format=${format}`);
+      const blob = new Blob([res], { type: format === 'csv' ? 'text/csv' : 'application/json' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `dispatch_manifest.${format}`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      showToast(err.message || 'Failed to download report', 'error');
+    }
   };
 
   // Filtering

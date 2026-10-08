@@ -9,7 +9,7 @@ export const defaultRig = {
   },
   mobo: {
     id: 'mobo-b650-tomahawk',
-    name: 'MSI MAG B650 TOMAHAWK WIFI',
+    name: 'MSI B650 TOMAHAWK WIFI',
     brand: 'MSI',
     category: 'Motherboard',
     price: 19999,
@@ -17,7 +17,7 @@ export const defaultRig = {
   },
   gpu: {
     id: 'gpu-rtx4090',
-    name: 'NVIDIA GeForce RTX 4090 24GB',
+    name: 'NVIDIA RTX 4090',
     brand: 'NVIDIA',
     category: 'GPU',
     price: 159999,
@@ -33,7 +33,7 @@ export const defaultRig = {
   },
   ssd: {
     id: 'ssd-samsung-990pro',
-    name: 'Samsung 990 PRO 2TB PCIe 4.0 NVMe',
+    name: 'Samsung 990 PRO 2TB',
     brand: 'Samsung',
     category: 'SSD',
     price: 15499,
@@ -41,7 +41,7 @@ export const defaultRig = {
   },
   psu: {
     id: 'psu-corsair-rm850x',
-    name: 'Corsair RM850x 850W Gold Fully Modular',
+    name: 'Corsair RM850x',
     brand: 'Corsair',
     category: 'PSU',
     price: 12499,
@@ -49,7 +49,7 @@ export const defaultRig = {
   },
   cabinet: {
     id: 'case-nzxt-h7',
-    name: 'NZXT H7 Flow RGB Tempered Glass',
+    name: 'NZXT H7 Flow',
     brand: 'NZXT',
     category: 'Cabinet',
     price: 10999,
@@ -57,7 +57,7 @@ export const defaultRig = {
   },
   cooler: {
     id: 'cooler-ak620',
-    name: 'DeepCool AK620 Digital Dual Tower',
+    name: 'DeepCool AK620 Digital',
     brand: 'DeepCool',
     category: 'Cooler',
     price: 5999,
@@ -106,13 +106,13 @@ export const componentCatalog = {
     { id: 'psu-corsair-1200', name: 'Corsair HX1200 1200W Platinum', brand: 'Corsair', price: 23999, specs: { wattage: 1200, efficiency: '80+ Platinum', modular: 'Fully Modular' } }
   ],
   Cabinet: [
-    { id: 'case-nzxt-h7', name: 'NZXT H7 Flow RGB Tempered Glass', brand: 'NZXT', price: 10999, specs: { formFactor: 'ATX', maxGpuLength: 400, type: 'Mid Tower' } },
+    { id: 'case-nzxt-h7', name: 'NZXT H7 Flow', brand: 'NZXT', price: 10999, specs: { formFactor: 'ATX', maxGpuLength: 400, type: 'Mid Tower' } },
     { id: 'case-lianli-o11', name: 'Lian Li O11 Dynamic EVO', brand: 'Lian Li', price: 13999, specs: { formFactor: 'ATX', maxGpuLength: 422, type: 'Dual Chamber' } },
     { id: 'case-fractal-north', name: 'Fractal Design North (Walnut Wood)', brand: 'Fractal', price: 14499, specs: { formFactor: 'ATX', maxGpuLength: 355, type: 'Nordic Wood' } },
     { id: 'case-corsair-4000d', name: 'Corsair 4000D Airflow', brand: 'Corsair', price: 6999, specs: { formFactor: 'ATX', maxGpuLength: 360, type: 'Mid Tower' } }
   ],
   Cooler: [
-    { id: 'cooler-ak620', name: 'DeepCool AK620 Digital Dual Tower', brand: 'DeepCool', price: 5999, specs: { coolerSocketSupport: ['AM5', 'LGA1700'], type: 'Dual Tower Air' } },
+    { id: 'cooler-ak620', name: 'DeepCool AK620 Digital', brand: 'DeepCool', price: 5999, specs: { coolerSocketSupport: ['AM5', 'LGA1700'], type: 'Dual Tower Air' } },
     { id: 'cooler-kraken360', name: 'NZXT Kraken Elite 360 RGB LCD', brand: 'NZXT', price: 24999, specs: { coolerSocketSupport: ['AM5', 'LGA1700'], type: '360mm AIO Liquid' } },
     { id: 'cooler-h150i', name: 'Corsair iCUE LINK H150i RGB 360mm', brand: 'Corsair', price: 19999, specs: { coolerSocketSupport: ['AM5', 'LGA1700'], type: '360mm AIO Liquid' } },
     { id: 'cooler-nh-d15', name: 'Noctua NH-D15 chromax.black', brand: 'Noctua', price: 10999, specs: { coolerSocketSupport: ['AM5', 'LGA1700'], type: 'Premium Air Cooler' } }
