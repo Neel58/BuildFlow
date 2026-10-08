@@ -197,12 +197,26 @@ export default function FlagshipBuilds({ onAddToCart, onCustomizePreset }) {
                     <span>Customize</span>
                   </button>
                   <button 
-                    onClick={() => onAddToCart({ 
-                      type: 'customBuild', 
-                      name: rig.title, 
-                      price: rig.price,
-                      componentIds: [] 
-                    })}
+                    onClick={() => {
+                      const preset = presets[rig.key];
+                      const resolvedIds = [];
+                      if (preset) {
+                        const allFallback = Object.values(fallbackCatalog).flat();
+                        Object.values(preset.slots).forEach(mockId => {
+                           const mockComp = allFallback.find(c => c.id === mockId);
+                           if (mockComp) {
+                             const dbComp = components.find(c => c.name === mockComp.name);
+                             if (dbComp) resolvedIds.push(dbComp._id || dbComp.id);
+                           }
+                        });
+                      }
+                      onAddToCart({ 
+                        type: 'customBuild', 
+                        name: rig.title, 
+                        price: rig.price,
+                        componentIds: resolvedIds 
+                      });
+                    }}
                     className="p-2 bg-red-600 hover:bg-red-700 text-white rounded-xl transition-colors cursor-pointer shadow-xs shadow-red-600/20"
                     title="Add to cart"
                   >
